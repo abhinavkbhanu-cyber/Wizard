@@ -56,7 +56,21 @@ public partial class MainWindow : Window
         return IntPtr.Zero;
     }
 
-    OverlayWindow? overlay;\n\n    void OverlayWindow()\n    {\n        if (overlay != null)\n        {\n            if (overlay.IsVisible) { overlay.Close(); return; }\n            overlay = null;\n        }\n        overlay = new OverlayWindow();\n        overlay.Owner = this;\n        overlay.Closed += (_, _) => overlay = null;\n        overlay.Show();\n    }
+    OverlayWindow? overlay;
+
+    void OverlayWindow()
+    {
+        if (overlay != null)
+        {
+            if (overlay.IsVisible) { overlay.Close(); return; }
+            overlay = null;
+        }
+
+        overlay = new OverlayWindow();
+        overlay.Owner = this;
+        overlay.Closed += (_, _) => overlay = null;
+        overlay.Show();
+    }
 
     void UpdateStats()
     {
