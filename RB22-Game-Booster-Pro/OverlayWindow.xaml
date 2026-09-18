@@ -49,7 +49,6 @@
                     <TextBlock Text="PERFORMANCE MONITOR"
                                FontSize="9"
                                FontWeight="SemiBold"
-                               LetterSpacing="1"
                                Opacity=".55"
                                Foreground="White"
                                Margin="0,2,0,0"/>
