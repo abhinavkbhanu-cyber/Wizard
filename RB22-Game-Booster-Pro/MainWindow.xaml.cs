@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.Net.NetworkInformation;
 using System.Runtime.InteropServices;
 using System.Windows;
+using System.Windows.Input;
 using System.Windows.Interop;
 using System.Windows.Threading;
 
@@ -12,6 +13,7 @@ public partial class MainWindow : Window
 {
     const int HotkeyId=2208;
     const uint MOD_NONE=0;
+    const uint MOD_NOREPEAT=0x4000;
     const int PROCESS_SET_QUOTA=0x0100;
     const int PROCESS_QUERY_INFORMATION=0x0400;
 
@@ -22,6 +24,8 @@ public partial class MainWindow : Window
     [DllImport("psapi.dll", SetLastError=true)] static extern bool EmptyWorkingSet(IntPtr h);
 
     HwndSource? source;
+    OverlayWindow? overlay;
+    bool globalF8Registered;
     readonly DispatcherTimer timer=new(){Interval=TimeSpan.FromSeconds(1)};
     readonly (string Name,string Host)[] dns={
         ("Cloudflare","1.1.1.1"),("Google","8.8.8.8"),
@@ -35,7 +39,8 @@ public partial class MainWindow : Window
     {
         InitializeComponent();
         Loaded+=LoadedHandler;
-        Closed+=(_,_)=>{if(source!=null)UnregisterHotKey(source.Handle,HotkeyId);};
+        PreviewKeyDown+=MainWindow_PreviewKeyDown;
+        Closed+=MainWindow_Closed;
         timer.Tick+=(_,_)=>UpdateStats();
         timer.Start();
     }
@@ -46,30 +51,53 @@ public partial class MainWindow : Window
         var h=new WindowInteropHelper(this).Handle;
         source=HwndSource.FromHwnd(h);
         source.AddHook(WndProc);
-        RegisterHotKey(h,HotkeyId,MOD_NONE,0x77);
+        globalF8Registered=RegisterHotKey(h,HotkeyId,MOD_NONE|MOD_NOREPEAT,0x77);
         UpdateStats();
+    }
+
+    void MainWindow_PreviewKeyDown(object? sender,KeyEventArgs e)
+    {
+        if(e.Key==Key.F8 && Keyboard.Modifiers==ModifierKeys.None)
+        {
+            OverlayWindow();
+            e.Handled=true;
+        }
+    }
+
+    void MainWindow_Closed(object? sender,EventArgs e)
+    {
+        if(source!=null && globalF8Registered)
+            UnregisterHotKey(source.Handle,HotkeyId);
+        overlay?.Close();
+        timer.Stop();
     }
 
     IntPtr WndProc(IntPtr h,int m,IntPtr w,IntPtr l,ref bool handled)
     {
-        if(m==0x0312 && w.ToInt32()==HotkeyId){OverlayWindow();handled=true;}
+        if(m==0x0312 && w.ToInt32()==HotkeyId)
+        {
+            OverlayWindow();
+            handled=true;
+        }
         return IntPtr.Zero;
     }
 
-    OverlayWindow? overlay;
-
     void OverlayWindow()
     {
-        if (overlay != null)
+        if(overlay==null)
         {
-            if (overlay.IsVisible) { overlay.Close(); return; }
-            overlay = null;
+            overlay=new OverlayWindow();
+            overlay.Owner=this;
+            overlay.Closed+=(_,_)=>overlay=null;
         }
 
-        overlay = new OverlayWindow();
-        overlay.Owner = this;
-        overlay.Closed += (_, _) => overlay = null;
-        overlay.Show();
+        if(overlay.IsVisible)
+            overlay.Hide();
+        else
+        {
+            overlay.Show();
+            overlay.Activate();
+        }
     }
 
     void UpdateStats()
@@ -83,7 +111,6 @@ public partial class MainWindow : Window
 
         try
         {
-            // Memory is a single-instance counter, so use an empty instance name.
             var ram=PerformanceCounter("Memory","% Committed Bytes In Use","");
             RamText.Text=$"{ram:F0}%";
             if(autoMemoryClean && ram>=70 && (DateTime.Now-lastMemoryClean).TotalSeconds>=30)
@@ -230,7 +257,7 @@ public partial class MainWindow : Window
     {
         autoMemoryClean=!autoMemoryClean;
         MessageBox.Show(
-            $"Default overlay hotkey: F8\nAuto memory clean: {(autoMemoryClean?"ON at 70%":"OFF")}\nBoost modes: Basic / Advanced / Turbo\nNetwork: Cloudflare, Google, Quad9, OpenDNS\nFPS is shown only when a reliable frame source is available.",
+            $"Default overlay hotkey: F8\nGlobal F8 registered: {(globalF8Registered?"YES":"NO — local fallback active")}\nAuto memory clean: {(autoMemoryClean?"ON at 70%":"OFF")}\nBoost modes: Basic / Advanced / Turbo\nNetwork: Cloudflare, Google, Quad9, OpenDNS\nFPS is shown only when a reliable frame source is available.",
             "RB22 Settings");
     }
 }
