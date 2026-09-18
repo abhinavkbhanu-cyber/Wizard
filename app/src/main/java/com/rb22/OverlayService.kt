@@ -1,6 +1,7 @@
 package com.rb22
 import android.app.*
-import android.content.Context
+import android.content.Intent
+import android.content.pm.ServiceInfo
 import android.graphics.Color
 import android.graphics.PixelFormat
 import android.os.Build
