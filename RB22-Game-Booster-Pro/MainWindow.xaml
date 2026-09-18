@@ -10,7 +10,7 @@
   </DockPanel>
   <Border Margin="0,30,0,20" Padding="28" CornerRadius="22" Background="#9910182E" BorderBrush="#334A6FA8" BorderThickness="1">
    <Grid>
-    <StackPanel><TextBlock Text="READY FOR BATTLE" FontSize="13" Opacity=".7"/><TextBlock Text="Boost your game session" FontSize="30" FontWeight="SemiBold" Margin="0,5,0,20"/><Button x:Name="BoostButton" Content="BOOST NOW" Width="210" Height="55" FontSize="17" FontWeight="Bold" Click="Boost_Click"/></StackPanel>
+    <StackPanel><TextBlock Text="READY FOR BATTLE" FontSize="13" Opacity=".7"/><TextBlock Text="Boost your game session" FontSize="30" FontWeight="SemiBold" Margin="0,5,0,20"/><StackPanel Orientation="Horizontal"><Button x:Name="BasicButton" Content="BASIC BOOST" Width="125" Height="50" FontWeight="Bold" Click="BasicBoost_Click" Margin="0,0,8,0"/><Button x:Name="AdvancedButton" Content="ADVANCED BOOST" Width="145" Height="50" FontWeight="Bold" Click="AdvancedBoost_Click" Margin="0,0,8,0"/><Button x:Name="TurboButton" Content="TURBO BOOST" Width="125" Height="50" FontWeight="Bold" Click="TurboBoost_Click"/></StackPanel></StackPanel>
     <StackPanel HorizontalAlignment="Right" VerticalAlignment="Center" Width="390"><TextBlock Text="F8  OVERLAY" FontSize="13" FontWeight="Bold"/><TextBlock Text="Press F8 to show/hide the live gaming overlay. Change the hotkey in Settings." TextWrapping="Wrap" Opacity=".7" Margin="0,7,0,0"/></StackPanel>
    </Grid>
   </Border>
@@ -18,11 +18,11 @@
    <Border Margin="0,0,10,0" Padding="18" CornerRadius="16" Background="#9910182E"><StackPanel><TextBlock Text="CPU" Opacity=".65"/><TextBlock x:Name="CpuText" Text="—" FontSize="26" FontWeight="Bold"/><TextBlock x:Name="CpuTemp" Text="Temp —"/></StackPanel></Border>
    <Border Margin="0,0,10,0" Padding="18" CornerRadius="16" Background="#9910182E"><StackPanel><TextBlock Text="GPU" Opacity=".65"/><TextBlock x:Name="GpuText" Text="—" FontSize="26" FontWeight="Bold"/></StackPanel></Border>
    <Border Margin="0,0,10,0" Padding="18" CornerRadius="16" Background="#9910182E"><StackPanel><TextBlock Text="RAM" Opacity=".65"/><TextBlock x:Name="RamText" Text="—" FontSize="26" FontWeight="Bold"/></StackPanel></Border>
-   <Border Padding="18" CornerRadius="16" Background="#9910182E"><StackPanel><TextBlock Text="NETWORK" Opacity=".65"/><TextBlock x:Name="PingText" Text="—" FontSize="26" FontWeight="Bold"/><TextBlock x:Name="NetText" Text="Testing DNS…"/></StackPanel></Border>
+   <Border Padding="18" CornerRadius="16" Background="#9910182E"><StackPanel><TextBlock Text="NETWORK" Opacity=".65"/><TextBlock x:Name="PingText" Text="—" FontSize="26" FontWeight="Bold"/><TextBlock x:Name="NetText" Text="DNS ready"/><TextBlock x:Name="MemoryModeText" Text="Auto memory clean: ON at 70%" FontSize="10" Opacity=".55" Margin="0,3,0,0"/></StackPanel></Border>
   </UniformGrid>
   <DockPanel>
    <Border Padding="20" CornerRadius="16" Background="#9910182E" Width="500" DockPanel.Dock="Left"><StackPanel><TextBlock Text="NETWORK OPTIMIZER" FontSize="15" FontWeight="Bold"/><TextBlock Text="Choose a DNS service or let RB22 test all four." Opacity=".65" Margin="0,5,0,12"/><ComboBox x:Name="DnsBox" SelectedIndex="0" Height="38"><ComboBoxItem Content="Auto Select"/><ComboBoxItem Content="Cloudflare • 1.1.1.1"/><ComboBoxItem Content="Google • 8.8.8.8"/><ComboBoxItem Content="Quad9 • 9.9.9.9"/><ComboBoxItem Content="OpenDNS • 208.67.222.222"/></ComboBox><Button Content="TEST SERVERS" Margin="0,10,0,0" Height="36" Click="TestDns_Click"/></StackPanel></Border>
-   <Border Margin="18,0,0,0" Padding="20" CornerRadius="16" Background="#9910182E"><StackPanel><TextBlock Text="TOOLS" FontSize="15" FontWeight="Bold"/><TextBlock Text="Laptop-aware performance mode • safe background cleanup • live hardware stats" TextWrapping="Wrap" Opacity=".65" Margin="0,5,0,15"/><Button Content="SETTINGS / HOTKEY" Height="38" Click="Settings_Click"/><TextBlock x:Name="StatusText" Text="Status: Ready" Margin="0,12,0,0" Opacity=".75"/></StackPanel></Border>
+   <Border Margin="18,0,0,0" Padding="20" CornerRadius="16" Background="#9910182E"><StackPanel><TextBlock Text="TOOLS" FontSize="15" FontWeight="Bold"/><TextBlock Text="3 boost modes • auto memory clean at 70% • laptop-aware performance • safe background cleanup • live hardware stats" TextWrapping="Wrap" Opacity=".65" Margin="0,5,0,15"/><Button Content="SETTINGS / HOTKEY" Height="38" Click="Settings_Click"/><TextBlock x:Name="StatusText" Text="Status: Ready" Margin="0,12,0,0" Opacity=".75"/></StackPanel></Border>
   </DockPanel>
  </StackPanel>
 </Grid></Window>
