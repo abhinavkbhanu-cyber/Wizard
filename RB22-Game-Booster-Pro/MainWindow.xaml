@@ -5,7 +5,7 @@
  <Ellipse Width="255" Height="255" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,28,73,0" Opacity=".16" Fill="#AFC7FF"/>
  <StackPanel Margin="42">
   <DockPanel>
-   <StackPanel DockPanel.Dock="Left"><TextBlock Text="RB22" FontSize="34" FontWeight="Bold"/><TextBlock Text="GAME BOOSTER PRO" FontSize="12" Opacity=".7" LetterSpacing="2"/></StackPanel>
+   <StackPanel DockPanel.Dock="Left"><TextBlock Text="RB22" FontSize="34" FontWeight="Bold"/><TextBlock Text="GAME BOOSTER PRO" FontSize="12" Opacity=".7"/></StackPanel>
    <StackPanel DockPanel.Dock="Right" HorizontalAlignment="Right"><TextBlock x:Name="DeviceLabel" Text="DETECTING DEVICE..." HorizontalAlignment="Right"/><TextBlock Text="Windows 10/11 • Universal Mode" FontSize="11" Opacity=".6"/></StackPanel>
   </DockPanel>
   <Border Margin="0,30,0,20" Padding="28" CornerRadius="22" Background="#9910182E" BorderBrush="#334A6FA8" BorderThickness="1">
