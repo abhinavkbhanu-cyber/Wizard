@@ -69,7 +69,8 @@ public partial class MainWindow : Window
 
         try
         {
-            var ram=PerformanceCounter("Memory","% Committed Bytes In Use");
+            // Memory is a single-instance counter, so use an empty instance name.
+            var ram=PerformanceCounter("Memory","% Committed Bytes In Use","");
             RamText.Text=$"{ram:F0}%";
             if(autoMemoryClean && ram>=70 && (DateTime.Now-lastMemoryClean).TotalSeconds>=30)
             {
@@ -148,7 +149,7 @@ public partial class MainWindow : Window
             }
         }catch{}
 
-        int priority=mode=="Turbo"?ProcessPriorityClass.High:
+        ProcessPriorityClass priority=mode=="Turbo"?ProcessPriorityClass.High:
                      mode=="Advanced"?ProcessPriorityClass.AboveNormal:
                      ProcessPriorityClass.Normal;
         try{Process.GetCurrentProcess().PriorityClass=priority;}catch{}
