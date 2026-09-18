@@ -4,11 +4,11 @@ on:
   push:
     branches: [main]
 
-# Explicitly test GitHub Actions with the Node.js 24 runtime.
-# GitHub will use Node 24 by default on supported runners, and this
-# environment variable makes the requirement explicit for this workflow.
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+permissions:
+  contents: write
 
 jobs:
   build:
@@ -34,8 +34,24 @@ jobs:
       - name: Publish portable Windows EXE
         run: dotnet publish RB22-Game-Booster-Pro/RB22-Game-Booster-Pro.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:EnableCompressionInSingleFile=true -o publish
 
-      - name: Upload RB22 Windows EXE
+      - name: Upload RB22 Windows EXE artifact
         uses: actions/upload-artifact@v6
         with:
           name: RB22-Game-Booster-Pro-Windows-x64
           path: publish/*.exe
+
+      - name: Publish latest GitHub Release
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $exe = Get-ChildItem -Path publish -Filter *.exe | Select-Object -First 1
+          if (-not $exe) { throw "RB22 EXE was not produced." }
+
+          gh release view latest 2>$null
+          if ($LASTEXITCODE -ne 0) {
+            gh release create latest $exe.FullName --title "RB22 Game Booster Pro — Latest" --notes "Latest Windows x64 portable build of RB22 Game Booster Pro. Built automatically from main."
+          } else {
+            gh release upload latest $exe.FullName --clobber
+            gh release edit latest --title "RB22 Game Booster Pro — Latest" --notes "Latest Windows x64 portable build of RB22 Game Booster Pro. Updated automatically from main."
+          }
