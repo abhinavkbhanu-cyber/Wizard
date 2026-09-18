@@ -1,1 +1,42 @@
-<Window x:Class="RB22.GameBooster.OverlayWindow" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" Title="RB22 Overlay" Width="330" Height="190" WindowStyle="None" AllowsTransparency="True" Background="Transparent" Topmost="True" ShowInTaskbar="False"><Border CornerRadius="16" Background="#E5101628" BorderBrush="#557A9BFF" BorderThickness="1" Padding="16"><StackPanel><DockPanel><TextBlock Text="RB22 OVERLAY" FontWeight="Bold"/><Button Content="×" Width="28" Height="24" DockPanel.Dock="Right" Click="Close_Click"/></DockPanel><UniformGrid Columns="2" Margin="0,12,0,0"><TextBlock Text="CPU"/><TextBlock x:Name="Cpu"/><TextBlock Text="RAM"/><TextBlock x:Name="Ram"/><TextBlock Text="PING"/><TextBlock x:Name="Ping"/><TextBlock Text="FPS"/><TextBlock Text="N/A"/></UniformGrid><TextBlock Text="F8 • drag window to move" FontSize="10" Opacity=".55" Margin="0,12,0,0"/></StackPanel></Border></Window>
+<Window x:Class="RB22.GameBooster.OverlayWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="RB22 Overlay"
+        Width="330"
+        Height="190"
+        WindowStyle="None"
+        AllowsTransparency="True"
+        Background="Transparent"
+        Topmost="True"
+        ShowInTaskbar="False">
+    <Border CornerRadius="16"
+            Background="#E5101628"
+            BorderBrush="#557A9BFF"
+            BorderThickness="1"
+            Padding="16">
+        <StackPanel>
+            <DockPanel>
+                <TextBlock Text="RB22 OVERLAY" FontWeight="Bold"/>
+                <Button Content="×"
+                        Width="28"
+                        Height="24"
+                        DockPanel.Dock="Right"
+                        Click="Close_Click"/>
+            </DockPanel>
+            <UniformGrid Columns="2" Margin="0,12,0,0">
+                <TextBlock Text="CPU"/>
+                <TextBlock x:Name="Cpu"/>
+                <TextBlock Text="RAM"/>
+                <TextBlock x:Name="Ram"/>
+                <TextBlock Text="PING"/>
+                <TextBlock x:Name="Ping"/>
+                <TextBlock Text="FPS"/>
+                <TextBlock Text="N/A"/>
+            </UniformGrid>
+            <TextBlock Text="F8 • drag window to move"
+                       FontSize="10"
+                       Opacity=".55"
+                       Margin="0,12,0,0"/>
+        </StackPanel>
+    </Border>
+</Window>
