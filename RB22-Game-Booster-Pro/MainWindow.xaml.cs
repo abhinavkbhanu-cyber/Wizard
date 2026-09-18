@@ -135,20 +135,51 @@ public partial class MainWindow : Window
     void ApplyBoost(string mode)
     {
         boostMode=mode;
-        string plan=mode=="Turbo"?"SCHEME_MIN":"SCHEME_MIN";
+        string plan="SCHEME_MIN";
         try
         {
             Process.Start(new ProcessStartInfo("powercfg",$"/setactive {plan}")
             {CreateNoWindow=true,UseShellExecute=false});
+            if(mode=="Turbo")
+            {
+                SetPowerValue("SUB_PROCESSOR","PROCTHROTTLEMIN",100);
+                SetPowerValue("SUB_PROCESSOR","PROCTHROTTLEMAX",100);
+                SetPowerValue("SUB_PROCESSOR","PERFBOOSTMODE",2);
+            }
         }catch{}
 
         int priority=mode=="Turbo"?ProcessPriorityClass.High:
                      mode=="Advanced"?ProcessPriorityClass.AboveNormal:
                      ProcessPriorityClass.Normal;
         try{Process.GetCurrentProcess().PriorityClass=priority;}catch{}
+        SetGamePriority(mode=="Turbo"?ProcessPriorityClass.High:ProcessPriorityClass.AboveNormal);
 
         CleanMemory();
         StatusText.Text=$"{mode.ToUpperInvariant()} BOOST active • performance plan + safe memory cleanup";
+    }
+
+    static void SetPowerValue(string subgroup,string setting,int value)
+    {
+        try
+        {
+            Process.Start(new ProcessStartInfo("powercfg",$"/setacvalueindex SCHEME_CURRENT {subgroup} {setting} {value}")
+            {CreateNoWindow=true,UseShellExecute=false})?.WaitForExit(1500);
+            Process.Start(new ProcessStartInfo("powercfg","/S SCHEME_CURRENT")
+            {CreateNoWindow=true,UseShellExecute=false})?.WaitForExit(1500);
+        }catch{}
+    }
+
+    void SetGamePriority(ProcessPriorityClass priority)
+    {
+        foreach(var p in Process.GetProcesses())
+        {
+            try
+            {
+                if(p.MainWindowHandle!=IntPtr.Zero && IsLikelyGame(p)) p.PriorityClass=priority;
+            }
+            catch{}
+            finally{p.Dispose();}
+        }
     }
 
     void BasicBoost_Click(object s,RoutedEventArgs e)=>ApplyBoost("Basic");
