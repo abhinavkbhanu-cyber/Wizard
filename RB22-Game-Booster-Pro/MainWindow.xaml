@@ -68,7 +68,8 @@
  <!-- dark glass overlay keeps text readable -->
  <Rectangle Fill="#030714" Opacity="0.18"/>
 
- <StackPanel Margin="42">
+ <ScrollViewer Margin="0" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+ <StackPanel Margin="42" MaxWidth="1100">
   <DockPanel>
    <StackPanel DockPanel.Dock="Left"><TextBlock Text="RB22" FontSize="34" FontWeight="Bold"/><TextBlock Text="GAME BOOSTER PRO" FontSize="12" Opacity=".7"/></StackPanel>
    <StackPanel DockPanel.Dock="Right" HorizontalAlignment="Right"><TextBlock x:Name="DeviceLabel" Text="DETECTING DEVICE..." HorizontalAlignment="Right"/><TextBlock Text="Windows 10/11 • Universal Mode" FontSize="11" Opacity=".6"/></StackPanel>
@@ -76,8 +77,26 @@
 
   <Border Margin="0,30,0,20" Padding="28" CornerRadius="22" Background="#9910182E" BorderBrush="#334A6FA8" BorderThickness="1">
    <Grid>
-    <StackPanel><TextBlock Text="READY FOR BATTLE" FontSize="13" Opacity=".7"/><TextBlock Text="Boost your game session" FontSize="30" FontWeight="SemiBold" Margin="0,5,0,20"/><StackPanel Orientation="Horizontal"><Button x:Name="BasicButton" Content="BASIC BOOST" Width="125" Height="50" FontWeight="Bold" Click="BasicBoost_Click" Margin="0,0,8,0"/><Button x:Name="AdvancedButton" Content="ADVANCED BOOST" Width="145" Height="50" FontWeight="Bold" Click="AdvancedBoost_Click" Margin="0,0,8,0"/><Button x:Name="TurboButton" Content="TURBO BOOST" Width="125" Height="50" FontWeight="Bold" Click="TurboBoost_Click"/></StackPanel></StackPanel>
-    <StackPanel HorizontalAlignment="Right" VerticalAlignment="Center" Width="390"><TextBlock Text="F8  OVERLAY" FontSize="13" FontWeight="Bold"/><TextBlock Text="Press F8 to show/hide the live gaming overlay. Change the hotkey in Settings." TextWrapping="Wrap" Opacity=".7" Margin="0,7,0,0"/></StackPanel>
+    <Grid.ColumnDefinitions>
+     <ColumnDefinition Width="*"/>
+     <ColumnDefinition Width="360"/>
+    </Grid.ColumnDefinitions>
+    <StackPanel Grid.Column="0" Margin="0,0,24,0">
+     <TextBlock Text="READY FOR BATTLE" FontSize="13" Opacity=".7"/>
+     <TextBlock Text="Boost your game session" FontSize="30" FontWeight="SemiBold" Margin="0,5,0,20"/>
+     <StackPanel Orientation="Horizontal">
+      <Button x:Name="BasicButton" Content="BASIC BOOST" Width="125" Height="50" FontWeight="Bold" Click="BasicBoost_Click" Margin="0,0,8,0"/>
+      <Button x:Name="AdvancedButton" Content="ADVANCED BOOST" Width="145" Height="50" FontWeight="Bold" Click="AdvancedBoost_Click" Margin="0,0,8,0"/>
+      <Button x:Name="TurboButton" Content="TURBO BOOST" Width="125" Height="50" FontWeight="Bold" Click="TurboBoost_Click"/>
+     </StackPanel>
+    </StackPanel>
+    <Border Grid.Column="1" Padding="18" CornerRadius="14" Background="#3315223D" BorderBrush="#223B5575" BorderThickness="1" VerticalAlignment="Center">
+     <StackPanel>
+      <TextBlock Text="F8  OVERLAY" FontSize="13" FontWeight="Bold"/>
+      <TextBlock Text="Press F8 anywhere to show or hide the RB22 performance overlay." TextWrapping="Wrap" Opacity=".7" Margin="0,7,0,0"/>
+      <TextBlock Text="Global hotkey • works even when RB22 is not focused" FontSize="10" Opacity=".45" Margin="0,8,0,0"/>
+     </StackPanel>
+    </Border>
    </Grid>
   </Border>
 
@@ -93,5 +112,6 @@
    <Border Margin="18,0,0,0" Padding="20" CornerRadius="16" Background="#9910182E"><StackPanel><TextBlock Text="TOOLS" FontSize="15" FontWeight="Bold"/><TextBlock Text="3 boost modes • auto memory clean at 70% • laptop-aware performance • safe background cleanup • live hardware stats" TextWrapping="Wrap" Opacity=".65" Margin="0,5,0,15"/><Button Content="SETTINGS / HOTKEY" Height="38" Click="Settings_Click"/><TextBlock x:Name="StatusText" Text="Status: Ready" Margin="0,12,0,0" Opacity=".75"/></StackPanel></Border>
   </DockPanel>
  </StackPanel>
+ </ScrollViewer>
 </Grid>
 </Window>
