@@ -3,17 +3,39 @@ on:
   workflow_dispatch:
   push:
     branches: [main]
+
+# Explicitly test GitHub Actions with the Node.js 24 runtime.
+# GitHub will use Node 24 by default on supported runners, and this
+# environment variable makes the requirement explicit for this workflow.
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 jobs:
   build:
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-dotnet@v4
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Setup .NET 8
+        uses: actions/setup-dotnet@v6
         with:
           dotnet-version: 8.0.x
+
+      - name: Show build environment
+        shell: pwsh
+        run: |
+          Write-Host "Runner OS: $env:RUNNER_OS"
+          Write-Host "Node version:"
+          node --version
+          Write-Host "dotnet version:"
+          dotnet --version
+
       - name: Publish portable Windows EXE
         run: dotnet publish RB22-Game-Booster-Pro/RB22-Game-Booster-Pro.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:EnableCompressionInSingleFile=true -o publish
-      - uses: actions/upload-artifact@v4
+
+      - name: Upload RB22 Windows EXE
+        uses: actions/upload-artifact@v6
         with:
           name: RB22-Game-Booster-Pro-Windows-x64
           path: publish/*.exe
