@@ -1,6 +1,5 @@
 using System;
 using System.Windows;
-using System.Windows.Threading;
 
 namespace RB22;
 
@@ -24,15 +23,5 @@ public partial class App : Application
                 MessageBoxImage.Error);
             Shutdown(1);
         }
-    }
-
-    protected override void OnDispatcherUnhandledException(DispatcherUnhandledExceptionEventArgs e)
-    {
-        MessageBox.Show(
-            "RB22 encountered an error.\n\n" + e.Exception.GetType().Name + ": " + e.Exception.Message,
-            "RB22 error",
-            MessageBoxButton.OK,
-            MessageBoxImage.Error);
-        e.Handled = true;
     }
 }
