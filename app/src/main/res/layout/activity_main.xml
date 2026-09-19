@@ -81,6 +81,15 @@
             android:layout_width="match_parent" android:layout_height="wrap_content"/>
     </LinearLayout>
 
+    <TextView android:text="GAME LIBRARY" android:textColor="#A6B5E6" android:textSize="13sp" android:textStyle="bold" android:layout_marginTop="28dp" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+    <LinearLayout android:orientation="vertical" android:padding="18dp" android:layout_marginTop="10dp" android:background="@drawable/rb22_card" android:layout_width="match_parent" android:layout_height="wrap_content">
+        <TextView android:text="🎮  YOUR GAMES" android:textColor="#FFFFFF" android:textSize="18sp" android:textStyle="bold" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+        <TextView android:id="@+id/game_library_status" android:text="No games added yet" android:textColor="#9AA8D8" android:textSize="13sp" android:layout_marginTop="5dp" android:layout_width="match_parent" android:layout_height="wrap_content"/>
+        <Button android:id="@+id/add_game" android:text="＋ ADD GAME" android:textAllCaps="false" android:layout_marginTop="12dp" android:layout_width="match_parent" android:layout_height="50dp"/>
+        <Button android:id="@+id/game_library" android:text="🎮 OPEN GAME LIBRARY" android:textAllCaps="false" android:layout_marginTop="8dp" android:layout_width="match_parent" android:layout_height="50dp"/>
+        <TextView android:text="Saved games are detected automatically when they become the active app." android:textColor="#9AA8D8" android:textSize="12sp" android:layout_marginTop="9dp" android:layout_width="match_parent" android:layout_height="wrap_content"/>
+    </LinearLayout>
+
     <TextView android:text="SMART AI AUTOMATION" android:textColor="#A6B5E6" android:textSize="13sp"
         android:textStyle="bold" android:layout_marginTop="28dp" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
     <LinearLayout android:orientation="vertical" android:padding="18dp"
