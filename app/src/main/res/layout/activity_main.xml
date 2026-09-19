@@ -13,7 +13,7 @@
             android:layout_width="wrap_content" android:layout_height="wrap_content">
             <TextView android:text="RB22" android:textColor="#FFFFFF" android:textSize="34sp"
                 android:textStyle="bold" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
-            <TextView android:text="GAME BOOSTER PRO  •  v2.0.0" android:textColor="#C9D7FF" android:textSize="13sp"
+            <TextView android:text="GAME BOOSTER PRO  •  ULTIMATE v3.0.0" android:textColor="#C9D7FF" android:textSize="13sp"
                 android:textStyle="bold" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
         </LinearLayout>
     </LinearLayout>
@@ -63,15 +63,16 @@
     <LinearLayout android:orientation="vertical" android:padding="18dp"
         android:layout_marginTop="10dp" android:background="@drawable/rb22_card"
         android:layout_width="match_parent" android:layout_height="wrap_content">
-        <TextView android:text="RB22 Adaptive Performance Core" android:textColor="#FFFFFF"
+        <TextView android:text="RB22 Ultimate Adaptive Engine" android:textColor="#FFFFFF"
             android:textSize="18sp" android:textStyle="bold"
             android:layout_width="wrap_content" android:layout_height="wrap_content"/>
-        <TextView android:text="Built around the same categories used by modern OEM gaming suites: adaptive performance, thermal awareness, memory pressure, network stability and distraction control."
+        <TextView android:text="Device-aware performance engine with thermal protection, memory pressure monitoring, network telemetry, game profiles and a premium transparent HUD."
             android:textColor="#E5ECFF" android:textSize="13sp" android:layout_marginTop="6dp"
             android:layout_width="match_parent" android:layout_height="wrap_content"/>
-        <TextView android:text="✓ Adaptive game profiles&#10;✓ Thermal-aware performance guard&#10;✓ RAM pressure monitoring&#10;✓ Live network telemetry&#10;✓ Battery-aware behavior&#10;✓ Premium movable HUD"
+        <TextView android:text="✓ Adaptive game profiles&#10;✓ Thermal-aware performance guard&#10;✓ RAM pressure monitoring&#10;✓ Live network telemetry&#10;✓ Battery-aware behavior&#10;✓ Premium movable HUD&#10;✓ Real FPS estimate when screen capture is enabled&#10;✓ Capability-aware Android behavior"
             android:textColor="#F2F6FF" android:textSize="14sp" android:lineSpacingExtra="5dp"
             android:layout_marginTop="12dp" android:layout_width="match_parent" android:layout_height="wrap_content"/>
+        <TextView android:id="@+id/ultimate_status" android:text="ULTIMATE ENGINE: STARTING…" android:textColor="#B8FFE7" android:textSize="13sp" android:textStyle="bold" android:layout_marginTop="12dp" android:layout_width="match_parent" android:layout_height="wrap_content"/>
     </LinearLayout>
 
     <TextView android:text="NETWORK OPTIMIZER" android:textColor="#D9E4FF" android:textSize="13sp"
