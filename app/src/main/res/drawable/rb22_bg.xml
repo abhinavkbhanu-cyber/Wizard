@@ -2,19 +2,22 @@
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
     <item>
         <shape android:shape="rectangle">
-            <gradient android:angle="135" android:startColor="#030510" android:centerColor="#08142A" android:endColor="#040611" />
+            <gradient android:angle="270" android:startColor="#02030A" android:centerColor="#061126" android:endColor="#010207" />
         </shape>
     </item>
-    <item android:top="90dp" android:left="-140dp">
-        <shape android:shape="oval">
-            <size android:width="620dp" android:height="300dp"/>
-            <solid android:color="#143B68"/>
-        </shape>
+    <item android:top="70dp" android:left="-120dp">
+        <shape android:shape="oval"><size android:width="520dp" android:height="250dp"/><solid android:color="#123E4A"/></shape>
     </item>
-    <item android:top="160dp" android:left="230dp">
-        <shape android:shape="oval">
-            <size android:width="520dp" android:height="300dp"/>
-            <solid android:color="#35145A"/>
-        </shape>
+    <item android:top="135dp" android:left="180dp">
+        <shape android:shape="oval"><size android:width="500dp" android:height="230dp"/><solid android:color="#24104A"/></shape>
+    </item>
+    <item android:top="210dp" android:left="40dp">
+        <shape android:shape="oval"><size android:width="600dp" android:height="190dp"/><solid android:color="#063B38"/></shape>
+    </item>
+    <item android:top="45dp" android:left="275dp">
+        <shape android:shape="oval"><size android:width="88dp" android:height="88dp"/><solid android:color="#F1F3FF"/></shape>
+    </item>
+    <item android:top="36dp" android:left="291dp">
+        <shape android:shape="oval"><size android:width="88dp" android:height="88dp"/><solid android:color="#061126"/></shape>
     </item>
 </layer-list>
