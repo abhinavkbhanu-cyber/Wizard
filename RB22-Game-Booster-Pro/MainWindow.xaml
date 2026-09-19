@@ -73,7 +73,7 @@
      </StackPanel>
      <StackPanel Grid.Row="2" Margin="43,0,0,22">
       <TextBlock Text="—  PLAY SMART  —" FontSize="11" Foreground="#A6B5FF"/>
-      <TextBlock Text="—  NOT HARD  —" FontSize="11" Foreground="#A6B5FF" CharacterSpacing="80" Margin="0,7,0,0"/>
+      <TextBlock Text="—  NOT HARD  —" FontSize="11" Foreground="#A6B5FF" Margin="0,7,0,0"/>
       <TextBlock Text="v1.0.0" FontSize="11" Opacity=".55" Margin="0,18,0,0"/>
      </StackPanel>
     </Grid>
