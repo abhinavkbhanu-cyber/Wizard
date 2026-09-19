@@ -9,4 +9,7 @@
     <RootNamespace>RB22</RootNamespace>
     <Version>0.1.0</Version>
   </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="System.Diagnostics.PerformanceCounter" Version="8.0.0" />
+  </ItemGroup>
 </Project>
