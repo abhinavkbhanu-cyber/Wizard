@@ -177,7 +177,7 @@
      </Grid>
 
      <UniformGrid Columns="4" Margin="0,20,0,0">
-      <Button Content="🎮  Game Library" Height="72" Margin="0,0,10,0" Click="GameLibrary_Click" Background="#24101A35"/>
+      <Button Content="🤖  AI Boost" Height="72" Margin="0,0,10,0" Click="AIBoost_Click" Background="#241A1635"/>
       <Button Content="⚡  Quick Scan" Height="72" Margin="0,0,10,0" Click="QuickScan_Click" Background="#24101A35"/>
       <Button Content="🛡  System Cleaner" Height="72" Margin="0,0,10,0" Click="SystemCleaner_Click" Background="#24101A35"/>
       <Button Content="⚙  Advanced Settings" Height="72" Click="AdvancedSettings_Click" Background="#24101A35"/>
