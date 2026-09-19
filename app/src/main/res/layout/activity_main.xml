@@ -54,9 +54,55 @@
     <Button android:id="@+id/overlay" android:text="F8 / EDGE PERFORMANCE OVERLAY" android:textAllCaps="false"
         android:layout_marginTop="14dp" android:layout_width="match_parent" android:layout_height="52dp"/>
 
-    <TextView android:text="SYSTEM AUTOMATION" android:textColor="#A6B5E6" android:textSize="13sp"
-        android:textStyle="bold" android:layout_marginTop="26dp" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
-    <TextView android:text="⚡ Auto memory cleanup at 70%+ RAM&#10;🎮 Game performance profile&#10;🌡️ Thermal-aware monitoring&#10;🌐 Network monitoring"
+    <TextView android:text="NETWORK OPTIMIZER" android:textColor="#A6B5E6" android:textSize="13sp"
+        android:textStyle="bold" android:layout_marginTop="28dp" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+    <LinearLayout android:orientation="vertical" android:padding="18dp"
+        android:layout_marginTop="10dp" android:background="@drawable/rb22_card"
+        android:layout_width="match_parent" android:layout_height="wrap_content">
+        <TextView android:text="DNS can improve name-resolution time, but it cannot guarantee lower in-game ping."
+            android:textColor="#9AA8D8" android:textSize="12sp" android:layout_width="match_parent" android:layout_height="wrap_content"/>
+        <Button android:id="@+id/dns_auto" android:text="⚡ AUTO TEST — FIND FASTEST DNS"
+            android:textAllCaps="false" android:layout_marginTop="12dp"
+            android:layout_width="match_parent" android:layout_height="52dp"/>
+        <Button android:id="@+id/dns_cloudflare" android:text="1.1.1.1  •  Cloudflare"
+            android:textAllCaps="false" android:layout_marginTop="8dp"
+            android:layout_width="match_parent" android:layout_height="48dp"/>
+        <Button android:id="@+id/dns_google" android:text="8.8.8.8  •  Google"
+            android:textAllCaps="false" android:layout_marginTop="8dp"
+            android:layout_width="match_parent" android:layout_height="48dp"/>
+        <Button android:id="@+id/dns_quad9" android:text="9.9.9.9  •  Quad9"
+            android:textAllCaps="false" android:layout_marginTop="8dp"
+            android:layout_width="match_parent" android:layout_height="48dp"/>
+        <Button android:id="@+id/dns_adguard" android:text="94.140.14.14  •  AdGuard"
+            android:textAllCaps="false" android:layout_marginTop="8dp"
+            android:layout_width="match_parent" android:layout_height="48dp"/>
+        <TextView android:id="@+id/dns_status" android:text="DNS: Not tested"
+            android:textColor="#DCE5FF" android:textSize="13sp" android:layout_marginTop="10dp"
+            android:layout_width="match_parent" android:layout_height="wrap_content"/>
+    </LinearLayout>
+
+    <TextView android:text="SMART AI AUTOMATION" android:textColor="#A6B5E6" android:textSize="13sp"
+        android:textStyle="bold" android:layout_marginTop="28dp" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+    <LinearLayout android:orientation="vertical" android:padding="18dp"
+        android:layout_marginTop="10dp" android:background="@drawable/rb22_card"
+        android:layout_width="match_parent" android:layout_height="wrap_content">
+        <TextView android:text="RB22 Smart Engine"
+            android:textColor="#FFFFFF" android:textSize="18sp" android:textStyle="bold"
+            android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+        <TextView android:text="Automatically reacts to RAM pressure, temperature and network conditions."
+            android:textColor="#9AA8D8" android:textSize="13sp" android:layout_marginTop="5dp"
+            android:layout_width="match_parent" android:layout_height="wrap_content"/>
+        <Button android:id="@+id/smart_auto" android:text="🤖 ENABLE SMART AUTOMATION"
+            android:textAllCaps="false" android:layout_marginTop="12dp"
+            android:layout_width="match_parent" android:layout_height="52dp"/>
+        <TextView android:text="• Auto RAM cleanup at 70%+&#10;• Thermal-aware boost adjustment&#10;• Game launch optimization&#10;• Network/DNS recommendation&#10;• Battery-aware mode"
+            android:textColor="#DCE5FF" android:textSize="14sp" android:lineSpacingExtra="5dp"
+            android:layout_marginTop="10dp" android:layout_width="match_parent" android:layout_height="wrap_content"/>
+    </LinearLayout>
+
+    <TextView android:text="QUICK TOOLS" android:textColor="#A6B5E6" android:textSize="13sp"
+        android:textStyle="bold" android:layout_marginTop="28dp" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+    <TextView android:text="🧹 Smart RAM Cleaner&#10;🎮 Game Profile Manager&#10;🌡️ Thermal Guard&#10;📶 Network Monitor&#10;🔋 Battery Saver while idle"
         android:textColor="#DCE5FF" android:textSize="15sp" android:lineSpacingExtra="6dp"
         android:layout_marginTop="10dp" android:layout_width="match_parent" android:layout_height="wrap_content"/>
 </LinearLayout>
