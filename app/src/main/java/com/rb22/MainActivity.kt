@@ -1,5 +1,7 @@
 package com.rb22
 
+import android.app.AppOpsManager
+import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Build
@@ -8,6 +10,7 @@ import android.provider.Settings
 import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import java.net.InetAddress
 import java.util.concurrent.Executors
@@ -20,6 +23,10 @@ class MainActivity : AppCompatActivity() {
         "AdGuard" to "dns.adguard-dns.com"
     )
 
+    private val gamePrefs by lazy {
+        getSharedPreferences("rb22_games", Context.MODE_PRIVATE)
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -27,10 +34,14 @@ class MainActivity : AppCompatActivity() {
 
         findViewById<TextView>(R.id.overlay).setOnClickListener {
             if (!Settings.canDrawOverlays(this)) {
-                startActivity(Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:$packageName")))
+                startActivity(
+                    Intent(
+                        Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+                        Uri.parse("package:$packageName")
+                    )
+                )
             } else {
-                val intent = Intent(this, OverlayService::class.java)
-                if (Build.VERSION.SDK_INT >= 26) startForegroundService(intent) else startService(intent)
+                startForegroundCompat(Intent(this, OverlayService::class.java))
             }
         }
 
@@ -43,7 +54,9 @@ class MainActivity : AppCompatActivity() {
             R.id.dns_adguard to dnsOptions[3]
         )
         dnsButtons.forEach { (id, dns) ->
-            findViewById<Button>(id).setOnClickListener { openPrivateDns(dns.first, dns.second) }
+            findViewById<Button>(id).setOnClickListener {
+                openPrivateDns(dns.first, dns.second)
+            }
         }
 
         findViewById<Button>(R.id.add_game).setOnClickListener { showGamePicker() }
@@ -51,12 +64,31 @@ class MainActivity : AppCompatActivity() {
         updateGameLibraryText()
 
         findViewById<Button>(R.id.smart_auto).setOnClickListener {
+            startAutoBoostMonitor()
             Toast.makeText(this, "RB22 Smart Automation enabled", Toast.LENGTH_SHORT).show()
+        }
+
+        if (savedGames().isNotEmpty()) startAutoBoostMonitor()
+    }
+
+    private fun startForegroundCompat(intent: Intent) {
+        try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                startForegroundService(intent)
+            } else {
+                startService(intent)
+            }
+        } catch (_: Exception) {
+            Toast.makeText(this, "RB22 could not start the background service", Toast.LENGTH_LONG).show()
         }
     }
 
     private fun openPrivateDns(name: String, hostname: String) {
-        Toast.makeText(this, "$name selected: $hostname. Set this hostname in Private DNS.", Toast.LENGTH_LONG).show()
+        Toast.makeText(
+            this,
+            "$name selected: $hostname. Set this hostname in Private DNS.",
+            Toast.LENGTH_LONG
+        ).show()
         try {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
                 startActivity(Intent(Settings.ACTION_PRIVATE_DNS_SETTINGS))
@@ -90,10 +122,121 @@ class MainActivity : AppCompatActivity() {
                 } else {
                     val best = results.first()
                     status.text = "FASTEST LOOKUP: " + best.first + "  " + best.second + " ms"
-                    Toast.makeText(this, "RB22 recommends " + best.first + " for this connection", Toast.LENGTH_LONG).show()
+                    Toast.makeText(
+                        this,
+                        "RB22 recommends " + best.first + " for this connection",
+                        Toast.LENGTH_LONG
+                    ).show()
                 }
             }
         }
+    }
+
+    private fun savedGames(): Set<String> =
+        gamePrefs.getStringSet("packages", emptySet()) ?: emptySet()
+
+    private fun showGamePicker() {
+        val intent = Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_LAUNCHER)
+        val apps = packageManager.queryIntentActivities(intent, 0)
+            .filter { it.activityInfo.packageName != packageName }
+            .distinctBy { it.activityInfo.packageName }
+            .sortedBy { it.loadLabel(packageManager).toString().lowercase() }
+
+        if (apps.isEmpty()) {
+            Toast.makeText(this, "No launchable apps found", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        val labels = apps.map { it.loadLabel(packageManager).toString() }.toTypedArray()
+        val selected = savedGames()
+        val checked = BooleanArray(labels.size) { apps[it].activityInfo.packageName in selected }
+
+        AlertDialog.Builder(this)
+            .setTitle("Add games to RB22")
+            .setMultiChoiceItems(labels, checked) { _, which, isChecked ->
+                val updated = savedGames().toMutableSet()
+                val pkg = apps[which].activityInfo.packageName
+                if (isChecked) updated.add(pkg) else updated.remove(pkg)
+                gamePrefs.edit().putStringSet("packages", updated).apply()
+                updateGameLibraryText()
+                if (updated.isNotEmpty()) startAutoBoostMonitor()
+            }
+            .setPositiveButton("DONE", null)
+            .show()
+    }
+
+    private fun showGameLibrary() {
+        val games = savedGames()
+        if (games.isEmpty()) {
+            AlertDialog.Builder(this)
+                .setTitle("RB22 Game Library")
+                .setMessage("No games added yet. Add a game and RB22 will watch for it.")
+                .setPositiveButton("ADD GAME") { _, _ -> showGamePicker() }
+                .setNegativeButton("CLOSE", null)
+                .show()
+            return
+        }
+
+        val labels = games.mapNotNull { pkg ->
+            runCatching {
+                packageManager.getApplicationLabel(
+                    packageManager.getApplicationInfo(pkg, 0)
+                ).toString()
+            }.getOrNull()
+        }.sorted()
+
+        AlertDialog.Builder(this)
+            .setTitle("RB22 Game Library")
+            .setItems(labels.toTypedArray(), null)
+            .setPositiveButton("AUTO BOOST") { _, _ -> startAutoBoostMonitor() }
+            .setNeutralButton("EDIT") { _, _ -> showGamePicker() }
+            .setNegativeButton("CLOSE", null)
+            .show()
+    }
+
+    private fun updateGameLibraryText() {
+        val view = findViewById<TextView>(R.id.game_library_status)
+        val count = savedGames().size
+        view.text = if (count == 0) {
+            "No games added • Auto Boost is ready"
+        } else {
+            count.toString() + " game" + if (count == 1) "" else "s" + " saved • Auto Boost monitoring"
+        }
+    }
+
+    private fun hasUsageAccess(): Boolean {
+        val appOps = getSystemService(APP_OPS_SERVICE) as AppOpsManager
+        @Suppress("DEPRECATION")
+        val mode = appOps.checkOpNoThrow(
+            AppOpsManager.OPSTR_GET_USAGE_STATS,
+            android.os.Process.myUid(),
+            packageName
+        )
+        return mode == AppOpsManager.MODE_ALLOWED
+    }
+
+    private fun startAutoBoostMonitor() {
+        if (savedGames().isEmpty()) {
+            updateGameLibraryText()
+            return
+        }
+
+        if (!hasUsageAccess()) {
+            Toast.makeText(
+                this,
+                "Allow Usage Access so RB22 can detect when a saved game is open.",
+                Toast.LENGTH_LONG
+            ).show()
+            try {
+                startActivity(Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS))
+            } catch (_: Exception) {
+                startActivity(Intent(Settings.ACTION_SETTINGS))
+            }
+            return
+        }
+
+        startForegroundCompat(Intent(this, GameAutoBoostService::class.java))
+        updateGameLibraryText()
     }
 
     private fun updateStats() {
@@ -101,12 +244,12 @@ class MainActivity : AppCompatActivity() {
         val info = android.app.ActivityManager.MemoryInfo()
         am.getMemoryInfo(info)
         val used = info.totalMem - info.availMem
-        val percent = (used * 100 / info.totalMem).toInt()
-        findViewById<TextView>(R.id.ram).text = "RAM     $percent%"
+        val percent = if (info.totalMem > 0) (used * 100 / info.totalMem).toInt() else 0
+        findViewById<TextView>(R.id.ram).text = "RAM     " + percent + "%"
 
         val battery = registerReceiver(
             null,
-            android.content.IntentFilter(android.content.Intent.ACTION_BATTERY_CHANGED)
+            android.content.IntentFilter(Intent.ACTION_BATTERY_CHANGED)
         )
         val temp = battery?.getIntExtra(android.os.BatteryManager.EXTRA_TEMPERATURE, -1) ?: -1
         findViewById<TextView>(R.id.temp).text =
