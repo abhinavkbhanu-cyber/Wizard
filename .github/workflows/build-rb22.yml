@@ -1,14 +1,22 @@
 name: Build RB22 Game Booster Pro
+
 on:
   workflow_dispatch:
   push:
     branches: [main]
+    paths:
+      - 'RB22-Game-Booster-Pro/**'
+      - '.github/workflows/build-rb22.yml'
 
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 permissions:
   contents: write
+
+concurrency:
+  group: rb22-pc
+  cancel-in-progress: true
 
 jobs:
   build:
