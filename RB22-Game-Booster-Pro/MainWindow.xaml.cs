@@ -193,7 +193,7 @@ public partial class MainWindow : Window
         }
     }
 
-0
+    void MainWindow_Closed(object? sender, EventArgs e)
     {
         if(source!=null && globalF8Registered)
             UnregisterHotKey(source.Handle,HotkeyId);
