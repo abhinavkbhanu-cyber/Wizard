@@ -20,10 +20,20 @@ public partial class MainWindow : Window
         ShowDashboard();
     }
 
-    Button B(string text, RoutedEventHandler click) => new() { Content=text, Margin=new Thickness(0,6,0,6), Padding=new Thickness(12,9), Click=click };
+    Button B(string text, RoutedEventHandler click)
+{
+    var b = new Button
+    {
+        Content = text,
+        Margin = new Thickness(0, 6, 0, 6),
+        Padding = new Thickness(12, 9, 12, 9)
+    };
+    b.Click += click;
+    return b;
+}
     TextBlock H(string text) => new() { Text=text, FontSize=22, FontWeight=FontWeights.SemiBold, Margin=new Thickness(0,0,0,14) };
     TextBlock P(string text) => new() { Text=text, FontSize=14, Foreground=FindResource("Muted") as Brush, TextWrapping=TextWrapping.Wrap, Margin=new Thickness(0,4,0,12) };
-    void Clear(string title,string sub) { Content.Children.Clear(); Content.Children.Add(H(title)); Content.Children.Add(P(sub)); }
+    void Clear(string title,string sub) { MainMainContent.Children.Clear(); Content.Children.Add(H(title)); Content.Children.Add(P(sub)); }
     void ShowDashboard()
     {
         Clear("Gaming Dashboard","RB22 is a separate product from RB22 Game Booster Pro.");
