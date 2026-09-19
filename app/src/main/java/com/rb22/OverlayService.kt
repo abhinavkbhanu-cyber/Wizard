@@ -208,7 +208,7 @@ class OverlayService : Service() {
         statViews["temp"]?.text=if(temp>=0)(temp/10.0).toString()+"°C" else "--"
         val seconds=((System.currentTimeMillis()-startTime)/1000).toInt()
         statViews["session"]?.text=String.format("%02d:%02d",seconds/60,seconds%60)
-        statViews["fps"]?.text="--"
+        if(statViews["fps"]?.text.isNullOrBlank())statViews["fps"]?.text="--"
     }
 
     private fun currentX()=(panelView?.layoutParams as? WindowManager.LayoutParams)?.x ?: dp(10)
@@ -234,6 +234,6 @@ class OverlayService : Service() {
     private fun hidePanel(){handler.removeCallbacksAndMessages("stats");panelView?.let{runCatching{wm.removeView(it)}};panelView=null;showEdge()}
     private fun text(s:String,size:Int,bold:Boolean)=TextView(this).apply{text=s;textSize=size.toFloat();setTextColor(Color.WHITE);if(bold)setTypeface(typeface,android.graphics.Typeface.BOLD)}
     private fun dp(v:Int)=(v*resources.displayMetrics.density).toInt()
-    override fun onDestroy(){handler.removeCallbacksAndMessages(null);io.shutdownNow();listOf(panelView,tabView,edgeView).forEach{v->v?.let{runCatching{wm.removeView(it)}}};super.onDestroy()}
+    override fun onDestroy(){handler.removeCallbacksAndMessages(null);io.shutdownNow();fpsMonitor?.stop();listOf(panelView,tabView,edgeView).forEach{v->v?.let{runCatching{wm.removeView(it)}}};super.onDestroy()}
     override fun onBind(intent:Intent?):IBinder?=null
 }
