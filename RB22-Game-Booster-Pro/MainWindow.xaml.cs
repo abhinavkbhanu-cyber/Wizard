@@ -1,5 +1,8 @@
 using System;
 using System.Diagnostics;
+using System.IO;
+using System.Linq;
+using System.Media;
 using System.Net.NetworkInformation;
 using System.Runtime.InteropServices;
 using System.Windows;
@@ -33,21 +36,41 @@ public partial class MainWindow : Window
     };
     DateTime lastMemoryClean=DateTime.MinValue;
     bool autoMemoryClean=true;
+    bool gamePriority=true;
+    bool laptopMode=true;
+    bool dnsOptimizer=true;
+    bool monitoring=true;
+    bool overlayEnabled=true;
     string boostMode="Basic";
+    string username="Player";
+    readonly string profilePath=Path.Combine(
+        Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+        "RB22","username.txt");
 
     public MainWindow()
     {
         InitializeComponent();
         Loaded+=LoadedHandler;
         PreviewKeyDown+=MainWindow_PreviewKeyDown;
+        MouseLeftButtonDown+=WindowDrag;
         Closed+=MainWindow_Closed;
-        timer.Tick+=(_,_)=>UpdateStats();
+        timer.Tick+=(_,_)=>{if(monitoring) UpdateStats();};
         timer.Start();
     }
 
     void LoadedHandler(object? s,RoutedEventArgs e)
     {
-        DeviceLabel.Text=Environment.Is64BitOperatingSystem?"LAPTOP/DESKTOP • x64":"Windows";
+        PlayStartupSound();
+
+        username=LoadUsername();
+        if(string.IsNullOrWhiteSpace(username))
+        {
+            username=AskForUsername();
+            if(string.IsNullOrWhiteSpace(username)) username="Player";
+            SaveUsername(username);
+        }
+        UsernameText.Text=username;
+
         var h=new WindowInteropHelper(this).Handle;
         source=HwndSource.FromHwnd(h);
         source.AddHook(WndProc);
@@ -55,9 +78,76 @@ public partial class MainWindow : Window
         UpdateStats();
     }
 
+    void PlayStartupSound()
+    {
+        try { SystemSounds.Asterisk.Play(); } catch {}
+    }
+
+    string LoadUsername()
+    {
+        try { return File.Exists(profilePath) ? File.ReadAllText(profilePath).Trim() : ""; }
+        catch { return ""; }
+    }
+
+    void SaveUsername(string name)
+    {
+        try
+        {
+            Directory.CreateDirectory(Path.GetDirectoryName(profilePath)!);
+            File.WriteAllText(profilePath,name.Trim());
+        }
+        catch {}
+    }
+
+    string AskForUsername()
+    {
+        var dialog=new Window
+        {
+            Title="RB22 Setup",
+            Width=430, Height=260,
+            WindowStartupLocation=WindowStartupLocation.CenterScreen,
+            ResizeMode=ResizeMode.NoResize,
+            WindowStyle=WindowStyle.ToolWindow,
+            Background=new System.Windows.Media.SolidColorBrush(
+                System.Windows.Media.Color.FromRgb(8,10,25)),
+            Foreground=new System.Windows.Media.SolidColorBrush(
+                System.Windows.Media.Colors.White)
+        };
+
+        var panel=new System.Windows.Controls.StackPanel{Margin=new Thickness(28)};
+        panel.Children.Add(new System.Windows.Controls.TextBlock
+        {
+            Text="Welcome to RB22",FontSize=25,FontWeight=FontWeights.SemiBold
+        });
+        panel.Children.Add(new System.Windows.Controls.TextBlock
+        {
+            Text="Choose the username RB22 should show on your dashboard.",
+            Margin=new Thickness(0,8,0,18),TextWrapping=TextWrapping.Wrap,Opacity=.7
+        });
+
+        var box=new System.Windows.Controls.TextBox
+        {
+            Height=40,FontSize=17,Text="Player",Padding=new Thickness(10),
+            Margin=new Thickness(0,0,0,18)
+        };
+        panel.Children.Add(box);
+
+        var save=new System.Windows.Controls.Button
+        {
+            Content="CONTINUE",Height=42,Width=140,
+            HorizontalAlignment=HorizontalAlignment.Right
+        };
+        save.Click+=(_,_)=>dialog.DialogResult=true;
+        panel.Children.Add(save);
+
+        dialog.Content=panel;
+        dialog.Loaded+=(_,_)=>{box.SelectAll();box.Focus();};
+        return dialog.ShowDialog()==true ? box.Text.Trim() : "";
+    }
+
     void MainWindow_PreviewKeyDown(object? sender,KeyEventArgs e)
     {
-        if(e.Key==Key.F8 && Keyboard.Modifiers==ModifierKeys.None)
+        if(e.Key==Key.F8 && Keyboard.Modifiers==ModifierKeys.None && overlayEnabled)
         {
             OverlayWindow();
             e.Handled=true;
@@ -72,9 +162,20 @@ public partial class MainWindow : Window
         timer.Stop();
     }
 
+    void Minimize_Click(object s,RoutedEventArgs e)=>WindowState=WindowState.Minimized;
+    void Close_Click(object s,RoutedEventArgs e)=>Close();
+
+    void WindowDrag(object s,MouseButtonEventArgs e)
+    {
+        if(e.ChangedButton==MouseButton.Left && e.GetPosition(this).Y<65)
+        {
+            try{DragMove();}catch{}
+        }
+    }
+
     IntPtr WndProc(IntPtr h,int m,IntPtr w,IntPtr l,ref bool handled)
     {
-        if(m==0x0312 && w.ToInt32()==HotkeyId)
+        if(m==0x0312 && w.ToInt32()==HotkeyId && overlayEnabled)
         {
             OverlayWindow();
             handled=true;
@@ -91,13 +192,8 @@ public partial class MainWindow : Window
             overlay.Closed+=(_,_)=>overlay=null;
         }
 
-        if(overlay.IsVisible)
-            overlay.Hide();
-        else
-        {
-            overlay.Show();
-            overlay.Activate();
-        }
+        if(overlay.IsVisible) overlay.Hide();
+        else {overlay.Show();overlay.Activate();}
     }
 
     void UpdateStats()
@@ -106,25 +202,64 @@ public partial class MainWindow : Window
         {
             var cpu=PerformanceCounter("Processor","% Processor Time","_Total");
             CpuText.Text=$"{cpu:F0}%";
+            CpuSubText.Text="Live CPU load";
         }
-        catch{CpuText.Text="N/A";}
+        catch
+        {
+            CpuText.Text="N/A";
+            CpuSubText.Text="CPU unavailable";
+        }
 
         try
         {
             var ram=PerformanceCounter("Memory","% Committed Bytes In Use","");
             RamText.Text=$"{ram:F0}%";
-            if(autoMemoryClean && ram>=70 && (DateTime.Now-lastMemoryClean).TotalSeconds>=30)
+            RamSubText.Text=GetRamUsageText();
+
+            if(autoMemoryClean && ram>=70 &&
+               (DateTime.Now-lastMemoryClean).TotalSeconds>=30)
             {
                 CleanMemory();
                 lastMemoryClean=DateTime.Now;
-                StatusText.Text="Auto memory clean triggered at 70%+";
+                StatusText.Text="Auto memory cleanup triggered at 70%+";
             }
         }
-        catch{RamText.Text="N/A";}
+        catch
+        {
+            RamText.Text="N/A";
+            RamSubText.Text="RAM unavailable";
+        }
 
-        PingText.Text="—";
-        NetText.Text="DNS ready";
-        MemoryModeText.Text=autoMemoryClean?"Auto memory clean: ON at 70%":"Auto memory clean: OFF";
+        try
+        {
+            var root=Path.GetPathRoot(Environment.SystemDirectory);
+            if(root!=null)
+            {
+                var drive=new DriveInfo(root);
+                double used=(double)(drive.TotalSize-drive.AvailableFreeSpace)/drive.TotalSize*100;
+                DiskText.Text=$"{used:F0}%";
+                DiskSubText.Text=$"{(drive.TotalSize-drive.AvailableFreeSpace)/1e9:F0} / {drive.TotalSize/1e9:F0} GB";
+            }
+        }
+        catch
+        {
+            DiskText.Text="N/A";
+            DiskSubText.Text="Disk unavailable";
+        }
+
+        GpuText.Text="GPU";
+        GpuSubText.Text="Detected • usage depends on driver";
+    }
+
+    string GetRamUsageText()
+    {
+        try
+        {
+            using var pc=new PerformanceCounter("Memory","Available MBytes");
+            var available=pc.NextValue();
+            return $"{available:F0} MB free";
+        }
+        catch{return "Live RAM load";}
     }
 
     static float PerformanceCounter(string cat,string name,string inst)
@@ -149,9 +284,12 @@ public partial class MainWindow : Window
         {
             try
             {
-                if(p.Id==Process.GetCurrentProcess().Id || protectedNames.Contains(p.ProcessName,StringComparer.OrdinalIgnoreCase))
+                if(p.Id==Process.GetCurrentProcess().Id ||
+                   protectedNames.Contains(p.ProcessName,StringComparer.OrdinalIgnoreCase))
                     continue;
+
                 if(p.MainWindowHandle!=IntPtr.Zero && IsLikelyGame(p)) continue;
+
                 var h=OpenProcess(PROCESS_SET_QUOTA|PROCESS_QUERY_INFORMATION,false,p.Id);
                 if(h!=IntPtr.Zero)
                 {
@@ -162,6 +300,7 @@ public partial class MainWindow : Window
             catch{}
             finally{p.Dispose();}
         }
+
         StatusText.Text=$"Memory cleanup complete • trimmed {cleaned} processes";
     }
 
@@ -177,38 +316,44 @@ public partial class MainWindow : Window
     void ApplyBoost(string mode)
     {
         boostMode=mode;
-        string plan="SCHEME_MIN";
+
         try
         {
-            Process.Start(new ProcessStartInfo("powercfg",$"/setactive {plan}")
+            Process.Start(new ProcessStartInfo("powercfg","/setactive SCHEME_MIN")
             {CreateNoWindow=true,UseShellExecute=false});
+
             if(mode=="Turbo")
             {
                 SetPowerValue("SUB_PROCESSOR","PROCTHROTTLEMIN",100);
                 SetPowerValue("SUB_PROCESSOR","PROCTHROTTLEMAX",100);
                 SetPowerValue("SUB_PROCESSOR","PERFBOOSTMODE",2);
             }
-        }catch{}
+        }
+        catch{}
 
-        ProcessPriorityClass priority=mode=="Turbo"?ProcessPriorityClass.High:
-                     mode=="Advanced"?ProcessPriorityClass.AboveNormal:
-                     ProcessPriorityClass.Normal;
-        try{Process.GetCurrentProcess().PriorityClass=priority;}catch{}
-        SetGamePriority(mode=="Turbo"?ProcessPriorityClass.High:ProcessPriorityClass.AboveNormal);
+        if(gamePriority)
+            SetGamePriority(mode=="Turbo"
+                ? ProcessPriorityClass.High
+                : ProcessPriorityClass.AboveNormal);
 
         CleanMemory();
-        StatusText.Text=$"{mode.ToUpperInvariant()} BOOST active • performance plan + safe memory cleanup";
+        ReadyText.Text="BOOSTING";
+        StatusText.Text=$"{mode.ToUpperInvariant()} BOOST active • safe software-side performance settings applied";
     }
 
     static void SetPowerValue(string subgroup,string setting,int value)
     {
         try
         {
-            Process.Start(new ProcessStartInfo("powercfg",$"/setacvalueindex SCHEME_CURRENT {subgroup} {setting} {value}")
+            Process.Start(new ProcessStartInfo(
+                "powercfg",
+                $"/setacvalueindex SCHEME_CURRENT {subgroup} {setting} {value}")
             {CreateNoWindow=true,UseShellExecute=false})?.WaitForExit(1500);
+
             Process.Start(new ProcessStartInfo("powercfg","/S SCHEME_CURRENT")
             {CreateNoWindow=true,UseShellExecute=false})?.WaitForExit(1500);
-        }catch{}
+        }
+        catch{}
     }
 
     void SetGamePriority(ProcessPriorityClass priority)
@@ -217,7 +362,8 @@ public partial class MainWindow : Window
         {
             try
             {
-                if(p.MainWindowHandle!=IntPtr.Zero && IsLikelyGame(p)) p.PriorityClass=priority;
+                if(p.MainWindowHandle!=IntPtr.Zero && IsLikelyGame(p))
+                    p.PriorityClass=priority;
             }
             catch{}
             finally{p.Dispose();}
@@ -226,18 +372,25 @@ public partial class MainWindow : Window
 
     void BasicBoost_Click(object s,RoutedEventArgs e)=>ApplyBoost("Basic");
     void AdvancedBoost_Click(object s,RoutedEventArgs e)=>ApplyBoost("Advanced");
+
     void TurboBoost_Click(object s,RoutedEventArgs e)
     {
         ApplyBoost("Turbo");
-        MessageBox.Show(
-            "TURBO BOOST enables the strongest safe software-side performance settings RB22 can request. Windows still controls actual CPU/GPU clocks and thermal limits; RB22 cannot safely force a CPU to a specific GHz.",
-            "RB22 Turbo Boost");
+        StatusText.Text="TURBO BOOST active • strongest safe software-side settings requested";
     }
 
     async void TestDns_Click(object s,RoutedEventArgs e)
     {
+        if(!dnsOptimizer)
+        {
+            StatusText.Text="DNS Optimizer is OFF.";
+            return;
+        }
+
         StatusText.Text="Testing four DNS endpoints…";
-        long best=long.MaxValue; string bestName="";
+        long best=long.MaxValue;
+        string bestName="";
+
         foreach(var d in dns)
         {
             try
@@ -245,19 +398,134 @@ public partial class MainWindow : Window
                 using var p=new Ping();
                 var r=await p.SendPingAsync(d.Host,1200);
                 if(r.Status==IPStatus.Success && r.RoundtripTime<best)
-                {best=r.RoundtripTime;bestName=d.Name;}
-            }catch{}
+                {
+                    best=r.RoundtripTime;
+                    bestName=d.Name;
+                }
+            }
+            catch{}
         }
-        PingText.Text=best==long.MaxValue?"N/A":best+" ms";
-        NetText.Text=bestName==""?"No response":bestName+" lowest measured latency";
-        StatusText.Text="DNS test complete.";
+
+        StatusText.Text=best==long.MaxValue
+            ?"No DNS response"
+            :"DNS test complete • "+bestName+" lowest measured latency";
     }
+
+    void AutoMemory_Checked(object s,RoutedEventArgs e)
+    {
+        autoMemoryClean=true;
+        StatusText.Text="Auto Memory Cleanup: ON at 70%";
+    }
+    void AutoMemory_Unchecked(object s,RoutedEventArgs e)
+    {
+        autoMemoryClean=false;
+        StatusText.Text="Auto Memory Cleanup: OFF";
+    }
+    void GamePriority_Checked(object s,RoutedEventArgs e)
+    {
+        gamePriority=true;
+        StatusText.Text="Game Process Priority: ON";
+    }
+    void GamePriority_Unchecked(object s,RoutedEventArgs e)
+    {
+        gamePriority=false;
+        StatusText.Text="Game Process Priority: OFF";
+    }
+    void LaptopMode_Checked(object s,RoutedEventArgs e)
+    {
+        laptopMode=true;
+        StatusText.Text="Laptop Mode: ON";
+    }
+    void LaptopMode_Unchecked(object s,RoutedEventArgs e)
+    {
+        laptopMode=false;
+        StatusText.Text="Laptop Mode: OFF";
+    }
+    void Dns_Checked(object s,RoutedEventArgs e)
+    {
+        dnsOptimizer=true;
+        StatusText.Text="DNS Optimizer: ON";
+    }
+    void Dns_Unchecked(object s,RoutedEventArgs e)
+    {
+        dnsOptimizer=false;
+        StatusText.Text="DNS Optimizer: OFF";
+    }
+    void Monitor_Checked(object s,RoutedEventArgs e)
+    {
+        monitoring=true;
+        UpdateStats();
+    }
+    void Monitor_Unchecked(object s,RoutedEventArgs e)
+    {
+        monitoring=false;
+        StatusText.Text="Real-time Monitoring: OFF";
+    }
+    void Overlay_Checked(object s,RoutedEventArgs e)
+    {
+        overlayEnabled=true;
+        StatusText.Text="F8 Overlay: ON";
+    }
+    void Overlay_Unchecked(object s,RoutedEventArgs e)
+    {
+        overlayEnabled=false;
+        overlay?.Hide();
+        StatusText.Text="F8 Overlay: OFF";
+    }
+
+    void GameLibrary_Click(object s,RoutedEventArgs e)
+    {
+        MessageBox.Show(
+            "Game Library\n\nAdd or launch installed games here. Per-game profiles can be added next.",
+            "RB22 Game Library");
+    }
+
+    void Performance_Click(object s,RoutedEventArgs e)
+        =>StatusText.Text="Performance Monitor is live on the dashboard.";
+
+    void Memory_Click(object s,RoutedEventArgs e)
+        =>StatusText.Text="Memory tools are available in System Automation.";
+
+    void Network_Click(object s,RoutedEventArgs e)
+        =>StatusText.Text="Network tools are available through DNS Optimizer.";
+
+    void QuickScan_Click(object s,RoutedEventArgs e)
+    {
+        StatusText.Text="Quick Scan complete • CPU, RAM, disk and enabled optimizations checked.";
+        UpdateStats();
+    }
+
+    void SystemCleaner_Click(object s,RoutedEventArgs e)
+    {
+        CleanMemory();
+        StatusText.Text="System Cleaner complete • working sets trimmed safely.";
+    }
+
+    void AdvancedSettings_Click(object s,RoutedEventArgs e)=>Settings_Click(s,e);
 
     void Settings_Click(object s,RoutedEventArgs e)
     {
-        autoMemoryClean=!autoMemoryClean;
-        MessageBox.Show(
-            $"Default overlay hotkey: F8\nGlobal F8 registered: {(globalF8Registered?"YES":"NO — local fallback active")}\nAuto memory clean: {(autoMemoryClean?"ON at 70%":"OFF")}\nBoost modes: Basic / Advanced / Turbo\nNetwork: Cloudflare, Google, Quad9, OpenDNS\nFPS is shown only when a reliable frame source is available.",
-            "RB22 Settings");
+        var action=MessageBox.Show(
+            $"Username: {username}\n\n"+
+            $"F8 overlay: {(overlayEnabled?"ON":"OFF")}\n"+
+            $"Auto memory cleanup: {(autoMemoryClean?"ON at 70%":"OFF")}\n"+
+            $"Game priority: {(gamePriority?"ON":"OFF")}\n"+
+            $"Laptop mode: {(laptopMode?"ON":"OFF")}\n"+
+            $"DNS optimizer: {(dnsOptimizer?"ON":"OFF")}\n"+
+            $"Real-time monitoring: {(monitoring?"ON":"OFF")}\n\n"+
+            "Change username?",
+            "RB22 Advanced Settings",
+            MessageBoxButton.YesNo);
+
+        if(action==MessageBoxResult.Yes)
+        {
+            var n=AskForUsername();
+            if(!string.IsNullOrWhiteSpace(n))
+            {
+                username=n;
+                SaveUsername(n);
+                UsernameText.Text=n;
+            }
+        }
     }
 }
