@@ -35,6 +35,7 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
         updateStats()
         setupBoostModes()
+        startUltimateEngine()
 
         findViewById<TextView>(R.id.overlay).setOnClickListener {
             if (!Settings.canDrawOverlays(this)) {
@@ -94,6 +95,19 @@ class MainActivity : AppCompatActivity() {
         }
         startForegroundCompat(intent)
     }
+    private fun startUltimateEngine() {
+        val engine = AdaptivePerformanceEngine(this)
+        val status = findViewById<TextView>(R.id.ultimate_status)
+        val handler = android.os.Handler(mainLooper)
+        val tick = object : Runnable {
+            override fun run() {
+                status.text = engine.statusText()
+                handler.postDelayed(this, 2000)
+            }
+        }
+        handler.post(tick)
+    }
+
     private fun setupBoostModes() {
         val status = findViewById<TextView>(R.id.boost_status)
         findViewById<Button>(R.id.basic).setOnClickListener {
