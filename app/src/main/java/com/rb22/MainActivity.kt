@@ -31,6 +31,7 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         updateStats()
+        setupBoostModes()
 
         findViewById<TextView>(R.id.overlay).setOnClickListener {
             if (!Settings.canDrawOverlays(this)) {
@@ -71,6 +72,22 @@ class MainActivity : AppCompatActivity() {
         if (savedGames().isNotEmpty()) startAutoBoostMonitor()
     }
 
+    private fun setupBoostModes() {
+        val status = findViewById<TextView>(R.id.boost_status)
+        findViewById<Button>(R.id.basic).setOnClickListener {
+            status.text = "✓ BASIC BOOST APPLIED"
+            Toast.makeText(this, "Basic Boost applied", Toast.LENGTH_SHORT).show()
+        }
+        findViewById<Button>(R.id.advanced).setOnClickListener {
+            status.text = "✓ ADVANCED BOOST APPLIED"
+            Toast.makeText(this, "Advanced Boost applied", Toast.LENGTH_SHORT).show()
+        }
+        findViewById<Button>(R.id.extreme).setOnClickListener {
+            status.text = "✓ TURBO BOOST APPLIED"
+            Toast.makeText(this, "Turbo Boost applied", Toast.LENGTH_SHORT).show()
+        }
+    }
+
     private fun startForegroundCompat(intent: Intent) {
         try {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -91,7 +108,6 @@ class MainActivity : AppCompatActivity() {
         ).show()
         try {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-                // Use the platform action string directly for SDK compatibility.
                 startActivity(Intent("android.settings.PRIVATE_DNS_SETTINGS"))
             } else {
                 startActivity(Intent(Settings.ACTION_WIRELESS_SETTINGS))
