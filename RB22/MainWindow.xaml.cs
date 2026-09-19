@@ -33,22 +33,22 @@ public partial class MainWindow : Window
 }
     TextBlock H(string text) => new() { Text=text, FontSize=22, FontWeight=FontWeights.SemiBold, Margin=new Thickness(0,0,0,14) };
     TextBlock P(string text) => new() { Text=text, FontSize=14, Foreground=FindResource("Muted") as Brush, TextWrapping=TextWrapping.Wrap, Margin=new Thickness(0,4,0,12) };
-    void Clear(string title,string sub) { MainMainContent.Children.Clear(); Content.Children.Add(H(title)); Content.Children.Add(P(sub)); }
+    void Clear(string title,string sub) { MainMainContent.Children.Clear(); MainContent.Children.Add(H(title)); MainContent.Children.Add(P(sub)); }
     void ShowDashboard()
     {
         Clear("Gaming Dashboard","RB22 is a separate product from RB22 Game Booster Pro.");
         var g=new Grid(); for(int i=0;i<4;i++) g.ColumnDefinitions.Add(new ColumnDefinition());
         string[] a={"CPU","GPU","RAM","MODE"}; string[] v={Cpu()+"%","—","—",mode};
         for(int i=0;i<4;i++){ var p=new Border{Background=FindResource("Panel") as Brush,Padding=new Thickness(18),Margin=new Thickness(5),CornerRadius=new CornerRadius(14)}; var s=new StackPanel(); s.Children.Add(new TextBlock{Text=a[i],Foreground=FindResource("Muted") as Brush}); s.Children.Add(new TextBlock{Text=v[i],FontSize=26,FontWeight=FontWeights.Bold,Margin=new Thickness(0,8,0,0)}); p.Child=s; Grid.SetColumn(p,i); g.Children.Add(p);}
-        Content.Children.Add(g);
-        Content.Children.Add(B("⚡ Basic Boost",(_,_)=>Apply("Basic")));
-        Content.Children.Add(B("⚡ Advanced Boost",(_,_)=>Apply("Advanced")));
-        Content.Children.Add(B("🔥 TURBO Boost",(_,_)=>Apply("Turbo")));
+        MainContent.Children.Add(g);
+        MainContent.Children.Add(B("⚡ Basic Boost",(_,_)=>Apply("Basic")));
+        MainContent.Children.Add(B("⚡ Advanced Boost",(_,_)=>Apply("Advanced")));
+        MainContent.Children.Add(B("🔥 TURBO Boost",(_,_)=>Apply("Turbo")));
     }
     int Cpu(){ try { using var pc=new PerformanceCounter("Processor","% Processor Time","_Total"); pc.NextValue(); System.Threading.Thread.Sleep(30); return (int)Math.Round(pc.NextValue()); } catch { return 0; } }
-    void RefreshDashboard(){ if(Content.Children.Count>0 && Content.Children[0] is TextBlock) ShowDashboard(); }
+    void RefreshDashboard(){ if(MainContent.Children.Count>0 && MainContent.Children[0] is TextBlock) ShowDashboard(); }
     void Apply(string m){ mode=m; MessageBox.Show($"RB22 {m} mode selected. Optimization profile is ready.","RB22"); ShowDashboard(); }
-    void Show(string title,string sub, params UIElement[] controls){ Clear(title,sub); foreach(var c in controls) Content.Children.Add(c); }
+    void Show(string title,string sub, params UIElement[] controls){ Clear(title,sub); foreach(var c in controls) MainContent.Children.Add(c); }
     void ShowAI(){ Show("AI Game Optimizer","Analyze the active system and choose a software-side performance profile.",B("🤖 Analyze & Optimize",(_,_)=>Apply(Cpu()>70?"Advanced":"Basic")),P("AI will use CPU load and available telemetry to choose a profile. Results are measured rather than guaranteed FPS gains.")); }
     void ShowGames(){ Show("Game Library","Per-game profiles, launch and optimization will live here.",B("+ Add Game",(_,_)=>MessageBox.Show("Game picker is reserved for the next module update.","RB22")),P("Create profiles for each game and keep optimization settings isolated.")); }
     void ShowPerformance(){ Show("Performance Center","Live CPU telemetry and a home for FPS/frametime monitoring.",P($"CPU usage: {Cpu()}%"),P("FPS, 1% low, 0.1% low and frametime graphs are planned for the benchmark/overlay engine.")); }
