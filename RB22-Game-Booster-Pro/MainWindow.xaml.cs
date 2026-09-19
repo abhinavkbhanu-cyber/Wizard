@@ -602,7 +602,7 @@ public partial class MainWindow : Window
 
     Button ToolButton(string text,RoutedEventHandler click)
     {
-        var b=new Button{Content=text,Height=44,Margin=new Thickness(0,8,0,0),Padding=new Thickness(16,0),
+        var b=new Button{Content=text,Height=44,Margin=new Thickness(0,8,0,0),Padding=new Thickness(16,0,16,0),
             Background=new SolidColorBrush(Color.FromRgb(20,28,58)),Foreground=Brushes.White,
             BorderBrush=new SolidColorBrush(Color.FromRgb(55,86,150))};
         b.Click+=click; return b;
