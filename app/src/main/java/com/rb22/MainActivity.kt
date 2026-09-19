@@ -46,6 +46,10 @@ class MainActivity : AppCompatActivity() {
             findViewById<Button>(id).setOnClickListener { openPrivateDns(dns.first, dns.second) }
         }
 
+        findViewById<Button>(R.id.add_game).setOnClickListener { showGamePicker() }
+        findViewById<Button>(R.id.game_library).setOnClickListener { showGameLibrary() }
+        updateGameLibraryText()
+
         findViewById<Button>(R.id.smart_auto).setOnClickListener {
             Toast.makeText(this, "RB22 Smart Automation enabled", Toast.LENGTH_SHORT).show()
         }
