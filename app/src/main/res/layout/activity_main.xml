@@ -13,14 +13,14 @@
             android:layout_width="wrap_content" android:layout_height="wrap_content">
             <TextView android:text="RB22" android:textColor="#FFFFFF" android:textSize="34sp"
                 android:textStyle="bold" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
-            <TextView android:text="GAME BOOSTER PRO" android:textColor="#9AA8D8" android:textSize="13sp"
+            <TextView android:text="GAME BOOSTER PRO" android:textColor="#C9D7FF" android:textSize="13sp"
                 android:textStyle="bold" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
         </LinearLayout>
     </LinearLayout>
 
-    <TextView android:text="WELCOME BACK" android:textColor="#D0D8FF" android:textSize="13sp"
-        android:layout_marginTop="22dp" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
-    <TextView android:text="Your games. Our priority." android:textColor="#9AA8D8" android:textSize="18sp"
+    <TextView android:text="WELCOME BACK" android:textColor="#F0F5FF" android:textSize="13sp"
+        android:textStyle="bold" android:layout_marginTop="22dp" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+    <TextView android:text="Your games. Our priority." android:textColor="#C8D5F5" android:textSize="18sp"
         android:layout_marginTop="4dp" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
 
     <LinearLayout android:orientation="vertical" android:padding="20dp"
@@ -29,16 +29,16 @@
         <TextView android:text="⚡  PERFORMANCE MONITOR" android:textColor="#FFFFFF"
             android:textStyle="bold" android:textSize="15sp" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
         <TextView android:id="@+id/ram" android:text="RAM     --" android:textColor="#FFFFFF"
-            android:textSize="19sp" android:layout_marginTop="18dp" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+            android:textSize="19sp" android:textStyle="bold" android:layout_marginTop="18dp" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
         <TextView android:id="@+id/temp" android:text="TEMP    --" android:textColor="#FFFFFF"
-            android:textSize="19sp" android:layout_marginTop="9dp" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+            android:textSize="19sp" android:textStyle="bold" android:layout_marginTop="9dp" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
         <TextView android:text="FPS     --" android:textColor="#FFFFFF" android:textSize="19sp"
-            android:layout_marginTop="9dp" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
-        <TextView android:text="PING    --" android:textColor="#FFFFFF" android:textSize="19sp"
-            android:layout_marginTop="9dp" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+            android:textStyle="bold" android:layout_marginTop="9dp" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+        <TextView android:text="NET     --" android:textColor="#FFFFFF" android:textSize="19sp"
+            android:textStyle="bold" android:layout_marginTop="9dp" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
     </LinearLayout>
 
-    <TextView android:text="BOOST MODE" android:textColor="#A6B5E6" android:textSize="13sp"
+    <TextView android:text="BOOST MODE" android:textColor="#D9E4FF" android:textSize="13sp"
         android:textStyle="bold" android:layout_marginTop="24dp" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
 
     <LinearLayout android:orientation="horizontal" android:layout_width="match_parent"
@@ -51,20 +51,36 @@
     </LinearLayout>
     <Button android:id="@+id/extreme" android:text="🔥  TURBO BOOST" android:textAllCaps="false"
         android:layout_marginTop="10dp" android:layout_width="match_parent" android:layout_height="52dp"/>
-    <TextView android:id="@+id/boost_status" android:text="No boost selected"
-        android:textColor="#A8E6CF" android:textSize="12sp" android:textStyle="bold"
+    <TextView android:id="@+id/boost_status" android:text="NO BOOST SELECTED"
+        android:textColor="#B8FFE7" android:textSize="13sp" android:textStyle="bold"
         android:layout_marginTop="7dp" android:gravity="center"
         android:layout_width="match_parent" android:layout_height="wrap_content"/>
     <Button android:id="@+id/overlay" android:text="F8 / EDGE PERFORMANCE OVERLAY" android:textAllCaps="false"
         android:layout_marginTop="14dp" android:layout_width="match_parent" android:layout_height="52dp"/>
 
-    <TextView android:text="NETWORK OPTIMIZER" android:textColor="#A6B5E6" android:textSize="13sp"
+    <TextView android:text="PRO GAMING ENGINE" android:textColor="#D9E4FF" android:textSize="13sp"
+        android:textStyle="bold" android:layout_marginTop="28dp" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+    <LinearLayout android:orientation="vertical" android:padding="18dp"
+        android:layout_marginTop="10dp" android:background="@drawable/rb22_card"
+        android:layout_width="match_parent" android:layout_height="wrap_content">
+        <TextView android:text="RB22 Adaptive Performance Core" android:textColor="#FFFFFF"
+            android:textSize="18sp" android:textStyle="bold"
+            android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+        <TextView android:text="Built around the same categories used by modern OEM gaming suites: adaptive performance, thermal awareness, memory pressure, network stability and distraction control."
+            android:textColor="#E5ECFF" android:textSize="13sp" android:layout_marginTop="6dp"
+            android:layout_width="match_parent" android:layout_height="wrap_content"/>
+        <TextView android:text="✓ Adaptive game profiles&#10;✓ Thermal-aware performance guard&#10;✓ RAM pressure monitoring&#10;✓ Live network telemetry&#10;✓ Battery-aware behavior&#10;✓ Premium movable HUD"
+            android:textColor="#F2F6FF" android:textSize="14sp" android:lineSpacingExtra="5dp"
+            android:layout_marginTop="12dp" android:layout_width="match_parent" android:layout_height="wrap_content"/>
+    </LinearLayout>
+
+    <TextView android:text="NETWORK OPTIMIZER" android:textColor="#D9E4FF" android:textSize="13sp"
         android:textStyle="bold" android:layout_marginTop="28dp" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
     <LinearLayout android:orientation="vertical" android:padding="18dp"
         android:layout_marginTop="10dp" android:background="@drawable/rb22_card"
         android:layout_width="match_parent" android:layout_height="wrap_content">
         <TextView android:text="DNS can improve name-resolution time, but it cannot guarantee lower in-game ping."
-            android:textColor="#9AA8D8" android:textSize="12sp" android:layout_width="match_parent" android:layout_height="wrap_content"/>
+            android:textColor="#E5ECFF" android:textSize="12sp" android:layout_width="match_parent" android:layout_height="wrap_content"/>
         <Button android:id="@+id/dns_auto" android:text="⚡ AUTO TEST — FIND FASTEST DNS"
             android:textAllCaps="false" android:layout_marginTop="12dp"
             android:layout_width="match_parent" android:layout_height="52dp"/>
@@ -81,20 +97,20 @@
             android:textAllCaps="false" android:layout_marginTop="8dp"
             android:layout_width="match_parent" android:layout_height="48dp"/>
         <TextView android:id="@+id/dns_status" android:text="DNS: Not tested"
-            android:textColor="#DCE5FF" android:textSize="13sp" android:layout_marginTop="10dp"
+            android:textColor="#F0F5FF" android:textSize="13sp" android:textStyle="bold" android:layout_marginTop="10dp"
             android:layout_width="match_parent" android:layout_height="wrap_content"/>
     </LinearLayout>
 
-    <TextView android:text="GAME LIBRARY" android:textColor="#A6B5E6" android:textSize="13sp" android:textStyle="bold" android:layout_marginTop="28dp" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+    <TextView android:text="GAME LIBRARY" android:textColor="#D9E4FF" android:textSize="13sp" android:textStyle="bold" android:layout_marginTop="28dp" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
     <LinearLayout android:orientation="vertical" android:padding="18dp" android:layout_marginTop="10dp" android:background="@drawable/rb22_card" android:layout_width="match_parent" android:layout_height="wrap_content">
         <TextView android:text="🎮  YOUR GAMES" android:textColor="#FFFFFF" android:textSize="18sp" android:textStyle="bold" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
-        <TextView android:id="@+id/game_library_status" android:text="No games added yet" android:textColor="#9AA8D8" android:textSize="13sp" android:layout_marginTop="5dp" android:layout_width="match_parent" android:layout_height="wrap_content"/>
+        <TextView android:id="@+id/game_library_status" android:text="No games added yet" android:textColor="#E5ECFF" android:textSize="13sp" android:layout_marginTop="5dp" android:layout_width="match_parent" android:layout_height="wrap_content"/>
         <Button android:id="@+id/add_game" android:text="＋ ADD GAME" android:textAllCaps="false" android:layout_marginTop="12dp" android:layout_width="match_parent" android:layout_height="50dp"/>
         <Button android:id="@+id/game_library" android:text="🎮 OPEN GAME LIBRARY" android:textAllCaps="false" android:layout_marginTop="8dp" android:layout_width="match_parent" android:layout_height="50dp"/>
-        <TextView android:text="Saved games are detected automatically when they become the active app." android:textColor="#9AA8D8" android:textSize="12sp" android:layout_marginTop="9dp" android:layout_width="match_parent" android:layout_height="wrap_content"/>
+        <TextView android:text="Saved games are detected automatically when they become the active app." android:textColor="#E5ECFF" android:textSize="12sp" android:layout_marginTop="9dp" android:layout_width="match_parent" android:layout_height="wrap_content"/>
     </LinearLayout>
 
-    <TextView android:text="SMART AI AUTOMATION" android:textColor="#A6B5E6" android:textSize="13sp"
+    <TextView android:text="SMART AI AUTOMATION" android:textColor="#D9E4FF" android:textSize="13sp"
         android:textStyle="bold" android:layout_marginTop="28dp" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
     <LinearLayout android:orientation="vertical" android:padding="18dp"
         android:layout_marginTop="10dp" android:background="@drawable/rb22_card"
@@ -103,20 +119,20 @@
             android:textColor="#FFFFFF" android:textSize="18sp" android:textStyle="bold"
             android:layout_width="wrap_content" android:layout_height="wrap_content"/>
         <TextView android:text="Automatically reacts to RAM pressure, temperature and network conditions."
-            android:textColor="#9AA8D8" android:textSize="13sp" android:layout_marginTop="5dp"
+            android:textColor="#E5ECFF" android:textSize="13sp" android:layout_marginTop="5dp"
             android:layout_width="match_parent" android:layout_height="wrap_content"/>
         <Button android:id="@+id/smart_auto" android:text="🤖 ENABLE SMART AUTOMATION"
             android:textAllCaps="false" android:layout_marginTop="12dp"
             android:layout_width="match_parent" android:layout_height="52dp"/>
         <TextView android:text="• Auto RAM cleanup at 70%+&#10;• Thermal-aware boost adjustment&#10;• Game launch optimization&#10;• Network/DNS recommendation&#10;• Battery-aware mode"
-            android:textColor="#DCE5FF" android:textSize="14sp" android:lineSpacingExtra="5dp"
+            android:textColor="#F2F6FF" android:textSize="14sp" android:lineSpacingExtra="5dp"
             android:layout_marginTop="10dp" android:layout_width="match_parent" android:layout_height="wrap_content"/>
     </LinearLayout>
 
-    <TextView android:text="QUICK TOOLS" android:textColor="#A6B5E6" android:textSize="13sp"
+    <TextView android:text="QUICK TOOLS" android:textColor="#D9E4FF" android:textSize="13sp"
         android:textStyle="bold" android:layout_marginTop="28dp" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
     <TextView android:text="🧹 Smart RAM Cleaner&#10;🎮 Game Profile Manager&#10;🌡️ Thermal Guard&#10;📶 Network Monitor&#10;🔋 Battery Saver while idle"
-        android:textColor="#DCE5FF" android:textSize="15sp" android:lineSpacingExtra="6dp"
+        android:textColor="#F2F6FF" android:textSize="15sp" android:lineSpacingExtra="6dp"
         android:layout_marginTop="10dp" android:layout_width="match_parent" android:layout_height="wrap_content"/>
 </LinearLayout>
 </ScrollView>
