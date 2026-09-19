@@ -19,10 +19,11 @@ jobs:
         with:
           dotnet-version: '8.0.x'
 
-      - run: dotnet restore RB22/RB22.csproj
+      - name: Restore for Windows x64 publish
+        run: dotnet restore RB22/RB22.csproj --runtime win-x64
 
       - name: Build
-        run: dotnet build RB22/RB22.csproj --configuration Release --no-restore
+        run: dotnet build RB22/RB22.csproj --configuration Release --no-restore --runtime win-x64
 
       - name: Publish self-contained single-file EXE
         run: >
