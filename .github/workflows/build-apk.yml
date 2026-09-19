@@ -4,9 +4,20 @@ on:
   workflow_dispatch:
   push:
     branches: [main]
+    paths:
+      - 'app/**'
+      - 'gradle/**'
+      - 'build.gradle.kts'
+      - 'settings.gradle.kts'
+      - 'gradle.properties'
+      - '.github/workflows/build-apk.yml'
 
 permissions:
   contents: write
+
+concurrency:
+  group: rb22-mobile
+  cancel-in-progress: true
 
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
@@ -56,7 +67,7 @@ jobs:
 
       - name: Publish latest GitHub Release
         env:
-          GH_TOKEN: \${{ github.token }}
+          GH_TOKEN: ${{ github.token }}
         run: |
           gh release view latest 2>/dev/null || gh release create latest --title "RB22 — Latest APK" --notes "Latest RB22 Android APK build from main."
           gh release upload latest RB22-v1.0.0-debug.apk --clobber
