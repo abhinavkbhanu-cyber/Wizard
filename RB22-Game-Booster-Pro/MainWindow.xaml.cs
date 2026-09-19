@@ -43,6 +43,8 @@ public partial class MainWindow : Window
     bool autoMemoryClean=true;
     bool gamePriority=true;
     bool laptopMode=true;
+    bool adaptiveGameMode=true;
+    string adaptiveGame="";
     bool dnsOptimizer=true;
     string selectedDnsHost="";
     string selectedDnsName="Auto";
@@ -62,7 +64,7 @@ public partial class MainWindow : Window
         PreviewKeyDown+=MainWindow_PreviewKeyDown;
         MouseLeftButtonDown+=WindowDrag;
         Closed+=MainWindow_Closed;
-        timer.Tick+=async (_,_)=>{if(monitoring) await UpdateStatsAsync();};
+        timer.Tick+=async (_,_)=>{if(monitoring) await UpdateStatsAsync(); if(adaptiveGameMode) AdaptiveGameTick();};
     }
 
     void LoadedHandler(object? s,RoutedEventArgs e)
@@ -320,6 +322,36 @@ public partial class MainWindow : Window
                n.Contains("elden")||n.Contains("overwatch")||n.Contains("cod");
     }
 
+    void AdaptiveGameTick()
+    {
+        if(!adaptiveGameMode) return;
+
+        string? detected=null;
+        try
+        {
+            detected=Process.GetProcesses()
+                .Where(p => p.MainWindowHandle!=IntPtr.Zero)
+                .Where(IsLikelyGame)
+                .Select(p => p.ProcessName)
+                .FirstOrDefault();
+        }
+        catch { }
+
+        if(!string.IsNullOrWhiteSpace(detected))
+        {
+            if(!string.Equals(adaptiveGame,detected,StringComparison.OrdinalIgnoreCase))
+            {
+                adaptiveGame=detected;
+                ApplyBoost("Advanced");
+                StatusText.Text=$"ADAPTIVE GAME MODE • {detected} detected • Advanced profile applied";
+            }
+        }
+        else
+        {
+            adaptiveGame="";
+        }
+    }
+
     void SetGamePriority(ProcessPriorityClass priority)
     {
         if(!gamePriority) return;
@@ -472,6 +504,8 @@ public partial class MainWindow : Window
     void GamePriority_Unchecked(object s,RoutedEventArgs e){if(!xamlInitialized)return;gamePriority=false;StatusText.Text="Game Process Priority: OFF";}
     void LaptopMode_Checked(object s,RoutedEventArgs e){if(!xamlInitialized)return;laptopMode=true;StatusText.Text="Laptop Mode: ON";}
     void LaptopMode_Unchecked(object s,RoutedEventArgs e){if(!xamlInitialized)return;laptopMode=false;StatusText.Text="Laptop Mode: OFF";}
+    void AdaptiveGame_Checked(object s,RoutedEventArgs e){if(!xamlInitialized)return;adaptiveGameMode=true;StatusText.Text="Adaptive Game Mode: ON";}
+    void AdaptiveGame_Unchecked(object s,RoutedEventArgs e){if(!xamlInitialized)return;adaptiveGameMode=false;adaptiveGame="";StatusText.Text="Adaptive Game Mode: OFF";}
     void Dns_Checked(object s,RoutedEventArgs e){if(!xamlInitialized)return;dnsOptimizer=true;StatusText.Text="DNS Optimizer: ON";}
     void Dns_Unchecked(object s,RoutedEventArgs e){if(!xamlInitialized)return;dnsOptimizer=false;StatusText.Text="DNS Optimizer: OFF";}
     void Monitor_Checked(object s,RoutedEventArgs e){if(!xamlInitialized)return;monitoring=true;if(IsInitialized)UpdateStats();}
@@ -733,6 +767,7 @@ public partial class MainWindow : Window
             $"Auto memory cleanup: {(autoMemoryClean?"ON at 70%":"OFF")}\n"+
             $"Game priority: {(gamePriority?"ON":"OFF")}\n"+
             $"Laptop mode: {(laptopMode?"ON":"OFF")}\n"+
+            $"Adaptive game mode: {(adaptiveGameMode?"ON":"OFF")}\n"+
             $"DNS optimizer: {(dnsOptimizer?"ON":"OFF")}\n"+
             $"Real-time monitoring: {(monitoring?"ON":"OFF")}\n\n"+
             "Change username?",
