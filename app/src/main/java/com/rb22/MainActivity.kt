@@ -91,7 +91,8 @@ class MainActivity : AppCompatActivity() {
         ).show()
         try {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-                startActivity(Intent(Settings.ACTION_PRIVATE_DNS_SETTINGS))
+                // Use the platform action string directly for SDK compatibility.
+                startActivity(Intent("android.settings.PRIVATE_DNS_SETTINGS"))
             } else {
                 startActivity(Intent(Settings.ACTION_WIRELESS_SETTINGS))
             }
