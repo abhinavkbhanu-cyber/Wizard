@@ -51,7 +51,7 @@ jobs:
       - name: Build debug APK
         run: gradle :app:assembleDebug --stacktrace --no-daemon --no-build-cache --console=plain
       - name: Rename APK
-        run: cp app/build/outputs/apk/debug/app-debug.apk RB22-v1.0.0-debug.apk
+        run: cp app/build/outputs/apk/debug/app-debug.apk RB22-v2.0.0-debug.apk
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
@@ -61,5 +61,5 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh release view latest 2>/dev/null || gh release create latest --title "RB22 — Latest APK" --notes "Latest RB22 Android APK build from main."
+          gh release view latest 2>/dev/null || gh release create latest --title "RB22 — Latest APK" --notes "RB22 Android v2.0.0 — adaptive gaming HUD, profiles, thermal/RAM/network telemetry and smart automation."
           gh release upload latest RB22-v1.0.0-debug.apk --clobber
