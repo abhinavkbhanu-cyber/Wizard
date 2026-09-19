@@ -92,7 +92,6 @@ public partial class MainWindow : Window
         }
         catch(Exception ex)
         {
-            // Keep RB22 usable even if optional startup integrations fail.
             globalF8Registered=false;
             StatusText.Text="Startup completed with limited optional features.";
             try
@@ -136,31 +135,29 @@ public partial class MainWindow : Window
             WindowStartupLocation=WindowStartupLocation.CenterScreen,
             ResizeMode=ResizeMode.NoResize,
             WindowStyle=WindowStyle.ToolWindow,
-            Background=new System.Windows.Media.SolidColorBrush(
-                System.Windows.Media.Color.FromRgb(8,10,25)),
-            Foreground=new System.Windows.Media.SolidColorBrush(
-                System.Windows.Media.Colors.White)
+            Background=new SolidColorBrush(Color.FromRgb(8,10,25)),
+            Foreground=new SolidColorBrush(Colors.White)
         };
 
-        var panel=new System.Windows.Controls.StackPanel{Margin=new Thickness(28)};
-        panel.Children.Add(new System.Windows.Controls.TextBlock
+        var panel=new StackPanel{Margin=new Thickness(28)};
+        panel.Children.Add(new TextBlock
         {
             Text="Welcome to RB22",FontSize=25,FontWeight=FontWeights.SemiBold
         });
-        panel.Children.Add(new System.Windows.Controls.TextBlock
+        panel.Children.Add(new TextBlock
         {
             Text="Choose the username RB22 should show on your dashboard.",
             Margin=new Thickness(0,8,0,18),TextWrapping=TextWrapping.Wrap,Opacity=.7
         });
 
-        var box=new System.Windows.Controls.TextBox
+        var box=new TextBox
         {
             Height=40,FontSize=17,Text="Player",Padding=new Thickness(10),
             Margin=new Thickness(0,0,0,18)
         };
         panel.Children.Add(box);
 
-        var save=new System.Windows.Controls.Button
+        var save=new Button
         {
             Content="CONTINUE",Height=42,Width=140,
             HorizontalAlignment=HorizontalAlignment.Right
@@ -195,7 +192,7 @@ public partial class MainWindow : Window
 
     void WindowDrag(object s,MouseButtonEventArgs e)
     {
-        if(e.ChangedButton==MouseButton.Left && e.GetPosition(this).Y<65 && e.OriginalSource is not System.Windows.Controls.Button)
+        if(e.ChangedButton==MouseButton.Left && e.GetPosition(this).Y<65 && e.OriginalSource is not Button)
         {
             try{DragMove();}catch{}
         }
@@ -251,65 +248,7 @@ public partial class MainWindow : Window
         return (cpuText,cpuSubText,ramText,ramSubText,diskText,diskSubText,shouldClean);
     }
 
-    void UpdateStats()
-    {
-        _ = UpdateStatsAsync();
-    }
-
-    void LegacyUpdateStatsRemoved()
-    {
-        try
-        {
-            var cpu=PerformanceCounter("Processor","% Processor Time","_Total");
-            CpuText.Text=$"{cpu:F0}%";
-            CpuSubText.Text="Live CPU load";
-        }
-        catch
-        {
-            CpuText.Text="N/A";
-            CpuSubText.Text="CPU unavailable";
-        }
-
-        try
-        {
-            var ram=PerformanceCounter("Memory","% Committed Bytes In Use","");
-            RamText.Text=$"{ram:F0}%";
-            RamSubText.Text=GetRamUsageText();
-
-            if(autoMemoryClean && ram>=70 &&
-               (DateTime.Now-lastMemoryClean).TotalSeconds>=30)
-            {
-                CleanMemory();
-                lastMemoryClean=DateTime.Now;
-                StatusText.Text="Auto memory cleanup triggered at 70%+";
-            }
-        }
-        catch
-        {
-            RamText.Text="N/A";
-            RamSubText.Text="RAM unavailable";
-        }
-
-        try
-        {
-            var root=Path.GetPathRoot(Environment.SystemDirectory);
-            if(root!=null)
-            {
-                var drive=new DriveInfo(root);
-                double used=(double)(drive.TotalSize-drive.AvailableFreeSpace)/drive.TotalSize*100;
-                DiskText.Text=$"{used:F0}%";
-                DiskSubText.Text=$"{(drive.TotalSize-drive.AvailableFreeSpace)/1e9:F0} / {drive.TotalSize/1e9:F0} GB";
-            }
-        }
-        catch
-        {
-            DiskText.Text="N/A";
-            DiskSubText.Text="Disk unavailable";
-        }
-
-        GpuText.Text="GPU";
-        GpuSubText.Text="Detected • usage depends on driver";
-    }
+    void UpdateStats(){ _ = UpdateStatsAsync(); }
 
     string GetRamUsageText()
     {
@@ -377,6 +316,31 @@ public partial class MainWindow : Window
                n.Contains("roblox")||n.Contains("valorant")||n.Contains("fortnite")||
                n.Contains("cs2")||n.Contains("minecraft")||n.Contains("gta")||
                n.Contains("elden")||n.Contains("overwatch")||n.Contains("cod");
+    }
+
+    void SetGamePriority(ProcessPriorityClass priority)
+    {
+        if(!gamePriority) return;
+
+        int changed=0;
+        foreach(var p in Process.GetProcesses())
+        {
+            try
+            {
+                if(p.Id==Environment.ProcessId ||
+                   p.MainWindowHandle==IntPtr.Zero ||
+                   !IsLikelyGame(p))
+                    continue;
+
+                p.PriorityClass=priority;
+                changed++;
+            }
+            catch { }
+            finally { p.Dispose(); }
+        }
+
+        if(changed>0)
+            StatusText.Text=$"Game priority set to {priority} for {changed} detected game process(es).";
     }
 
     void ApplyBoost(string mode)
@@ -466,7 +430,6 @@ public partial class MainWindow : Window
 
     void BasicBoost_Click(object s,RoutedEventArgs e)=>ApplyBoost("Basic");
     void AdvancedBoost_Click(object s,RoutedEventArgs e)=>ApplyBoost("Advanced");
-
     void TurboBoost_Click(object s,RoutedEventArgs e)=>ApplyBoost("Turbo");
 
     async void TestDns_Click(object s,RoutedEventArgs e)
@@ -501,96 +464,27 @@ public partial class MainWindow : Window
             :"DNS test complete • "+bestName+" lowest measured latency";
     }
 
-    void AutoMemory_Checked(object s,RoutedEventArgs e)
-    {
-        if(!xamlInitialized) return;
-        autoMemoryClean=true;
-        StatusText.Text="Auto Memory Cleanup: ON at 70%";
-    }
-    void AutoMemory_Unchecked(object s,RoutedEventArgs e)
-    {
-        if(!xamlInitialized) return;
-        autoMemoryClean=false;
-        StatusText.Text="Auto Memory Cleanup: OFF";
-    }
-    void GamePriority_Checked(object s,RoutedEventArgs e)
-    {
-        if(!xamlInitialized) return;
-        gamePriority=true;
-        StatusText.Text="Game Process Priority: ON";
-    }
-    void GamePriority_Unchecked(object s,RoutedEventArgs e)
-    {
-        if(!xamlInitialized) return;
-        gamePriority=false;
-        StatusText.Text="Game Process Priority: OFF";
-    }
-    void LaptopMode_Checked(object s,RoutedEventArgs e)
-    {
-        if(!xamlInitialized) return;
-        laptopMode=true;
-        StatusText.Text="Laptop Mode: ON";
-    }
-    void LaptopMode_Unchecked(object s,RoutedEventArgs e)
-    {
-        if(!xamlInitialized) return;
-        laptopMode=false;
-        StatusText.Text="Laptop Mode: OFF";
-    }
-    void Dns_Checked(object s,RoutedEventArgs e)
-    {
-        if(!xamlInitialized) return;
-        dnsOptimizer=true;
-        StatusText.Text="DNS Optimizer: ON";
-    }
-    void Dns_Unchecked(object s,RoutedEventArgs e)
-    {
-        if(!xamlInitialized) return;
-        dnsOptimizer=false;
-        StatusText.Text="DNS Optimizer: OFF";
-    }
-    void Monitor_Checked(object s,RoutedEventArgs e)
-    {
-        if(!xamlInitialized) return;
-        monitoring=true;
-        if(IsInitialized) UpdateStats();
-    }
-    void Monitor_Unchecked(object s,RoutedEventArgs e)
-    {
-        if(!xamlInitialized) return;
-        monitoring=false;
-        StatusText.Text="Real-time Monitoring: OFF";
-    }
-    void Overlay_Checked(object s,RoutedEventArgs e)
-    {
-        if(!xamlInitialized) return;
-        overlayEnabled=true;
-        StatusText.Text="F8 Overlay: ON";
-    }
-    void Overlay_Unchecked(object s,RoutedEventArgs e)
-    {
-        if(!xamlInitialized) return;
-        overlayEnabled=false;
-        overlay?.Hide();
-        StatusText.Text="F8 Overlay: OFF";
-    }
+    void AutoMemory_Checked(object s,RoutedEventArgs e){if(!xamlInitialized)return;autoMemoryClean=true;StatusText.Text="Auto Memory Cleanup: ON at 70%";}
+    void AutoMemory_Unchecked(object s,RoutedEventArgs e){if(!xamlInitialized)return;autoMemoryClean=false;StatusText.Text="Auto Memory Cleanup: OFF";}
+    void GamePriority_Checked(object s,RoutedEventArgs e){if(!xamlInitialized)return;gamePriority=true;StatusText.Text="Game Process Priority: ON";}
+    void GamePriority_Unchecked(object s,RoutedEventArgs e){if(!xamlInitialized)return;gamePriority=false;StatusText.Text="Game Process Priority: OFF";}
+    void LaptopMode_Checked(object s,RoutedEventArgs e){if(!xamlInitialized)return;laptopMode=true;StatusText.Text="Laptop Mode: ON";}
+    void LaptopMode_Unchecked(object s,RoutedEventArgs e){if(!xamlInitialized)return;laptopMode=false;StatusText.Text="Laptop Mode: OFF";}
+    void Dns_Checked(object s,RoutedEventArgs e){if(!xamlInitialized)return;dnsOptimizer=true;StatusText.Text="DNS Optimizer: ON";}
+    void Dns_Unchecked(object s,RoutedEventArgs e){if(!xamlInitialized)return;dnsOptimizer=false;StatusText.Text="DNS Optimizer: OFF";}
+    void Monitor_Checked(object s,RoutedEventArgs e){if(!xamlInitialized)return;monitoring=true;if(IsInitialized)UpdateStats();}
+    void Monitor_Unchecked(object s,RoutedEventArgs e){if(!xamlInitialized)return;monitoring=false;StatusText.Text="Real-time Monitoring: OFF";}
+    void Overlay_Checked(object s,RoutedEventArgs e){if(!xamlInitialized)return;overlayEnabled=true;StatusText.Text="F8 Overlay: ON";}
+    void Overlay_Unchecked(object s,RoutedEventArgs e){if(!xamlInitialized)return;overlayEnabled=false;overlay?.Hide();StatusText.Text="F8 Overlay: OFF";}
 
     void GameLibrary_Click(object s,RoutedEventArgs e)
     {
-        MessageBox.Show(
-            "Game Library\n\nAdd or launch installed games here. Per-game profiles can be added next.",
-            "RB22 Game Library");
+        MessageBox.Show("Game Library\n\nAdd or launch installed games here. Per-game profiles can be added next.","RB22 Game Library");
     }
 
-    void Performance_Click(object s,RoutedEventArgs e)
-        =>ShowPerformancePanel();
-
-    void Memory_Click(object s,RoutedEventArgs e)
-        =>ShowMemoryPanel();
-
-    void Network_Click(object s,RoutedEventArgs e)
-        =>ShowNetworkPanel();
-
+    void Performance_Click(object s,RoutedEventArgs e)=>ShowPerformancePanel();
+    void Memory_Click(object s,RoutedEventArgs e)=>ShowMemoryPanel();
+    void Network_Click(object s,RoutedEventArgs e)=>ShowNetworkPanel();
 
     Window MakeToolWindow(string title,int width=760,int height=520)
     {
@@ -616,12 +510,12 @@ public partial class MainWindow : Window
         p.Children.Add(new TextBlock{Text="Live system telemetry and performance actions",Opacity=.65,Margin=new Thickness(0,4,0,18)});
         var stats=new TextBlock{FontSize=18,TextWrapping=TextWrapping.Wrap,Margin=new Thickness(0,5,0,12)};
         p.Children.Add(stats);
-        var refresh=ToolButton("Refresh now",(_,_)=>{_ = UpdateStatsAsync(); stats.Text=$"CPU: {CpuText.Text}   RAM: {RamText.Text}   Disk: {DiskText.Text}\\nGPU: {GpuSubText.Text}";});
+        var refresh=ToolButton("Refresh now",async (_,_)=>{await UpdateStatsAsync(); stats.Text=$"CPU: {CpuText.Text}   RAM: {RamText.Text}   Disk: {DiskText.Text}\nGPU: {GpuSubText.Text}";});
         p.Children.Add(refresh);
         p.Children.Add(ToolButton("Quick Scan",(_,_)=>{_ = UpdateStatsAsync(); StatusText.Text="Performance quick scan started."; stats.Text="Scan requested — live values are shown on the dashboard."; }));
         p.Children.Add(ToolButton("Advanced Boost",AdvancedBoost_Click));
         p.Children.Add(ToolButton("Turbo Boost",TurboBoost_Click));
-        stats.Text=$"CPU: {CpuText.Text}   RAM: {RamText.Text}   Disk: {DiskText.Text}\\nGPU: {GpuSubText.Text}";
+        stats.Text=$"CPU: {CpuText.Text}   RAM: {RamText.Text}   Disk: {DiskText.Text}\nGPU: {GpuSubText.Text}";
         w.Content=p; w.Show();
     }
 
@@ -631,10 +525,10 @@ public partial class MainWindow : Window
         var p=new StackPanel{Margin=new Thickness(28)};
         p.Children.Add(new TextBlock{Text="MEMORY CENTER",FontSize=26,FontWeight=FontWeights.Bold});
         p.Children.Add(new TextBlock{Text="Monitor RAM usage and safely trim eligible working sets.",Opacity=.65,Margin=new Thickness(0,4,0,20)});
-        var info=new TextBlock{Text=$"Current RAM: {RamText.Text}\\n{RamSubText.Text}",FontSize=20,Margin=new Thickness(0,0,0,12)};
+        var info=new TextBlock{Text=$"Current RAM: {RamText.Text}\n{RamSubText.Text}",FontSize=20,Margin=new Thickness(0,0,0,12)};
         p.Children.Add(info);
-        p.Children.Add(ToolButton("Clean memory now",(_,_)=>{CleanMemory(); info.Text=$"Current RAM: {RamText.Text}\\nMemory cleanup completed."; _=UpdateStatsAsync();}));
-        p.Children.Add(ToolButton("Refresh RAM",(_,_)=>{_ = UpdateStatsAsync(); info.Text=$"Current RAM: {RamText.Text}\\n{RamSubText.Text}";}));
+        p.Children.Add(ToolButton("Clean memory now",(_,_)=>{CleanMemory(); info.Text=$"Current RAM: {RamText.Text}\nMemory cleanup completed."; _=UpdateStatsAsync();}));
+        p.Children.Add(ToolButton("Refresh RAM",async (_,_)=>{await UpdateStatsAsync(); info.Text=$"Current RAM: {RamText.Text}\n{RamSubText.Text}";}));
         p.Children.Add(ToolButton("Open Task Manager",(_,_)=>{try{Process.Start(new ProcessStartInfo("taskmgr.exe"){UseShellExecute=true});}catch{}}));
         w.Content=p; w.Show();
     }
@@ -655,7 +549,7 @@ public partial class MainWindow : Window
                 try{using var ping=new Ping(); var r=await ping.SendPingAsync(d.Host,1200); lines.Add(r.Status==IPStatus.Success?$"{d.Name}: {r.RoundtripTime} ms":$"{d.Name}: unavailable");}
                 catch{lines.Add($"{d.Name}: unavailable");}
             }
-            results.Text=string.Join("\\n",lines);
+            results.Text=string.Join("\n",lines);
             StatusText.Text="Network test complete.";
         }));
         p.Children.Add(ToolButton("Test DNS Optimizer",TestDns_Click));
