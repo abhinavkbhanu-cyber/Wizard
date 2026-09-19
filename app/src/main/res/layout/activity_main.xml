@@ -51,6 +51,10 @@
     </LinearLayout>
     <Button android:id="@+id/extreme" android:text="🔥  TURBO BOOST" android:textAllCaps="false"
         android:layout_marginTop="10dp" android:layout_width="match_parent" android:layout_height="52dp"/>
+    <TextView android:id="@+id/boost_status" android:text="No boost selected"
+        android:textColor="#A8E6CF" android:textSize="12sp" android:textStyle="bold"
+        android:layout_marginTop="7dp" android:gravity="center"
+        android:layout_width="match_parent" android:layout_height="wrap_content"/>
     <Button android:id="@+id/overlay" android:text="F8 / EDGE PERFORMANCE OVERLAY" android:textAllCaps="false"
         android:layout_marginTop="14dp" android:layout_width="match_parent" android:layout_height="52dp"/>
 
