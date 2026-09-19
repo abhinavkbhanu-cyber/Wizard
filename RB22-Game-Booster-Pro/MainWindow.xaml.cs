@@ -4,6 +4,10 @@ using System.IO;
 using System.Linq;
 using System.Media;
 using System.Net.NetworkInformation;
+using Microsoft.Win32;
+using System.Collections.Generic;
+using System.Windows.Controls;
+using System.Windows.Media;
 using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Input;
@@ -231,9 +235,9 @@ public partial class MainWindow : Window
         GpuText.Text="GPU"; GpuSubText.Text="Detected • usage depends on driver";
         if(stats.shouldClean && autoMemoryClean)
         {
-            await System.Threading.Tasks.Task.Run(() => CleanMemory());
+            var cleaned=await System.Threading.Tasks.Task.Run(() => CleanMemoryCore());
             lastMemoryClean=DateTime.Now;
-            if(IsInitialized) StatusText.Text="Auto memory cleanup triggered at 70%+";
+            if(IsInitialized) StatusText.Text=$"Auto memory cleanup triggered at 70%+ • trimmed {cleaned} processes";
         }
     }
 
@@ -328,6 +332,12 @@ public partial class MainWindow : Window
 
     void CleanMemory()
     {
+        var cleaned=CleanMemoryCore();
+        StatusText.Text=$"Memory cleanup complete • trimmed {cleaned} processes";
+    }
+
+    int CleanMemoryCore()
+    {
         string[] protectedNames={
             "System","Idle","Registry","smss","csrss","wininit","winlogon","services",
             "lsass","svchost","dwm","fontdrvhost","Memory Compression","MsMpEng",
@@ -357,7 +367,7 @@ public partial class MainWindow : Window
             finally{p.Dispose();}
         }
 
-        StatusText.Text=$"Memory cleanup complete • trimmed {cleaned} processes";
+        return cleaned;
     }
 
     static bool IsLikelyGame(Process p)
@@ -549,13 +559,171 @@ public partial class MainWindow : Window
     }
 
     void Performance_Click(object s,RoutedEventArgs e)
-        =>StatusText.Text="Performance Monitor is live on the dashboard.";
+        =>ShowPerformancePanel();
 
     void Memory_Click(object s,RoutedEventArgs e)
-        =>StatusText.Text="Memory tools are available in System Automation.";
+        =>ShowMemoryPanel();
 
     void Network_Click(object s,RoutedEventArgs e)
-        =>StatusText.Text="Network tools are available through DNS Optimizer.";
+        =>ShowNetworkPanel();
+
+
+    Window MakeToolWindow(string title,int width=760,int height=520)
+    {
+        var w=new Window{Title=title,Width=width,Height=height,WindowStartupLocation=WindowStartupLocation.CenterOwner,
+            Owner=this,Background=new SolidColorBrush(Color.FromRgb(7,10,25)),Foreground=Brushes.White,
+            ResizeMode=ResizeMode.CanMinimize,WindowStyle=WindowStyle.SingleBorderWindow};
+        return w;
+    }
+
+    Button ToolButton(string text,RoutedEventHandler click)
+    {
+        var b=new Button{Content=text,Height=44,Margin=new Thickness(0,8,0,0),Padding=new Thickness(16,0),
+            Background=new SolidColorBrush(Color.FromRgb(20,28,58)),Foreground=Brushes.White,
+            BorderBrush=new SolidColorBrush(Color.FromRgb(55,86,150))};
+        b.Click+=click; return b;
+    }
+
+    void ShowPerformancePanel()
+    {
+        var w=MakeToolWindow("RB22 • Performance",720,500);
+        var p=new StackPanel{Margin=new Thickness(28)};
+        p.Children.Add(new TextBlock{Text="PERFORMANCE CENTER",FontSize=26,FontWeight=FontWeights.Bold});
+        p.Children.Add(new TextBlock{Text="Live system telemetry and performance actions",Opacity=.65,Margin=new Thickness(0,4,0,18)});
+        var stats=new TextBlock{FontSize=18,TextWrapping=TextWrapping.Wrap,Margin=new Thickness(0,5,0,12)};
+        p.Children.Add(stats);
+        var refresh=ToolButton("Refresh now",(_,_)=>{_ = UpdateStatsAsync(); stats.Text=$"CPU: {CpuText.Text}   RAM: {RamText.Text}   Disk: {DiskText.Text}\\nGPU: {GpuSubText.Text}";});
+        p.Children.Add(refresh);
+        p.Children.Add(ToolButton("Quick Scan",(_,_)=>{_ = UpdateStatsAsync(); StatusText.Text="Performance quick scan started."; stats.Text="Scan requested — live values are shown on the dashboard."; }));
+        p.Children.Add(ToolButton("Advanced Boost",AdvancedBoost_Click));
+        p.Children.Add(ToolButton("Turbo Boost",TurboBoost_Click));
+        stats.Text=$"CPU: {CpuText.Text}   RAM: {RamText.Text}   Disk: {DiskText.Text}\\nGPU: {GpuSubText.Text}";
+        w.Content=p; w.Show();
+    }
+
+    void ShowMemoryPanel()
+    {
+        var w=MakeToolWindow("RB22 • Memory",680,430);
+        var p=new StackPanel{Margin=new Thickness(28)};
+        p.Children.Add(new TextBlock{Text="MEMORY CENTER",FontSize=26,FontWeight=FontWeights.Bold});
+        p.Children.Add(new TextBlock{Text="Monitor RAM usage and safely trim eligible working sets.",Opacity=.65,Margin=new Thickness(0,4,0,20)});
+        var info=new TextBlock{Text=$"Current RAM: {RamText.Text}\\n{RamSubText.Text}",FontSize=20,Margin=new Thickness(0,0,0,12)};
+        p.Children.Add(info);
+        p.Children.Add(ToolButton("Clean memory now",(_,_)=>{CleanMemory(); info.Text=$"Current RAM: {RamText.Text}\\nMemory cleanup completed."; _=UpdateStatsAsync();}));
+        p.Children.Add(ToolButton("Refresh RAM",(_,_)=>{_ = UpdateStatsAsync(); info.Text=$"Current RAM: {RamText.Text}\\n{RamSubText.Text}";}));
+        p.Children.Add(ToolButton("Open Task Manager",(_,_)=>{try{Process.Start(new ProcessStartInfo("taskmgr.exe"){UseShellExecute=true});}catch{}}));
+        w.Content=p; w.Show();
+    }
+
+    async void ShowNetworkPanel()
+    {
+        var w=MakeToolWindow("RB22 • Network",700,500);
+        var p=new StackPanel{Margin=new Thickness(28)};
+        p.Children.Add(new TextBlock{Text="NETWORK CENTER",FontSize=26,FontWeight=FontWeights.Bold});
+        p.Children.Add(new TextBlock{Text="Measure latency to common DNS endpoints.",Opacity=.65,Margin=new Thickness(0,4,0,18)});
+        var results=new TextBlock{Text="Press Test Network to measure latency.",FontSize=17,TextWrapping=TextWrapping.Wrap};
+        p.Children.Add(results);
+        p.Children.Add(ToolButton("Test Network",async (_,_)=>{
+            results.Text="Testing…";
+            var lines=new List<string>();
+            foreach(var d in dns)
+            {
+                try{using var ping=new Ping(); var r=await ping.SendPingAsync(d.Host,1200); lines.Add(r.Status==IPStatus.Success?$"{d.Name}: {r.RoundtripTime} ms":$"{d.Name}: unavailable");}
+                catch{lines.Add($"{d.Name}: unavailable");}
+            }
+            results.Text=string.Join("\\n",lines);
+            StatusText.Text="Network test complete.";
+        }));
+        p.Children.Add(ToolButton("Test DNS Optimizer",TestDns_Click));
+        p.Children.Add(ToolButton("Open Windows Network Settings",(_,_)=>{try{Process.Start(new ProcessStartInfo("ms-settings:network-status"){UseShellExecute=true});}catch{}}));
+        w.Content=p; w.Show();
+    }
+
+    void ShowGameLibrary()
+    {
+        var w=MakeToolWindow("RB22 • Game Library",820,620);
+        var p=new Grid{Margin=new Thickness(24)};
+        p.RowDefinitions.Add(new RowDefinition{Height=GridLength.Auto});
+        p.RowDefinitions.Add(new RowDefinition{Height=new GridLength(1,GridUnitType.Star)});
+        p.RowDefinitions.Add(new RowDefinition{Height=GridLength.Auto});
+        var header=new DockPanel{Margin=new Thickness(0,0,0,16)};
+        header.Children.Add(new TextBlock{Text="GAME LIBRARY",FontSize=27,FontWeight=FontWeights.Bold});
+        var add=ToolButton("+ Add Game",(_,_)=>AddGameToLibrary(list));
+        DockPanel.SetDock(add,Dock.Right); header.Children.Add(add); p.Children.Add(header);
+        var list=new ListBox{FontSize=16,Background=new SolidColorBrush(Color.FromRgb(12,16,35)),Foreground=Brushes.White,BorderBrush=new SolidColorBrush(Color.FromRgb(40,58,105))};
+        Grid.SetRow(list,1); p.Children.Add(list);
+        var bottom=new StackPanel{Orientation=Orientation.Horizontal,HorizontalAlignment=HorizontalAlignment.Right};
+        bottom.Children.Add(ToolButton("Launch Selected",(_,_)=>LaunchSelectedGame(list)));
+        bottom.Children.Add(ToolButton("Boost Selected",(_,_)=>BoostSelectedGame(list)));
+        Grid.SetRow(bottom,2); p.Children.Add(bottom);
+        LoadGames(list);
+        w.Content=p; w.Show();
+    }
+
+    string GamesPath()=>Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),"RB22","games.txt");
+
+    void LoadGames(ListBox list)
+    {
+        try
+        {
+            if(!File.Exists(GamesPath())) return;
+            foreach(var line in File.ReadAllLines(GamesPath()))
+            {
+                var parts=line.Split('|',2);
+                if(parts.Length==2 && File.Exists(parts[1])) list.Items.Add(new GameEntry(parts[0],parts[1]));
+            }
+        }catch{}
+    }
+
+    void SaveGames(ListBox list)
+    {
+        try
+        {
+            var dir=Path.GetDirectoryName(GamesPath());
+            if(!string.IsNullOrEmpty(dir)) Directory.CreateDirectory(dir);
+            File.WriteAllLines(GamesPath(),list.Items.OfType<GameEntry>().Select(g=>$"{g.Name}|{g.Path}"));
+        }catch{}
+    }
+
+    void AddGameToLibrary(ListBox list)
+    {
+        var dlg=new OpenFileDialog{Title="Select a game executable",Filter="Game executable (*.exe)|*.exe|All files (*.*)|*.*",CheckFileExists=true};
+        if(dlg.ShowDialog(this)==true)
+        {
+            var name=Path.GetFileNameWithoutExtension(dlg.FileName);
+            if(!list.Items.OfType<GameEntry>().Any(g=>string.Equals(g.Path,dlg.FileName,StringComparison.OrdinalIgnoreCase)))
+                list.Items.Add(new GameEntry(name,dlg.FileName));
+            SaveGames(list);
+            StatusText.Text=$"Added {name} to Game Library.";
+        }
+    }
+
+    void LaunchSelectedGame(ListBox list)
+    {
+        if(list.SelectedItem is not GameEntry g){MessageBox.Show("Select a game first.","RB22 Game Library");return;}
+        try{Process.Start(new ProcessStartInfo(g.Path){UseShellExecute=true}); StatusText.Text=$"Launched {g.Name}.";}catch(Exception ex){MessageBox.Show(ex.Message,"RB22");}
+    }
+
+    void BoostSelectedGame(ListBox list)
+    {
+        if(list.SelectedItem is not GameEntry g){MessageBox.Show("Select a game first.","RB22 Game Library");return;}
+        try
+        {
+            var exe=Path.GetFileNameWithoutExtension(g.Path);
+            var p=Process.GetProcessesByName(exe).FirstOrDefault();
+            if(p!=null && gamePriority) p.PriorityClass=ProcessPriorityClass.AboveNormal;
+            ApplyBoost("Advanced");
+            StatusText.Text=$"Boost applied for {g.Name}.";
+            p?.Dispose();
+        }catch{StatusText.Text=$"Boost requested for {g.Name}.";}
+    }
+
+    sealed class GameEntry
+    {
+        public string Name{get;} public string Path{get;}
+        public GameEntry(string name,string path){Name=name;Path=path;}
+        public override string ToString()=>Name+"  •  "+Path;
+    }
 
     void QuickScan_Click(object s,RoutedEventArgs e)
     {
