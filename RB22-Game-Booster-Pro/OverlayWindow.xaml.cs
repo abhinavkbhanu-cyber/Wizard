@@ -1,5 +1,10 @@
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
+using System.Globalization;
+using System.IO;
+using System.Linq;
+using System.Text;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Threading;
@@ -77,6 +82,7 @@ public partial class OverlayWindow : Window
             _=System.Threading.Tasks.Task.Run(ReadPresentMon);
         }catch{telemetryState="FPS telemetry unavailable";}
     }
+
     private async System.Threading.Tasks.Task ReadPresentMon()
     {
         try
@@ -113,27 +119,32 @@ public partial class OverlayWindow : Window
             }
         }catch{telemetryState="FPS telemetry stopped";}
     }
+
     private static int FindColumn(List<string> columns,string name)
     {
         for(int i=0;i<columns.Count;i++)if(string.Equals(columns[i].Trim(),name,StringComparison.OrdinalIgnoreCase))return i;
         return -1;
     }
+
     private static List<string> ParseCsv(string line)
     {
         var result=new List<string>();var sb=new StringBuilder();bool quoted=false;
         foreach(var ch in line){if(ch=='"'){quoted=!quoted;continue;}if(ch==','&&!quoted){result.Add(sb.ToString());sb.Clear();}else sb.Append(ch);}
         result.Add(sb.ToString());return result;
     }
+
     private static bool IsLikelyGame(Process p)
     {
         var n=p.ProcessName.ToLowerInvariant();
         return n.Contains("roblox")||n.Contains("valorant")||n.Contains("fortnite")||n.Contains("cs2")||n.Contains("minecraft")||n.Contains("gta")||n.Contains("elden")||n.Contains("overwatch")||n.Contains("apex")||n.Contains("rocketleague")||n.Contains("r5apex")||n.Contains("game");
     }
+
     private void StopPresentMon()
     {
         try{if(presentMon!=null&&!presentMon.HasExited)presentMon.Kill(true);}catch{}
         presentMon?.Dispose();presentMon=null;presentReader?.Dispose();presentReader=null;
     }
+
     private void Overlay_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
     {
         if (e.OriginalSource is not System.Windows.Controls.Button)
