@@ -29,7 +29,7 @@
         <Button DockPanel.Dock="Right" Content="🤖 AI BOOST" Click="AIBoost_Click" Padding="22,10"/>
       </DockPanel>
       <ScrollViewer Grid.Row="1" Margin="0,24,0,0" PanningMode="VerticalOnly" IsDeferredScrollingEnabled="True">
-        <StackPanel x:Name="Content" />
+        <StackPanel x:Name="MainContent" />
       </ScrollViewer>
     </Grid>
   </Grid>
