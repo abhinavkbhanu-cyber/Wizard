@@ -22,7 +22,8 @@ class MainActivity : AppCompatActivity() {
         "Cloudflare" to "one.one.one.one",
         "Google" to "dns.google",
         "Quad9" to "dns.quad9.net",
-        "AdGuard" to "dns.adguard-dns.com"
+        "AdGuard" to "dns.adguard-dns.com",
+        "OpenDNS" to "dns.opendns.com"
     )
 
     private val gamePrefs by lazy {
@@ -54,7 +55,8 @@ class MainActivity : AppCompatActivity() {
             R.id.dns_cloudflare to dnsOptions[0],
             R.id.dns_google to dnsOptions[1],
             R.id.dns_quad9 to dnsOptions[2],
-            R.id.dns_adguard to dnsOptions[3]
+            R.id.dns_adguard to dnsOptions[3],
+            R.id.dns_opendns to dnsOptions[4]
         )
         dnsButtons.forEach { (id, dns) ->
             findViewById<Button>(id).setOnClickListener {
@@ -96,14 +98,17 @@ class MainActivity : AppCompatActivity() {
         val status = findViewById<TextView>(R.id.boost_status)
         findViewById<Button>(R.id.basic).setOnClickListener {
             status.text = "✓ BASIC BOOST APPLIED"
+            gamePrefs.edit().putString("profile", "Basic").apply()
             Toast.makeText(this, "Basic Boost applied", Toast.LENGTH_SHORT).show()
         }
         findViewById<Button>(R.id.advanced).setOnClickListener {
             status.text = "✓ ADVANCED BOOST APPLIED"
+            gamePrefs.edit().putString("profile", "Advanced").apply()
             Toast.makeText(this, "Advanced Boost applied", Toast.LENGTH_SHORT).show()
         }
         findViewById<Button>(R.id.extreme).setOnClickListener {
             status.text = "✓ TURBO BOOST APPLIED"
+            gamePrefs.edit().putString("profile", "Turbo").apply()
             Toast.makeText(this, "Turbo Boost applied", Toast.LENGTH_SHORT).show()
         }
     }
