@@ -55,14 +55,15 @@ public partial class MainWindow : Window
         MouseLeftButtonDown+=WindowDrag;
         Closed+=MainWindow_Closed;
         timer.Tick+=(_,_)=>{if(monitoring) UpdateStats();};
-        timer.Start();
     }
 
     void LoadedHandler(object? s,RoutedEventArgs e)
     {
-        PlayStartupSound();
+        try
+        {
+            PlayStartupSound();
 
-        username=LoadUsername();
+            username=LoadUsername();
         if(string.IsNullOrWhiteSpace(username))
         {
             username=AskForUsername();
@@ -71,11 +72,32 @@ public partial class MainWindow : Window
         }
         UsernameText.Text=username;
 
-        var h=new WindowInteropHelper(this).Handle;
-        source=HwndSource.FromHwnd(h);
-        source.AddHook(WndProc);
-        globalF8Registered=RegisterHotKey(h,HotkeyId,MOD_NONE|MOD_NOREPEAT,0x77);
-        UpdateStats();
+            var h=new WindowInteropHelper(this).Handle;
+            source=HwndSource.FromHwnd(h);
+
+            if(source!=null)
+            {
+                source.AddHook(WndProc);
+                globalF8Registered=RegisterHotKey(h,HotkeyId,MOD_NONE|MOD_NOREPEAT,0x77);
+            }
+
+            UpdateStats();
+            timer.Start();
+        }
+        catch(Exception ex)
+        {
+            // Keep RB22 usable even if optional startup integrations fail.
+            globalF8Registered=false;
+            StatusText.Text="Startup completed with limited optional features.";
+            try
+            {
+                File.AppendAllText(
+                    Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+                    "RB22","startup-warning.log"),
+                    $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] {ex}\n");
+            }
+            catch { }
+        }
     }
 
     void PlayStartupSound()
