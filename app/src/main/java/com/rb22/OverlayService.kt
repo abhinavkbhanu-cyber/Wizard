@@ -105,7 +105,7 @@ class OverlayService : Service() {
         val row1=LinearLayout(this).apply{orientation=LinearLayout.HORIZONTAL}
         row1.addView(stat("RAM","--","ram"));row1.addView(stat("TEMP","--","temp"));row1.addView(stat("BATTERY","--","battery"))
         val row2=LinearLayout(this).apply{orientation=LinearLayout.HORIZONTAL}
-        row2.addView(stat("NET","--","net"));row2.addView(stat("SESSION","--","session"));row2.addView(stat("FPS","--","fps"))
+        row2.addView(stat("NET","--","net"));row2.addView(stat("THERMAL","--","thermal"));row2.addView(stat("FPS","--","fps"))
         stats.addView(row1);stats.addView(row2);box.addView(stats)
 
         box.addView(text("QUICK CONTROL",10,true).apply{setTextColor(Color.rgb(175,200,235));setPadding(0,dp(10),0,dp(5))})
@@ -208,6 +208,18 @@ class OverlayService : Service() {
         statViews["temp"]?.text=if(temp>=0)(temp/10.0).toString()+"°C" else "--"
         val seconds=((System.currentTimeMillis()-startTime)/1000).toInt()
         statViews["session"]?.text=String.format("%02d:%02d",seconds/60,seconds%60)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            val pm = getSystemService(POWER_SERVICE) as PowerManager
+            val thermal = when (pm.currentThermalStatus) {
+                PowerManager.THERMAL_STATUS_NONE -> "OK"
+                PowerManager.THERMAL_STATUS_LIGHT -> "LIGHT"
+                PowerManager.THERMAL_STATUS_MODERATE -> "MOD"
+                PowerManager.THERMAL_STATUS_SEVERE -> "SEVERE"
+                PowerManager.THERMAL_STATUS_CRITICAL -> "CRIT"
+                else -> "--"
+            }
+            statViews["thermal"]?.text = thermal
+        }
         if(statViews["fps"]?.text.isNullOrBlank())statViews["fps"]?.text="--"
     }
 
