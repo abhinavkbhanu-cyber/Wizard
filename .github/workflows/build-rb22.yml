@@ -12,7 +12,7 @@ permissions:
 
 jobs:
   build:
-    runs-on: windows-latest
+    runs-on: windows-2025
     steps:
       - name: Checkout
         uses: actions/checkout@v7
@@ -30,9 +30,17 @@ jobs:
           node --version
           Write-Host "dotnet version:"
           dotnet --version
+          Write-Host "dotnet info:"
+          dotnet --info
+
+      - name: Restore PC project
+        run: dotnet restore RB22-Game-Booster-Pro/RB22-Game-Booster-Pro.csproj --runtime win-x64
+
+      - name: Build PC project
+        run: dotnet build RB22-Game-Booster-Pro/RB22-Game-Booster-Pro.csproj -c Release --no-restore --runtime win-x64
 
       - name: Publish portable Windows EXE
-        run: dotnet publish RB22-Game-Booster-Pro/RB22-Game-Booster-Pro.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:EnableCompressionInSingleFile=true -o publish
+        run: dotnet publish RB22-Game-Booster-Pro/RB22-Game-Booster-Pro.csproj -c Release --no-restore -r win-x64 --self-contained true -p:PublishSingleFile=true -p:EnableCompressionInSingleFile=true -o publish
 
       - name: Upload RB22 Windows EXE artifact
         uses: actions/upload-artifact@v6
