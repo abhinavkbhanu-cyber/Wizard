@@ -1,117 +1,183 @@
-<Window x:Class="RB22.GameBooster.MainWindow" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Title="RB22 Game Booster Pro" Width="1100" Height="720" MinWidth="900" MinHeight="600" WindowStartupLocation="CenterScreen" Background="#030611" Foreground="#EAF1FF">
+<Window x:Class="RB22.GameBooster.MainWindow"
+ xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+ xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+ Title="RB22 Game Booster Pro" Width="1536" Height="864" MinWidth="1200" MinHeight="720"
+ WindowStartupLocation="CenterScreen" WindowStyle="None" AllowsTransparency="True" Background="Transparent"
+ Foreground="#EEF3FF" FontFamily="Segoe UI">
+<Window.Resources>
+ <Style TargetType="Button">
+  <Setter Property="Foreground" Value="#EAF1FF"/><Setter Property="Background" Value="#151A38"/>
+  <Setter Property="BorderBrush" Value="#2D3B72"/><Setter Property="BorderThickness" Value="1"/>
+  <Setter Property="FontSize" Value="14"/><Setter Property="Cursor" Value="Hand"/>
+  <Setter Property="Template"><Setter.Value><ControlTemplate TargetType="Button">
+   <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="12" Padding="{TemplateBinding Padding}">
+    <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+   </Border>
+  </ControlTemplate></Setter.Value></Setter>
+ </Style>
+ <Style TargetType="CheckBox">
+  <Setter Property="Foreground" Value="#DCE5FF"/><Setter Property="FontSize" Value="14"/><Setter Property="Cursor" Value="Hand"/>
+ </Style>
+</Window.Resources>
+
 <Grid ClipToBounds="True">
- <Grid.Background>
-  <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
-   <GradientStop Color="#02040D" Offset="0"/>
-   <GradientStop Color="#07142A" Offset="0.48"/>
-   <GradientStop Color="#030811" Offset="1"/>
-  </LinearGradientBrush>
- </Grid.Background>
+ <Border CornerRadius="18" Background="#050714" BorderBrush="#26325E" BorderThickness="1">
+  <Grid>
+   <Grid.Background>
+    <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+     <GradientStop Color="#030510" Offset="0"/><GradientStop Color="#08142A" Offset=".45"/><GradientStop Color="#040611" Offset="1"/>
+    </LinearGradientBrush>
+   </Grid.Background>
 
- <!-- RB22 night-sky wallpaper -->
- <Canvas IsHitTestVisible="False" Opacity="0.95">
-  <!-- distant blue atmospheric glow -->
-  <Ellipse Width="900" Height="500" Canvas.Left="-260" Canvas.Top="250" Fill="#102D52" Opacity="0.18">
-   <Ellipse.Effect><BlurEffect Radius="55"/></Ellipse.Effect>
-  </Ellipse>
-  <Ellipse Width="700" Height="360" Canvas.Left="560" Canvas.Top="300" Fill="#173B65" Opacity="0.16">
-   <Ellipse.Effect><BlurEffect Radius="60"/></Ellipse.Effect>
-  </Ellipse>
+   <!-- Aurora / moon / stars -->
+   <Canvas IsHitTestVisible="False" Opacity=".95">
+    <Ellipse Width="1000" Height="520" Canvas.Left="-250" Canvas.Top="170" Fill="#143B68" Opacity=".20"><Ellipse.Effect><BlurEffect Radius="65"/></Ellipse.Effect></Ellipse>
+    <Ellipse Width="850" Height="500" Canvas.Left="720" Canvas.Top="180" Fill="#4C1E80" Opacity=".17"><Ellipse.Effect><BlurEffect Radius="70"/></Ellipse.Effect></Ellipse>
+    <Path Stroke="#45E9CF" StrokeThickness="42" Opacity=".11" Data="M -80,500 C 190,250 370,600 650,340 S 1080,200 1650,390"><Path.Effect><BlurEffect Radius="35"/></Path.Effect></Path>
+    <Path Stroke="#5578FF" StrokeThickness="36" Opacity=".14" Data="M -100,610 C 220,350 390,650 700,430 S 1180,270 1700,480"><Path.Effect><BlurEffect Radius="34"/></Path.Effect></Path>
+    <Path Stroke="#A35BFF" StrokeThickness="32" Opacity=".12" Data="M -120,700 C 220,470 420,720 760,520 S 1220,390 1700,570"><Path.Effect><BlurEffect Radius="38"/></Path.Effect></Path>
+    <Ellipse Width="210" Height="210" Canvas.Left="830" Canvas.Top="35" Fill="#DDEAFF" Opacity=".10"><Ellipse.Effect><BlurEffect Radius="40"/></Ellipse.Effect></Ellipse>
+    <Ellipse Width="122" Height="122" Canvas.Left="875" Canvas.Top="58" Fill="#F4F8FF" Opacity=".95"/>
+    <Ellipse Width="122" Height="122" Canvas.Left="899" Canvas.Top="48" Fill="#081126"/>
+    <Ellipse Width="3" Height="3" Canvas.Left="80" Canvas.Top="90" Fill="White"/><Ellipse Width="3" Height="3" Canvas.Left="180" Canvas.Top="170" Fill="#D7E7FF"/>
+    <Ellipse Width="4" Height="4" Canvas.Left="270" Canvas.Top="80" Fill="White"/><Ellipse Width="2" Height="2" Canvas.Left="370" Canvas.Top="145" Fill="#BFD7FF"/>
+    <Ellipse Width="3" Height="3" Canvas.Left="470" Canvas.Top="70" Fill="White"/><Ellipse Width="2" Height="2" Canvas.Left="590" Canvas.Top="160" Fill="#DCEAFF"/>
+    <Ellipse Width="3" Height="3" Canvas.Left="700" Canvas.Top="90" Fill="White"/><Ellipse Width="3" Height="3" Canvas.Left="1110" Canvas.Top="160" Fill="White"/>
+    <Ellipse Width="2" Height="2" Canvas.Left="1250" Canvas.Top="80" Fill="#CFE1FF"/><Ellipse Width="3" Height="3" Canvas.Left="1400" Canvas.Top="180" Fill="White"/>
+    <Ellipse Width="2" Height="2" Canvas.Left="1500" Canvas.Top="110" Fill="#DCEAFF"/><Ellipse Width="3" Height="3" Canvas.Left="100" Canvas.Top="300" Fill="White"/>
+    <Ellipse Width="2" Height="2" Canvas.Left="280" Canvas.Top="360" Fill="#BFD7FF"/><Ellipse Width="3" Height="3" Canvas.Left="430" Canvas.Top="310" Fill="White"/>
+    <Ellipse Width="2" Height="2" Canvas.Left="600" Canvas.Top="380" Fill="#DCEAFF"/><Ellipse Width="3" Height="3" Canvas.Left="760" Canvas.Top="320" Fill="White"/>
+    <Ellipse Width="2" Height="2" Canvas.Left="1030" Canvas.Top="380" Fill="#DCEAFF"/><Ellipse Width="3" Height="3" Canvas.Left="1280" Canvas.Top="320" Fill="White"/>
+   </Canvas>
+   <Rectangle Fill="#02040C" Opacity=".27"/>
 
-  <!-- aurora bands -->
-  <Path Stroke="#58F6D0" StrokeThickness="34" Opacity="0.13" Data="M -80,420 C 160,240 330,530 520,330 S 850,180 1180,350">
-   <Path.Effect><BlurEffect Radius="30"/></Path.Effect>
-  </Path>
-  <Path Stroke="#6B8CFF" StrokeThickness="28" Opacity="0.14" Data="M -100,500 C 180,330 300,560 560,390 S 900,260 1200,410">
-   <Path.Effect><BlurEffect Radius="28"/></Path.Effect>
-  </Path>
-  <Path Stroke="#9D6BFF" StrokeThickness="24" Opacity="0.10" Data="M -100,570 C 180,400 350,600 590,440 S 920,350 1200,470">
-   <Path.Effect><BlurEffect Radius="32"/></Path.Effect>
-  </Path>
+   <!-- Left navigation -->
+   <Border Width="265" HorizontalAlignment="Left" Background="#05091B" Opacity=".94" BorderBrush="#182449" BorderThickness="0,0,1,0">
+    <Grid>
+     <Grid.RowDefinitions><RowDefinition Height="115"/><RowDefinition Height="*"/><RowDefinition Height="105"/></Grid.RowDefinitions>
+     <StackPanel Margin="28,25,0,0">
+      <StackPanel Orientation="Horizontal">
+       <TextBlock Text="RB" FontSize="40" FontWeight="Bold" Foreground="#7B4DFF"/>
+       <TextBlock Text="22" FontSize="40" FontWeight="Bold" Foreground="#40A9FF"/>
+      </StackPanel>
+      <TextBlock Text="Game Booster Pro" FontSize="15" FontWeight="SemiBold" Margin="3,-5,0,0"/>
+     </StackPanel>
+     <StackPanel Grid.Row="1" Margin="15,12,15,0">
+      <Button Content="⌂   Home" Height="56" HorizontalContentAlignment="Left" Padding="20,0" Background="#402C2C75" BorderBrush="#29B6FF" Margin="0,0,0,8"/>
+      <Button Content="🚀   Boost" Height="52" HorizontalContentAlignment="Left" Padding="20,0" Click="AdvancedBoost_Click" Background="Transparent" BorderBrush="Transparent"/>
+      <Button Content="🎮   Games" Height="52" HorizontalContentAlignment="Left" Padding="20,0" Click="GameLibrary_Click" Background="Transparent" BorderBrush="Transparent"/>
+      <Button Content="⌁   Performance" Height="52" HorizontalContentAlignment="Left" Padding="20,0" Click="Performance_Click" Background="Transparent" BorderBrush="Transparent"/>
+      <Button Content="▣   Memory" Height="52" HorizontalContentAlignment="Left" Padding="20,0" Click="Memory_Click" Background="Transparent" BorderBrush="Transparent"/>
+      <Button Content="◎   Network" Height="52" HorizontalContentAlignment="Left" Padding="20,0" Click="Network_Click" Background="Transparent" BorderBrush="Transparent"/>
+      <Button Content="⚙   Settings" Height="52" HorizontalContentAlignment="Left" Padding="20,0" Click="Settings_Click" Background="Transparent" BorderBrush="Transparent"/>
+     </StackPanel>
+     <StackPanel Grid.Row="2" Margin="43,0,0,22">
+      <TextBlock Text="—  PLAY SMART  —" FontSize="11" Foreground="#A6B5FF" CharacterSpacing="80"/>
+      <TextBlock Text="—  NOT HARD  —" FontSize="11" Foreground="#A6B5FF" CharacterSpacing="80" Margin="0,7,0,0"/>
+      <TextBlock Text="v1.0.0" FontSize="11" Opacity=".55" Margin="0,18,0,0"/>
+     </StackPanel>
+    </Grid>
+   </Border>
 
-  <!-- moon glow + moon -->
-  <Ellipse Width="190" Height="190" Canvas.Left="815" Canvas.Top="35" Fill="#DDEBFF" Opacity="0.10">
-   <Ellipse.Effect><BlurEffect Radius="35"/></Ellipse.Effect>
-  </Ellipse>
-  <Ellipse Width="112" Height="112" Canvas.Left="854" Canvas.Top="48" Fill="#F3F7FF" Opacity="0.96"/>
-  <Ellipse Width="112" Height="112" Canvas.Left="876" Canvas.Top="38" Fill="#071225" Opacity="0.98"/>
+   <!-- Custom title bar -->
+   <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,17,18,0">
+    <Button Content="⚙" Width="42" Height="36" Background="Transparent" BorderBrush="Transparent" Click="Settings_Click"/>
+    <Button Content="—" Width="42" Height="36" Background="Transparent" BorderBrush="Transparent" Click="Minimize_Click"/>
+    <Button Content="×" Width="42" Height="36" Background="Transparent" BorderBrush="Transparent" FontSize="24" Click="Close_Click"/>
+   </StackPanel>
 
-  <!-- stars -->
-  <Ellipse Width="3" Height="3" Canvas.Left="75" Canvas.Top="78" Fill="White"/>
-  <Ellipse Width="2" Height="2" Canvas.Left="150" Canvas.Top="145" Fill="#D8E8FF"/>
-  <Ellipse Width="4" Height="4" Canvas.Left="240" Canvas.Top="62" Fill="#FFFFFF"/>
-  <Ellipse Width="2" Height="2" Canvas.Left="315" Canvas.Top="175" Fill="#BFD7FF"/>
-  <Ellipse Width="3" Height="3" Canvas.Left="405" Canvas.Top="92" Fill="#FFFFFF"/>
-  <Ellipse Width="2" Height="2" Canvas.Left="505" Canvas.Top="48" Fill="#CFE1FF"/>
-  <Ellipse Width="3" Height="3" Canvas.Left="605" Canvas.Top="135" Fill="#FFFFFF"/>
-  <Ellipse Width="2" Height="2" Canvas.Left="700" Canvas.Top="70" Fill="#D9E8FF"/>
-  <Ellipse Width="3" Height="3" Canvas.Left="760" Canvas.Top="185" Fill="#FFFFFF"/>
-  <Ellipse Width="2" Height="2" Canvas.Left="950" Canvas.Top="175" Fill="#C9DCFF"/>
-  <Ellipse Width="3" Height="3" Canvas.Left="1020" Canvas.Top="90" Fill="#FFFFFF"/>
-  <Ellipse Width="2" Height="2" Canvas.Left="1070" Canvas.Top="220" Fill="#DCEAFF"/>
-  <Ellipse Width="3" Height="3" Canvas.Left="40" Canvas.Top="250" Fill="#FFFFFF"/>
-  <Ellipse Width="2" Height="2" Canvas.Left="125" Canvas.Top="330" Fill="#BFD7FF"/>
-  <Ellipse Width="3" Height="3" Canvas.Left="210" Canvas.Top="285" Fill="#FFFFFF"/>
-  <Ellipse Width="2" Height="2" Canvas.Left="350" Canvas.Top="350" Fill="#DCEAFF"/>
-  <Ellipse Width="3" Height="3" Canvas.Left="475" Canvas.Top="255" Fill="#FFFFFF"/>
-  <Ellipse Width="2" Height="2" Canvas.Left="575" Canvas.Top="320" Fill="#BFD7FF"/>
-  <Ellipse Width="3" Height="3" Canvas.Left="675" Canvas.Top="270" Fill="#FFFFFF"/>
-  <Ellipse Width="2" Height="2" Canvas.Left="790" Canvas.Top="330" Fill="#DCEAFF"/>
-  <Ellipse Width="3" Height="3" Canvas.Left="1010" Canvas.Top="300" Fill="#FFFFFF"/>
-  <Ellipse Width="2" Height="2" Canvas.Left="1090" Canvas.Top="390" Fill="#BFD7FF"/>
-  <Ellipse Width="3" Height="3" Canvas.Left="280" Canvas.Top="430" Fill="#FFFFFF"/>
-  <Ellipse Width="2" Height="2" Canvas.Left="420" Canvas.Top="470" Fill="#DCEAFF"/>
-  <Ellipse Width="3" Height="3" Canvas.Left="720" Canvas.Top="450" Fill="#FFFFFF"/>
-  <Ellipse Width="2" Height="2" Canvas.Left="880" Canvas.Top="420" Fill="#DCEAFF"/>
- </Canvas>
-
- <!-- dark glass overlay keeps text readable -->
- <Rectangle Fill="#030714" Opacity="0.18"/>
-
- <ScrollViewer Margin="0" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
- <StackPanel Margin="42" MaxWidth="1100">
-  <DockPanel>
-   <StackPanel DockPanel.Dock="Left"><TextBlock Text="RB22" FontSize="34" FontWeight="Bold"/><TextBlock Text="GAME BOOSTER PRO" FontSize="12" Opacity=".7"/></StackPanel>
-   <StackPanel DockPanel.Dock="Right" HorizontalAlignment="Right"><TextBlock x:Name="DeviceLabel" Text="DETECTING DEVICE..." HorizontalAlignment="Right"/><TextBlock Text="Windows 10/11 • Universal Mode" FontSize="11" Opacity=".6"/></StackPanel>
-  </DockPanel>
-
-  <Border Margin="0,30,0,20" Padding="28" CornerRadius="22" Background="#9910182E" BorderBrush="#334A6FA8" BorderThickness="1">
-   <Grid>
-    <Grid.ColumnDefinitions>
-     <ColumnDefinition Width="*"/>
-     <ColumnDefinition Width="360"/>
-    </Grid.ColumnDefinitions>
-    <StackPanel Grid.Column="0" Margin="0,0,24,0">
-     <TextBlock Text="READY FOR BATTLE" FontSize="13" Opacity=".7"/>
-     <TextBlock Text="Boost your game session" FontSize="30" FontWeight="SemiBold" Margin="0,5,0,20"/>
+   <ScrollViewer Grid.Column="0" Margin="265,0,0,0" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+    <StackPanel Margin="45,78,42,30">
+     <TextBlock Text="WELCOME BACK" FontSize="14" Foreground="#D0D8FF" Opacity=".9" CharacterSpacing="100"/>
      <StackPanel Orientation="Horizontal">
-      <Button x:Name="BasicButton" Content="BASIC BOOST" Width="125" Height="50" FontWeight="Bold" Click="BasicBoost_Click" Margin="0,0,8,0"/>
-      <Button x:Name="AdvancedButton" Content="ADVANCED BOOST" Width="145" Height="50" FontWeight="Bold" Click="AdvancedBoost_Click" Margin="0,0,8,0"/>
-      <Button x:Name="TurboButton" Content="TURBO BOOST" Width="125" Height="50" FontWeight="Bold" Click="TurboBoost_Click"/>
+      <TextBlock x:Name="UsernameText" Text="Player" FontSize="43" FontWeight="Bold" Margin="0,5,10,0"/>
+      <TextBlock Text="♛" FontSize="32" Foreground="#9C7BFF" VerticalAlignment="Center" Margin="0,10,0,0"/>
      </StackPanel>
+     <TextBlock Text="Your games. Our priority." FontSize="18" Foreground="#9AA8D8" Margin="0,-2,0,25"/>
+
+     <Grid>
+      <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="350"/></Grid.ColumnDefinitions>
+      <Border Grid.Column="0" Margin="0,0,20,0" Height="355" CornerRadius="24" Background="#30111A35" BorderBrush="#263E73" BorderThickness="1">
+       <Grid>
+        <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+         <Border Width="290" Height="290" CornerRadius="150" Background="#160B1835" BorderBrush="#2F8CFF" BorderThickness="4">
+          <Border.Effect><DropShadowEffect Color="#4A39FF" BlurRadius="30" ShadowDepth="0" Opacity=".8"/></Border.Effect>
+          <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+           <TextBlock Text="🚀" FontSize="42" HorizontalAlignment="Center"/>
+           <TextBlock x:Name="ReadyText" Text="READY" FontSize="31" FontWeight="SemiBold" HorizontalAlignment="Center" Margin="0,8,0,0"/>
+           <TextBlock Text="Optimize your system" FontSize="15" Foreground="#A7B5DF" HorizontalAlignment="Center"/>
+           <TextBlock Text="for the best performance" FontSize="15" Foreground="#A7B5DF" HorizontalAlignment="Center"/>
+          </StackPanel>
+         </Border>
+        </StackPanel>
+       </Grid>
+      </Border>
+
+      <Border Grid.Column="1" CornerRadius="20" Padding="22" Background="#38101A35" BorderBrush="#263B6B" BorderThickness="1">
+       <StackPanel>
+        <TextBlock Text="⚡  PERFORMANCE MONITOR" FontSize="15" FontWeight="Bold"/>
+        <Grid Margin="0,22,0,0">
+         <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+         <StackPanel><TextBlock Text="CPU" Foreground="#A6B5E6"/><TextBlock x:Name="CpuText" Text="—" FontSize="26" FontWeight="Bold"/><TextBlock x:Name="CpuSubText" Text="Loading..." FontSize="11" Opacity=".55"/></StackPanel>
+         <StackPanel Grid.Column="1"><TextBlock Text="RAM" Foreground="#A6B5E6"/><TextBlock x:Name="RamText" Text="—" FontSize="26" FontWeight="Bold"/><TextBlock x:Name="RamSubText" Text="Loading..." FontSize="11" Opacity=".55"/></StackPanel>
+        </Grid>
+        <Grid Margin="0,22,0,0">
+         <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+         <StackPanel><TextBlock Text="GPU" Foreground="#A6B5E6"/><TextBlock x:Name="GpuText" Text="—" FontSize="26" FontWeight="Bold"/><TextBlock x:Name="GpuSubText" Text="Detected" FontSize="11" Opacity=".55"/></StackPanel>
+         <StackPanel Grid.Column="1"><TextBlock Text="DISK" Foreground="#A6B5E6"/><TextBlock x:Name="DiskText" Text="—" FontSize="26" FontWeight="Bold"/><TextBlock x:Name="DiskSubText" Text="Loading..." FontSize="11" Opacity=".55"/></StackPanel>
+        </Grid>
+        <Border Height="65" Margin="0,20,0,0" CornerRadius="12" Background="#180E1A36">
+         <StackPanel VerticalAlignment="Center" Margin="12,0"><TextBlock Text="〰  Performance Monitor" Foreground="#9CAAF0"/><TextBlock Text="Live CPU • RAM • Disk • network telemetry" FontSize="10" Opacity=".55"/></StackPanel>
+        </Border>
+       </StackPanel>
+      </Border>
+     </Grid>
+
+     <Grid Margin="0,20,0,0">
+      <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="*"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+      <Border Margin="0,0,10,0" Height="235" CornerRadius="20" Background="#23101430" BorderBrush="#19DCC0" BorderThickness="1">
+       <StackPanel Margin="24"><TextBlock Text="🚀" FontSize="31"/><TextBlock Text="Basic Boost" FontSize="20" FontWeight="Bold" Foreground="#61F0DC" Margin="0,10,0,5"/><TextBlock Text="Light optimization + memory cleanup + background tweaks." TextWrapping="Wrap" Foreground="#A8B3D7" Height="53"/><Button x:Name="BasicButton" Content="Select" Height="42" Margin="0,16,0,0" Click="BasicBoost_Click" Background="#173D5049" BorderBrush="#1DE1C3"/></StackPanel>
+      </Border>
+      <Border Grid.Column="1" Margin="10,0,10,0" Height="235" CornerRadius="20" Background="#20101A39" BorderBrush="#2696FF" BorderThickness="1">
+       <StackPanel Margin="24"><TextBlock Text="⚡" FontSize="31"/><TextBlock Text="Advanced Boost" FontSize="20" FontWeight="Bold" Foreground="#70B8FF" Margin="0,10,0,5"/><TextBlock Text="Stronger performance mode + higher game priority + cleanup." TextWrapping="Wrap" Foreground="#A8B3D7" Height="53"/><Button x:Name="AdvancedButton" Content="Select" Height="42" Margin="0,16,0,0" Click="AdvancedBoost_Click" Background="#172D4A6B" BorderBrush="#2696FF"/></StackPanel>
+      </Border>
+      <Border Grid.Column="2" Margin="10,0,0,0" Height="235" CornerRadius="20" Background="#26170F24" BorderBrush="#FF365C" BorderThickness="1">
+       <StackPanel Margin="24"><TextBlock Text="🔥" FontSize="31"/><TextBlock Text="Turbo Boost" FontSize="20" FontWeight="Bold" Foreground="#FF7CA1" Margin="0,10,0,5"/><TextBlock Text="Max software-side performance requests and game priority." TextWrapping="Wrap" Foreground="#A8B3D7" Height="53"/><Button x:Name="TurboButton" Content="Select" Height="42" Margin="0,16,0,0" Click="TurboBoost_Click" Background="#4A142A3B" BorderBrush="#FF365C"/></StackPanel>
+      </Border>
+     </Grid>
+
+     <Grid Margin="0,20,0,0">
+      <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+      <Border Margin="0,0,10,0" Padding="22" CornerRadius="20" Background="#30101A35" BorderBrush="#263B6B" BorderThickness="1">
+       <StackPanel>
+        <TextBlock Text="SYSTEM AUTOMATION" FontSize="16" FontWeight="Bold"/>
+        <TextBlock Text="Automatic protection and optimization controls" Foreground="#8797C8" Margin="0,4,0,16"/>
+        <Grid Margin="0,7"><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="55"/></Grid.ColumnDefinitions><StackPanel><TextBlock Text="Auto Memory Cleanup"/><TextBlock Text="Triggers at 70% RAM usage" FontSize="11" Opacity=".5"/></StackPanel><CheckBox x:Name="AutoMemoryCheck" Grid.Column="1" IsChecked="True" Checked="AutoMemory_Checked" Unchecked="AutoMemory_Unchecked" VerticalAlignment="Center"/></Grid>
+        <Grid Margin="0,13"><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="55"/></Grid.ColumnDefinitions><StackPanel><TextBlock Text="Game Process Priority"/><TextBlock Text="Raises priority for detected game processes" FontSize="11" Opacity=".5"/></StackPanel><CheckBox x:Name="GamePriorityCheck" Grid.Column="1" IsChecked="True" Checked="GamePriority_Checked" Unchecked="GamePriority_Unchecked" VerticalAlignment="Center"/></Grid>
+        <Grid Margin="0,13"><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="55"/></Grid.ColumnDefinitions><StackPanel><TextBlock Text="Laptop Mode"/><TextBlock Text="Temperature and battery-aware behavior" FontSize="11" Opacity=".5"/></StackPanel><CheckBox x:Name="LaptopModeCheck" Grid.Column="1" IsChecked="True" Checked="LaptopMode_Checked" Unchecked="LaptopMode_Unchecked" VerticalAlignment="Center"/></Grid>
+       </StackPanel>
+      </Border>
+      <Border Grid.Column="1" Margin="10,0,0,0" Padding="22" CornerRadius="20" Background="#30101A35" BorderBrush="#263B6B" BorderThickness="1">
+       <StackPanel>
+        <TextBlock Text="NETWORK + OVERLAY" FontSize="16" FontWeight="Bold"/>
+        <TextBlock Text="Connection and in-game control features" Foreground="#8797C8" Margin="0,4,0,16"/>
+        <Grid Margin="0,7"><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="55"/></Grid.ColumnDefinitions><StackPanel><TextBlock Text="DNS Optimizer"/><TextBlock Text="Test Cloudflare, Google, Quad9 and OpenDNS" FontSize="11" Opacity=".5"/></StackPanel><CheckBox x:Name="DnsCheck" Grid.Column="1" IsChecked="True" Checked="Dns_Checked" Unchecked="Dns_Unchecked" VerticalAlignment="Center"/></Grid>
+        <Grid Margin="0,13"><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="55"/></Grid.ColumnDefinitions><StackPanel><TextBlock Text="Real-time Monitoring"/><TextBlock Text="Live hardware stats" FontSize="11" Opacity=".5"/></StackPanel><CheckBox x:Name="MonitorCheck" Grid.Column="1" IsChecked="True" Checked="Monitor_Checked" Unchecked="Monitor_Unchecked" VerticalAlignment="Center"/></Grid>
+        <Grid Margin="0,13"><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="55"/></Grid.ColumnDefinitions><StackPanel><TextBlock Text="F8 Overlay"/><TextBlock Text="In-game stats and controls" FontSize="11" Opacity=".5"/></StackPanel><CheckBox x:Name="OverlayCheck" Grid.Column="1" IsChecked="True" Checked="Overlay_Checked" Unchecked="Overlay_Unchecked" VerticalAlignment="Center"/></Grid>
+       </StackPanel>
+      </Border>
+     </Grid>
+
+     <UniformGrid Columns="4" Margin="0,20,0,0">
+      <Button Content="🎮  Game Library" Height="72" Margin="0,0,10,0" Click="GameLibrary_Click" Background="#24101A35"/>
+      <Button Content="⚡  Quick Scan" Height="72" Margin="0,0,10,0" Click="QuickScan_Click" Background="#24101A35"/>
+      <Button Content="🛡  System Cleaner" Height="72" Margin="0,0,10,0" Click="SystemCleaner_Click" Background="#24101A35"/>
+      <Button Content="⚙  Advanced Settings" Height="72" Click="AdvancedSettings_Click" Background="#24101A35"/>
+     </UniformGrid>
+     <TextBlock x:Name="StatusText" Text="Status: Ready" Margin="4,18,0,0" Foreground="#9EACE0"/>
     </StackPanel>
-    <Border Grid.Column="1" Padding="18" CornerRadius="14" Background="#3315223D" BorderBrush="#223B5575" BorderThickness="1" VerticalAlignment="Center">
-     <StackPanel>
-      <TextBlock Text="F8  OVERLAY" FontSize="13" FontWeight="Bold"/>
-      <TextBlock Text="Press F8 anywhere to show or hide the RB22 performance overlay." TextWrapping="Wrap" Opacity=".7" Margin="0,7,0,0"/>
-      <TextBlock Text="Global hotkey • works even when RB22 is not focused" FontSize="10" Opacity=".45" Margin="0,8,0,0"/>
-     </StackPanel>
-    </Border>
-   </Grid>
-  </Border>
-
-  <UniformGrid Columns="4" Margin="0,0,0,18">
-   <Border Margin="0,0,10,0" Padding="18" CornerRadius="16" Background="#9910182E"><StackPanel><TextBlock Text="CPU" Opacity=".65"/><TextBlock x:Name="CpuText" Text="—" FontSize="26" FontWeight="Bold"/><TextBlock x:Name="CpuTemp" Text="Temp —"/></StackPanel></Border>
-   <Border Margin="0,0,10,0" Padding="18" CornerRadius="16" Background="#9910182E"><StackPanel><TextBlock Text="GPU" Opacity=".65"/><TextBlock x:Name="GpuText" Text="—" FontSize="26" FontWeight="Bold"/></StackPanel></Border>
-   <Border Margin="0,0,10,0" Padding="18" CornerRadius="16" Background="#9910182E"><StackPanel><TextBlock Text="RAM" Opacity=".65"/><TextBlock x:Name="RamText" Text="—" FontSize="26" FontWeight="Bold"/></StackPanel></Border>
-   <Border Padding="18" CornerRadius="16" Background="#9910182E"><StackPanel><TextBlock Text="NETWORK" Opacity=".65"/><TextBlock x:Name="PingText" Text="—" FontSize="26" FontWeight="Bold"/><TextBlock x:Name="NetText" Text="DNS ready"/><TextBlock x:Name="MemoryModeText" Text="Auto memory clean: ON at 70%" FontSize="10" Opacity=".55" Margin="0,3,0,0"/></StackPanel></Border>
-  </UniformGrid>
-
-  <DockPanel>
-   <Border Padding="20" CornerRadius="16" Background="#9910182E" Width="500" DockPanel.Dock="Left"><StackPanel><TextBlock Text="NETWORK OPTIMIZER" FontSize="15" FontWeight="Bold"/><TextBlock Text="Choose a DNS service or let RB22 test all four." Opacity=".65" Margin="0,5,0,12"/><ComboBox x:Name="DnsBox" SelectedIndex="0" Height="38"><ComboBoxItem Content="Auto Select"/><ComboBoxItem Content="Cloudflare • 1.1.1.1"/><ComboBoxItem Content="Google • 8.8.8.8"/><ComboBoxItem Content="Quad9 • 9.9.9.9"/><ComboBoxItem Content="OpenDNS • 208.67.222.222"/></ComboBox><Button Content="TEST SERVERS" Margin="0,10,0,0" Height="36" Click="TestDns_Click"/></StackPanel></Border>
-   <Border Margin="18,0,0,0" Padding="20" CornerRadius="16" Background="#9910182E"><StackPanel><TextBlock Text="TOOLS" FontSize="15" FontWeight="Bold"/><TextBlock Text="3 boost modes • auto memory clean at 70% • laptop-aware performance • safe background cleanup • live hardware stats" TextWrapping="Wrap" Opacity=".65" Margin="0,5,0,15"/><Button Content="SETTINGS / HOTKEY" Height="38" Click="Settings_Click"/><TextBlock x:Name="StatusText" Text="Status: Ready" Margin="0,12,0,0" Opacity=".75"/></StackPanel></Border>
-  </DockPanel>
- </StackPanel>
- </ScrollViewer>
+   </ScrollViewer>
+  </Grid>
+ </Border>
 </Grid>
 </Window>
