@@ -57,6 +57,9 @@ public partial class MainWindow : Window
     readonly Dictionary<int, ProcessPriorityClass> prioritySnapshot=new();
     readonly Dictionary<int, long> affinitySnapshot=new();
     string activeGameProfile="";
+    string originalPowerScheme="";
+    readonly Dictionary<string,string> gameProfiles=new(StringComparer.OrdinalIgnoreCase);
+    string ProfilesPath()=>Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),"RB22","game-profiles.txt");
     string username="Player";
     readonly string profilePath=Path.Combine(
         Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
@@ -67,6 +70,7 @@ public partial class MainWindow : Window
         InitializeComponent();
         xamlInitialized=true;
         Loaded+=LoadedHandler;
+        LoadGameProfiles();
         PreviewKeyDown+=MainWindow_PreviewKeyDown;
         MouseLeftButtonDown+=WindowDrag;
         Closed+=MainWindow_Closed;
@@ -189,11 +193,15 @@ public partial class MainWindow : Window
         }
     }
 
-    void MainWindow_Closed(object? sender,EventArgs e)
+0
     {
         if(source!=null && globalF8Registered)
             UnregisterHotKey(source.Handle,HotkeyId);
-        if(restoreOnExit) RestoreSessionOptimizations();
+        if(restoreOnExit)
+        {
+            RestoreSessionOptimizations();
+            RestorePowerScheme();
+        }
         overlay?.Close();
         timer.Stop();
     }
@@ -498,6 +506,7 @@ public partial class MainWindow : Window
         bool powerApplied=false;
         try
         {
+            if(string.IsNullOrWhiteSpace(originalPowerScheme))originalPowerScheme=GetActivePowerScheme();
             powerApplied=RunPowerCfg("/setactive SCHEME_MIN");
             if(mode=="Advanced" || mode=="Turbo")
             {
@@ -847,8 +856,11 @@ public partial class MainWindow : Window
             var exe=Path.GetFileNameWithoutExtension(g.Path);
             var p=Process.GetProcessesByName(exe).FirstOrDefault();
             if(p!=null && gamePriority) p.PriorityClass=ProcessPriorityClass.AboveNormal;
-            ApplyBoost("Advanced");
-            StatusText.Text=$"Boost applied for {g.Name}.";
+            var mode=GetGameProfile(exe);
+            activeGameProfile=exe;
+            ApplyBoost(mode);
+            SaveGameProfile(exe,mode);
+            StatusText.Text=$"Boost applied for {g.Name} using {mode} profile.";
             p?.Dispose();
         }catch{StatusText.Text=$"Boost requested for {g.Name}.";}
     }
