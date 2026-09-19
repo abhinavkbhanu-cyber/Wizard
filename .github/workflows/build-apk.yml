@@ -27,7 +27,7 @@ jobs:
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v5
         with:
-          gradle-version: "8.10.2"
+          gradle-version: "8.9.2"
 
       - name: Verify Android project
         run: |
@@ -36,7 +36,7 @@ jobs:
           test -f app/build.gradle.kts
 
       - name: Build debug APK
-        run: gradle :app:assembleDebug --stacktrace --no-daemon
+        run: gradle :app:assembleDebug --stacktrace --no-daemon --console=plain
 
       - name: Rename APK
         run: cp app/build/outputs/apk/debug/app-debug.apk RB22-v1.0.0-debug.apk
