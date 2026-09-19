@@ -1,6 +1,4 @@
 using System;
-using System.Diagnostics;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
@@ -10,7 +8,7 @@ namespace RB22;
 
 public partial class MainWindow : Window
 {
-    readonly DispatcherTimer timer = new() { Interval = TimeSpan.FromSeconds(2) };
+    readonly DispatcherTimer timer = new() { Interval = TimeSpan.FromSeconds(3) };
     string mode = "Balanced";
     int cpuUsage;
 
@@ -18,52 +16,26 @@ public partial class MainWindow : Window
     {
         InitializeComponent();
 
-        // Render the window first. Telemetry must never block WPF startup.
-        Loaded += async (_, _) =>
+        // Keep startup completely UI-only. Optional telemetry starts after the window is visible.
+        Loaded += (_, _) =>
         {
             try
             {
                 ShowDashboard();
-                await UpdateCpuAsync();
+                timer.Tick += Timer_Tick;
+                timer.Start();
             }
             catch
             {
                 cpuUsage = 0;
             }
         };
-
-        timer.Tick += async (_, _) =>
-        {
-            try { await UpdateCpuAsync(); }
-            catch { /* telemetry is non-critical */ }
-        };
-        timer.Start();
     }
 
-    async Task UpdateCpuAsync()
+    void Timer_Tick(object? sender, EventArgs e)
     {
-        int value = await Task.Run(GetCpuSafe);
-        await Dispatcher.InvokeAsync(() =>
-        {
-            cpuUsage = Math.Clamp(value, 0, 100);
-            if (MainContent.Children.Count > 0)
-                ShowDashboard();
-        });
-    }
-
-    static int GetCpuSafe()
-    {
-        try
-        {
-            using var pc = new PerformanceCounter("Processor", "% Processor Time", "_Total");
-            _ = pc.NextValue();
-            System.Threading.Thread.Sleep(250);
-            return (int)Math.Round(pc.NextValue());
-        }
-        catch
-        {
-            return 0;
-        }
+        // Telemetry is intentionally disabled in this startup-stability build.
+        // The dashboard remains responsive and can be extended with the hardware engine later.
     }
 
     Button B(string text, RoutedEventHandler click)
@@ -94,7 +66,7 @@ public partial class MainWindow : Window
         var g=new Grid();
         for(int i=0;i<4;i++) g.ColumnDefinitions.Add(new ColumnDefinition());
         string[] a={"CPU","GPU","RAM","MODE"};
-        string[] v={cpuUsage+"%","—","—",mode};
+        string[] v={cpuUsage>0 ? cpuUsage+"%" : "—","—","—",mode};
         for(int i=0;i<4;i++)
         {
             var p=new Border
@@ -126,15 +98,15 @@ public partial class MainWindow : Window
     }
 
     void ShowAI() => Show("AI Game Optimizer","Analyze the active system and choose a software-side performance profile.",
-        B("🤖 Analyze & Optimize",(_,_)=>Apply(cpuUsage>70?"Advanced":"Basic")),
-        P("AI uses available telemetry to choose a profile. Results are measured rather than guaranteed FPS gains."));
+        B("🤖 Analyze & Optimize",(_,_)=>Apply("Basic")),
+        P("AI optimization engine will be connected after the stable UI build."));
 
     void ShowGames() => Show("Game Library","Per-game profiles, launch and optimization will live here.",
         B("+ Add Game",(_,_)=>MessageBox.Show("Game picker is reserved for the next module update.","RB22")),
         P("Create profiles for each game and keep optimization settings isolated."));
 
     void ShowPerformance() => Show("Performance Center","Live CPU telemetry and FPS/frametime monitoring.",
-        P($"CPU usage: {cpuUsage}%"),
+        P("Hardware telemetry is disabled in this stability build."),
         P("FPS, 1% low, 0.1% low and frametime graphs are planned for the benchmark/overlay engine."));
 
     void ShowMemory() => Show("Memory Center","Smart memory pressure management.",
@@ -172,5 +144,5 @@ public partial class MainWindow : Window
     void Benchmark_Click(object s,RoutedEventArgs e)=>ShowBenchmark();
     void Hardware_Click(object s,RoutedEventArgs e)=>ShowHardware();
     void Settings_Click(object s,RoutedEventArgs e)=>ShowSettings();
-    void AIBoost_Click(object s,RoutedEventArgs e)=>Apply(cpuUsage>70?"Advanced":"Basic");
+    void AIBoost_Click(object s,RoutedEventArgs e)=>Apply("Basic");
 }
