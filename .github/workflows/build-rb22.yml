@@ -47,8 +47,23 @@ jobs:
       - name: Build PC project
         run: dotnet build RB22-Game-Booster-Pro/RB22-Game-Booster-Pro.csproj -c Release --no-restore --runtime win-x64
 
+      - name: Download PresentMon telemetry engine
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          New-Item -ItemType Directory -Force -Path tools\presentmon | Out-Null
+          gh release download --repo GameTechDev/PresentMon --pattern "*x64.exe" --dir tools\presentmon --clobber
+          $pm = Get-ChildItem tools\presentmon -Filter "*.exe" | Select-Object -First 1
+          if (-not $pm) { throw "PresentMon x64 binary was not downloaded." }
+          Copy-Item $pm.FullName tools\presentmon\PresentMon.exe -Force
+
       - name: Publish portable Windows EXE
         run: dotnet publish RB22-Game-Booster-Pro/RB22-Game-Booster-Pro.csproj -c Release --no-restore -r win-x64 --self-contained true -p:PublishSingleFile=true -p:EnableCompressionInSingleFile=true -o publish
+
+      - name: Bundle PresentMon
+        shell: pwsh
+        run: Copy-Item tools\presentmon\PresentMon.exe publish\PresentMon.exe -Force
 
       - name: Upload RB22 Windows EXE artifact
         uses: actions/upload-artifact@v6
