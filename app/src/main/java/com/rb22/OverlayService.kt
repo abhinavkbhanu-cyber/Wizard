@@ -30,6 +30,9 @@ class OverlayService : Service() {
     private val handler = Handler(Looper.getMainLooper())
     private val io = Executors.newSingleThreadExecutor()
     private var statViews = mutableMapOf<String, TextView>()
+    private var fpsMonitor: ScreenFpsMonitor? = null
+    private var projectionResultCode: Int? = null
+    private var projectionData: Intent? = null
 
     override fun onCreate() {
         super.onCreate()
@@ -145,6 +148,7 @@ class OverlayService : Service() {
         val p=lp(dp(348),dp(315),WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS)
         p.gravity=Gravity.RIGHT or Gravity.CENTER_VERTICAL;p.x=dp(10);wm.addView(box,p)
         startStats()
+        startFpsMonitor()
     }
 
     private fun startStats(){
