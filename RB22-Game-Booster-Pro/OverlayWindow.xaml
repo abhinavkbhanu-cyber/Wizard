@@ -92,7 +92,7 @@
                            FontWeight="SemiBold"
                            Foreground="#8FA4C5"
                            VerticalAlignment="Center"/>
-                <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Center"><TextBlock Text="GPU frame work: " FontSize="10" Foreground="#8FA4C5"/><TextBlock x:Name="Gpu" Text="N/A" FontSize="10" Foreground="White"/><TextBlock Text="   Frame: " FontSize="10" Foreground="#8FA4C5" Margin="12,0,0,0"/><TextBlock x:Name="Frame" Text="N/A" FontSize="10" Foreground="White"/></StackPanel><TextBlock Text="F8  •  TOGGLE"
+                <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Center"><TextBlock Text="GPU frame work: " FontSize="10" Foreground="#8FA4C5"/><TextBlock x:Name="Gpu" Text="N/A" FontSize="10" Foreground="White"/><TextBlock Text="   Frame: " FontSize="10" Foreground="#8FA4C5" Margin="12,0,0,0"/><TextBlock x:Name="Frame" Text="N/A" FontSize="10" Foreground="White"/></StackPanel><TextBlock Grid.Column="2" Text="F8  •  TOGGLE"
                            FontSize="9"
                            FontWeight="SemiBold"
                            Opacity=".45"
