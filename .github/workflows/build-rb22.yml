@@ -53,7 +53,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           New-Item -ItemType Directory -Force -Path tools\presentmon | Out-Null
-          gh release download --repo GameTechDev/PresentMon --pattern "*x64.exe" --dir tools\presentmon --clobber
+          gh release download --repo GameTechDev/PresentMon --pattern "PresentMon-*-x64.exe" --dir tools\presentmon --clobber
           $pm = Get-ChildItem tools\presentmon -Filter "*.exe" | Select-Object -First 1
           if (-not $pm) { throw "PresentMon x64 binary was not downloaded." }
           Copy-Item $pm.FullName tools\presentmon\PresentMon.exe -Force
