@@ -123,7 +123,21 @@ class OverlayService : Service() {
         box.setOnTouchListener{_,e->
             when(e.action){
                 MotionEvent.ACTION_DOWN->{downX=e.rawX;downY=e.rawY;panelX=currentX();panelY=currentY();true}
-                MotionEvent.ACTION_MOVE->{val p=panelView?.layoutParams as? WindowManager.LayoutParams;if(p!=null){p.x=panelX+(e.rawX-downX).toInt();p.y=panelY+(e.rawY-downY).toInt();runCatching{wm.updateViewLayout(panelView,p)}};true}
+                MotionEvent.ACTION_MOVE->{
+                    val p=panelView?.layoutParams as? WindowManager.LayoutParams
+                    if(p!=null){
+                        // Panel uses RIGHT gravity, so positive x moves it LEFT.
+                        // Invert the horizontal finger delta so swipe-left moves left.
+                        val dx=(e.rawX-downX).toInt()
+                        val dy=(e.rawY-downY).toInt()
+                        val maxX=resources.displayMetrics.widthPixels-dp(24)
+                        val maxY=resources.displayMetrics.heightPixels-dp(24)
+                        p.x=(panelX-dx).coerceIn(-dp(8),maxX)
+                        p.y=(panelY+dy).coerceIn(-dp(8),maxY)
+                        runCatching{wm.updateViewLayout(panelView,p)}
+                    }
+                    true
+                }
                 else->true
             }
         }
