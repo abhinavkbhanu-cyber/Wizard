@@ -5,18 +5,51 @@ on:
       - 'RB22/**'
       - '.github/workflows/build-rb22-standalone.yml'
   workflow_dispatch:
+
+permissions:
+  contents: write
+
 jobs:
   build:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v5
+
       - uses: actions/setup-dotnet@v5
         with:
           dotnet-version: '8.0.x'
+
       - run: dotnet restore RB22/RB22.csproj
-      - run: dotnet build RB22/RB22.csproj --configuration Release --no-restore
-      - run: dotnet publish RB22/RB22.csproj --configuration Release --no-build --output RB22/publish
+
+      - name: Build
+        run: dotnet build RB22/RB22.csproj --configuration Release --no-restore
+
+      - name: Publish self-contained single-file EXE
+        run: >
+          dotnet publish RB22/RB22.csproj
+          --configuration Release
+          --runtime win-x64
+          --self-contained true
+          --no-restore
+          -p:PublishSingleFile=true
+          -p:IncludeNativeLibrariesForSelfExtract=true
+          -p:EnableCompressionInSingleFile=true
+          -o RB22/publish
+
       - uses: actions/upload-artifact@v4
         with:
           name: RB22-v0.1.0-alpha
-          path: RB22/publish/
+          path: RB22/publish/RB22.exe
+
+      - name: Create or update GitHub Release
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: v0.1.0-alpha
+        run: |
+          gh release view $env:TAG *> $null
+          if ($LASTEXITCODE -eq 0) {
+            gh release upload $env:TAG RB22/publish/RB22.exe --clobber
+          } else {
+            gh release create $env:TAG RB22/publish/RB22.exe --title "RB22 v0.1.0 Alpha" --notes "RB22 standalone PC control center alpha build." --prerelease --target $env:GITHUB_SHA
+          }
