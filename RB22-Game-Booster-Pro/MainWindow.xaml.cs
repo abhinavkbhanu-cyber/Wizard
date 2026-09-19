@@ -382,68 +382,92 @@ public partial class MainWindow : Window
     void ApplyBoost(string mode)
     {
         boostMode=mode;
+        ReadyText.Text="BOOSTING";
+        StatusText.Text=$"{mode.ToUpperInvariant()} BOOST starting…";
 
+        bool powerApplied=false;
         try
         {
-            Process.Start(new ProcessStartInfo("powercfg","/setactive SCHEME_MIN")
-            {CreateNoWindow=true,UseShellExecute=false});
-
+            powerApplied=RunPowerCfg("/setactive SCHEME_MIN");
+            if(mode=="Advanced" || mode=="Turbo")
+            {
+                RunPowerCfg("/setacvalueindex SCHEME_CURRENT SUB_PROCESSOR PROCTHROTTLEMIN 5");
+                RunPowerCfg("/setacvalueindex SCHEME_CURRENT SUB_PROCESSOR PROCTHROTTLEMAX 100");
+                RunPowerCfg("/setacvalueindex SCHEME_CURRENT SUB_PROCESSOR PERFBOOSTMODE 2");
+                RunPowerCfg("/S SCHEME_CURRENT");
+            }
             if(mode=="Turbo")
             {
-                SetPowerValue("SUB_PROCESSOR","PROCTHROTTLEMIN",100);
-                SetPowerValue("SUB_PROCESSOR","PROCTHROTTLEMAX",100);
-                SetPowerValue("SUB_PROCESSOR","PERFBOOSTMODE",2);
+                RunPowerCfg("/setacvalueindex SCHEME_CURRENT SUB_PROCESSOR PROCTHROTTLEMIN 100");
+                RunPowerCfg("/setacvalueindex SCHEME_CURRENT SUB_PROCESSOR PROCTHROTTLEMAX 100");
+                RunPowerCfg("/setacvalueindex SCHEME_CURRENT SUB_PROCESSOR PERFBOOSTMODE 2");
+                RunPowerCfg("/S SCHEME_CURRENT");
             }
         }
-        catch{}
+        catch { }
 
         if(gamePriority)
-            SetGamePriority(mode=="Turbo"
-                ? ProcessPriorityClass.High
-                : ProcessPriorityClass.AboveNormal);
+            SetGamePriority(mode=="Turbo" ? ProcessPriorityClass.High : ProcessPriorityClass.AboveNormal);
 
-        CleanMemory();
-        ReadyText.Text="BOOSTING";
-        StatusText.Text=$"{mode.ToUpperInvariant()} BOOST active • safe software-side performance settings applied";
+        _ = System.Threading.Tasks.Task.Run(() => CleanMemoryCore())
+            .ContinueWith(t =>
+            {
+                Dispatcher.Invoke(() =>
+                {
+                    ReadyText.Text="BOOSTED";
+                    StatusText.Text=$"{mode.ToUpperInvariant()} BOOST active • {(powerApplied ? "Windows performance plan applied" : "Windows plan change unavailable")} • memory cleaned";
+                });
+            });
     }
 
-    static void SetPowerValue(string subgroup,string setting,int value)
+    static bool RunPowerCfg(string arguments)
     {
         try
         {
-            Process.Start(new ProcessStartInfo(
-                "powercfg",
-                $"/setacvalueindex SCHEME_CURRENT {subgroup} {setting} {value}")
-            {CreateNoWindow=true,UseShellExecute=false})?.WaitForExit(1500);
-
-            Process.Start(new ProcessStartInfo("powercfg","/S SCHEME_CURRENT")
-            {CreateNoWindow=true,UseShellExecute=false})?.WaitForExit(1500);
+            using var p=Process.Start(new ProcessStartInfo("powercfg",arguments)
+            {
+                CreateNoWindow=true,
+                UseShellExecute=false,
+                RedirectStandardOutput=true,
+                RedirectStandardError=true
+            });
+            if(p==null) return false;
+            p.WaitForExit(2000);
+            return p.ExitCode==0;
         }
-        catch{}
+        catch { return false; }
     }
 
-    void SetGamePriority(ProcessPriorityClass priority)
+    async void AIBoost_Click(object s,RoutedEventArgs e)
     {
-        foreach(var p in Process.GetProcesses())
+        ReadyText.Text="AI ANALYZING";
+        StatusText.Text="AI Boost analyzing CPU load, RAM pressure and running games…";
+
+        var decision=await System.Threading.Tasks.Task.Run(() =>
         {
-            try
+            float cpu=0,ram=0;
+            try { cpu=PerformanceCounter("Processor","% Processor Time","_Total"); } catch {}
+            try { ram=PerformanceCounter("Memory","% Committed Bytes In Use",""); } catch {}
+            bool game=Process.GetProcesses().Any(p =>
             {
-                if(p.MainWindowHandle!=IntPtr.Zero && IsLikelyGame(p))
-                    p.PriorityClass=priority;
-            }
-            catch{}
-            finally{p.Dispose();}
-        }
+                try { return p.MainWindowHandle!=IntPtr.Zero && IsLikelyGame(p); }
+                catch { return false; }
+                finally { p.Dispose(); }
+            });
+
+            if(game && ram<80) return "Turbo";
+            if(cpu>70 || ram>75) return "Advanced";
+            return "Basic";
+        });
+
+        ApplyBoost(decision);
+        StatusText.Text=$"AI BOOST selected {decision} mode automatically for the current system load.";
     }
 
     void BasicBoost_Click(object s,RoutedEventArgs e)=>ApplyBoost("Basic");
     void AdvancedBoost_Click(object s,RoutedEventArgs e)=>ApplyBoost("Advanced");
 
-    void TurboBoost_Click(object s,RoutedEventArgs e)
-    {
-        ApplyBoost("Turbo");
-        StatusText.Text="TURBO BOOST active • strongest safe software-side settings requested";
-    }
+    void TurboBoost_Click(object s,RoutedEventArgs e)=>ApplyBoost("Turbo");
 
     async void TestDns_Click(object s,RoutedEventArgs e)
     {
@@ -701,7 +725,7 @@ public partial class MainWindow : Window
 
     void LaunchSelectedGame(ListBox list)
     {
-        if(list.SelectedItem is not GameEntry g){MessageBox.Show("Select a game first.","RB22 Game Library");return;}
+        if(list.SelectedItem is not GameEntry g || string.IsNullOrWhiteSpace(g.Path)){MessageBox.Show("Select a game first.","RB22 Game Library");return;}
         try{Process.Start(new ProcessStartInfo(g.Path){UseShellExecute=true}); StatusText.Text=$"Launched {g.Name}.";}catch(Exception ex){MessageBox.Show(ex.Message,"RB22");}
     }
 
