@@ -34,7 +34,7 @@ public partial class MainWindow : Window
     OverlayWindow? overlay;
     bool globalF8Registered;
     bool xamlInitialized;
-    readonly DispatcherTimer timer=new(){Interval=TimeSpan.FromSeconds(1.5)};
+    readonly DispatcherTimer timer=new(){Interval=TimeSpan.FromSeconds(3)};
     readonly (string Name,string Host)[] dns={
         ("Cloudflare","1.1.1.1"),("Google","8.8.8.8"),
         ("Quad9","9.9.9.9"),("OpenDNS","208.67.222.222")
@@ -44,6 +44,8 @@ public partial class MainWindow : Window
     bool gamePriority=true;
     bool laptopMode=true;
     bool dnsOptimizer=true;
+    string selectedDnsHost="";
+    string selectedDnsName="Auto";
     bool monitoring=true;
     bool overlayEnabled=true;
     string boostMode="Basic";
@@ -535,26 +537,91 @@ public partial class MainWindow : Window
 
     async void ShowNetworkPanel()
     {
-        var w=MakeToolWindow("RB22 • Network",700,500);
+        var w=MakeToolWindow("RB22 • Network",760,600);
         var p=new StackPanel{Margin=new Thickness(28)};
         p.Children.Add(new TextBlock{Text="NETWORK CENTER",FontSize=26,FontWeight=FontWeights.Bold});
-        p.Children.Add(new TextBlock{Text="Measure latency to common DNS endpoints.",Opacity=.65,Margin=new Thickness(0,4,0,18)});
-        var results=new TextBlock{Text="Press Test Network to measure latency.",FontSize=17,TextWrapping=TextWrapping.Wrap};
+        p.Children.Add(new TextBlock{Text="Choose Auto Select for the lowest measured latency, or manually choose a DNS provider.",Opacity=.65,TextWrapping=TextWrapping.Wrap,Margin=new Thickness(0,4,0,18)});
+
+        var mode=new TextBlock{Text="Mode: Auto Select",FontSize=18,FontWeight=FontWeights.SemiBold};
+        p.Children.Add(mode);
+        var results=new TextBlock{Text="Test the endpoints to compare latency.",FontSize=16,TextWrapping=TextWrapping.Wrap,Margin=new Thickness(0,12,0,10)};
         p.Children.Add(results);
-        p.Children.Add(ToolButton("Test Network",async (_,_)=>{
-            results.Text="Testing…";
-            var lines=new List<string>();
-            foreach(var d in dns)
-            {
-                try{using var ping=new Ping(); var r=await ping.SendPingAsync(d.Host,1200); lines.Add(r.Status==IPStatus.Success?$"{d.Name}: {r.RoundtripTime} ms":$"{d.Name}: unavailable");}
-                catch{lines.Add($"{d.Name}: unavailable");}
-            }
-            results.Text=string.Join("\n",lines);
-            StatusText.Text="Network test complete.";
+
+        p.Children.Add(ToolButton("⚡ Auto Select Best DNS",async (_,_)=>{
+            results.Text="Testing all DNS providers…";
+            var best=await FindBestDnsAsync(results);
+            if(best.host==null){mode.Text="Mode: Auto Select • no reachable DNS found";return;}
+            selectedDnsHost=best.host; selectedDnsName=best.name!;
+            mode.Text=$"Mode: Auto Select • {best.name} ({best.ms} ms)";
+            results.Text=$"Best measured: {best.name} — {best.ms} ms\nClick Apply Selected DNS to use it for Windows.";
         }));
-        p.Children.Add(ToolButton("Test DNS Optimizer",TestDns_Click));
+
+        p.Children.Add(new TextBlock{Text="Manual DNS",FontSize=17,FontWeight=FontWeights.SemiBold,Margin=new Thickness(0,18,0,4)});
+        foreach(var d in dns)
+        {
+            var host=d.Host; var name=d.Name;
+            p.Children.Add(ToolButton($"Use {name}  •  {host}",(_,_)=>{
+                selectedDnsHost=host; selectedDnsName=name;
+                mode.Text=$"Mode: Manual • {name} ({host})";
+                results.Text=$"Selected {name}. Click Apply Selected DNS to use it for Windows.";
+            }));
+        }
+
+        p.Children.Add(ToolButton("Apply Selected DNS",(_,_)=>ApplySelectedDns(results)));
         p.Children.Add(ToolButton("Open Windows Network Settings",(_,_)=>{try{Process.Start(new ProcessStartInfo("ms-settings:network-status"){UseShellExecute=true});}catch{}}));
         w.Content=p; w.Show();
+    }
+
+    async System.Threading.Tasks.Task<(string? name,string? host,long ms)> FindBestDnsAsync(TextBlock results)
+    {
+        var lines=new List<string>();
+        long best=long.MaxValue; string? bestName=null; string? bestHost=null;
+        foreach(var d in dns)
+        {
+            try
+            {
+                using var ping=new Ping();
+                var r=await ping.SendPingAsync(d.Host,1200);
+                if(r.Status==IPStatus.Success)
+                {
+                    lines.Add($"{d.Name}: {r.RoundtripTime} ms");
+                    if(r.RoundtripTime<best){best=r.RoundtripTime;bestName=d.Name;bestHost=d.Host;}
+                }
+                else lines.Add($"{d.Name}: unavailable");
+            }
+            catch{lines.Add($"{d.Name}: unavailable");}
+            results.Text=string.Join("\n",lines);
+        }
+        return (bestName,bestHost,best);
+    }
+
+    void ApplySelectedDns(TextBlock results)
+    {
+        if(string.IsNullOrWhiteSpace(selectedDnsHost))
+        {
+            results.Text="Choose Auto Select Best DNS or a manual provider first.";
+            return;
+        }
+        try
+        {
+            var adapters=NetworkInterface.GetAllNetworkInterfaces()
+                .Where(n=>n.OperationalStatus==OperationalStatus.Up && n.NetworkInterfaceType!=NetworkInterfaceType.Loopback)
+                .Select(n=>n.Name).ToList();
+            int applied=0;
+            foreach(var adapter in adapters)
+            {
+                var psi=new ProcessStartInfo("netsh",$"interface ip set dns name=\"{adapter}\" static {selectedDnsHost}")
+                {CreateNoWindow=true,UseShellExecute=false};
+                using var p=Process.Start(psi);
+                p?.WaitForExit(2000);
+                if(p?.ExitCode==0) applied++;
+            }
+            results.Text=applied>0
+                ?$"Applied {selectedDnsName} ({selectedDnsHost}) to {applied} active adapter(s)."
+                :"Windows rejected the DNS change. Try running RB22 as administrator or use Windows Network Settings.";
+            StatusText.Text=$"DNS selected: {selectedDnsName}.";
+        }
+        catch{results.Text="Could not apply DNS automatically. Use Windows Network Settings instead.";}
     }
 
     void ShowGameLibrary()
