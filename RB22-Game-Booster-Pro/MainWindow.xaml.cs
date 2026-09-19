@@ -648,15 +648,16 @@ public partial class MainWindow : Window
         p.RowDefinitions.Add(new RowDefinition{Height=GridLength.Auto});
         var header=new DockPanel{Margin=new Thickness(0,0,0,16)};
         header.Children.Add(new TextBlock{Text="GAME LIBRARY",FontSize=27,FontWeight=FontWeights.Bold});
+        var list=new ListBox{FontSize=16,Background=new SolidColorBrush(Color.FromRgb(12,16,35)),Foreground=Brushes.White,BorderBrush=new SolidColorBrush(Color.FromRgb(40,58,105))};
         var add=ToolButton("+ Add Game",(_,_)=>AddGameToLibrary(list));
         DockPanel.SetDock(add,Dock.Right); header.Children.Add(add); p.Children.Add(header);
-        var list=new ListBox{FontSize=16,Background=new SolidColorBrush(Color.FromRgb(12,16,35)),Foreground=Brushes.White,BorderBrush=new SolidColorBrush(Color.FromRgb(40,58,105))};
         Grid.SetRow(list,1); p.Children.Add(list);
         var bottom=new StackPanel{Orientation=Orientation.Horizontal,HorizontalAlignment=HorizontalAlignment.Right};
         bottom.Children.Add(ToolButton("Launch Selected",(_,_)=>LaunchSelectedGame(list)));
         bottom.Children.Add(ToolButton("Boost Selected",(_,_)=>BoostSelectedGame(list)));
         Grid.SetRow(bottom,2); p.Children.Add(bottom);
         LoadGames(list);
+        if(list.Items.Count==0) list.Items.Add(new GameEntry("No games added yet — use + Add Game",""));
         w.Content=p; w.Show();
     }
 
