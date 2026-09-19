@@ -13,7 +13,7 @@
             android:layout_width="wrap_content" android:layout_height="wrap_content">
             <TextView android:text="RB22" android:textColor="#FFFFFF" android:textSize="34sp"
                 android:textStyle="bold" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
-            <TextView android:text="GAME BOOSTER PRO" android:textColor="#C9D7FF" android:textSize="13sp"
+            <TextView android:text="GAME BOOSTER PRO  •  v2.0.0" android:textColor="#C9D7FF" android:textSize="13sp"
                 android:textStyle="bold" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
         </LinearLayout>
     </LinearLayout>
@@ -94,6 +94,9 @@
             android:textAllCaps="false" android:layout_marginTop="8dp"
             android:layout_width="match_parent" android:layout_height="48dp"/>
         <Button android:id="@+id/dns_adguard" android:text="94.140.14.14  •  AdGuard"
+            android:textAllCaps="false" android:layout_marginTop="8dp"
+            android:layout_width="match_parent" android:layout_height="48dp"/>
+        <Button android:id="@+id/dns_opendns" android:text="208.67.222.222  •  OpenDNS"
             android:textAllCaps="false" android:layout_marginTop="8dp"
             android:layout_width="match_parent" android:layout_height="48dp"/>
         <TextView android:id="@+id/dns_status" android:text="DNS: Not tested"
