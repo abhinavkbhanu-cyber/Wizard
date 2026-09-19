@@ -30,7 +30,7 @@ public partial class MainWindow : Window
     OverlayWindow? overlay;
     bool globalF8Registered;
     bool xamlInitialized;
-    readonly DispatcherTimer timer=new(){Interval=TimeSpan.FromSeconds(1)};
+    readonly DispatcherTimer timer=new(){Interval=TimeSpan.FromSeconds(1.5)};
     readonly (string Name,string Host)[] dns={
         ("Cloudflare","1.1.1.1"),("Google","8.8.8.8"),
         ("Quad9","9.9.9.9"),("OpenDNS","208.67.222.222")
@@ -56,7 +56,7 @@ public partial class MainWindow : Window
         PreviewKeyDown+=MainWindow_PreviewKeyDown;
         MouseLeftButtonDown+=WindowDrag;
         Closed+=MainWindow_Closed;
-        timer.Tick+=(_,_)=>{if(monitoring) UpdateStats();};
+        timer.Tick+=async (_,_)=>{if(monitoring) await UpdateStatsAsync();};
     }
 
     void LoadedHandler(object? s,RoutedEventArgs e)
@@ -83,7 +83,7 @@ public partial class MainWindow : Window
                 globalF8Registered=RegisterHotKey(h,HotkeyId,MOD_NONE|MOD_NOREPEAT,0x77);
             }
 
-            UpdateStats();
+            _ = UpdateStatsAsync();
             timer.Start();
         }
         catch(Exception ex)
@@ -191,7 +191,7 @@ public partial class MainWindow : Window
 
     void WindowDrag(object s,MouseButtonEventArgs e)
     {
-        if(e.ChangedButton==MouseButton.Left && e.GetPosition(this).Y<65)
+        if(e.ChangedButton==MouseButton.Left && e.GetPosition(this).Y<65 && e.OriginalSource is not System.Windows.Controls.Button)
         {
             try{DragMove();}catch{}
         }
@@ -220,9 +220,40 @@ public partial class MainWindow : Window
         else {overlay.Show();overlay.Activate();}
     }
 
-    void UpdateStats()
+    async System.Threading.Tasks.Task UpdateStatsAsync()
     {
         if(!xamlInitialized || !IsInitialized) return;
+        var stats = await System.Threading.Tasks.Task.Run(() => CollectStats());
+        if(!xamlInitialized || !IsInitialized) return;
+        CpuText.Text=stats.cpuText; CpuSubText.Text=stats.cpuSubText;
+        RamText.Text=stats.ramText; RamSubText.Text=stats.ramSubText;
+        DiskText.Text=stats.diskText; DiskSubText.Text=stats.diskSubText;
+        GpuText.Text="GPU"; GpuSubText.Text="Detected • usage depends on driver";
+        if(stats.shouldClean && autoMemoryClean)
+        {
+            await System.Threading.Tasks.Task.Run(() => CleanMemory());
+            lastMemoryClean=DateTime.Now;
+            if(IsInitialized) StatusText.Text="Auto memory cleanup triggered at 70%+";
+        }
+    }
+
+    (string cpuText,string cpuSubText,string ramText,string ramSubText,string diskText,string diskSubText,bool shouldClean) CollectStats()
+    {
+        string cpuText="N/A",cpuSubText="CPU unavailable",ramText="N/A",ramSubText="RAM unavailable",diskText="N/A",diskSubText="Disk unavailable";
+        bool shouldClean=false;
+        try { var cpu=PerformanceCounter("Processor","% Processor Time","_Total"); cpuText=$"{cpu:F0}%"; cpuSubText="Live CPU load"; } catch {}
+        try { var ram=PerformanceCounter("Memory","% Committed Bytes In Use",""); ramText=$"{ram:F0}%"; ramSubText=GetRamUsageText(); shouldClean=ram>=70 && (DateTime.Now-lastMemoryClean).TotalSeconds>=30; } catch {}
+        try { var root=Path.GetPathRoot(Environment.SystemDirectory); if(root!=null){var drive=new DriveInfo(root); double used=(double)(drive.TotalSize-drive.AvailableFreeSpace)/drive.TotalSize*100; diskText=$"{used:F0}%"; diskSubText=$"{(drive.TotalSize-drive.AvailableFreeSpace)/1e9:F0} / {drive.TotalSize/1e9:F0} GB";}} catch {}
+        return (cpuText,cpuSubText,ramText,ramSubText,diskText,diskSubText,shouldClean);
+    }
+
+    void UpdateStats()
+    {
+        _ = UpdateStatsAsync();
+    }
+
+    void LegacyUpdateStatsRemoved()
+    {
         try
         {
             var cpu=PerformanceCounter("Processor","% Processor Time","_Total");
@@ -529,7 +560,7 @@ public partial class MainWindow : Window
     void QuickScan_Click(object s,RoutedEventArgs e)
     {
         StatusText.Text="Quick Scan complete • CPU, RAM, disk and enabled optimizations checked.";
-        UpdateStats();
+        _ = UpdateStatsAsync();
     }
 
     void SystemCleaner_Click(object s,RoutedEventArgs e)
