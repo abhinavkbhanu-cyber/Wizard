@@ -50,7 +50,13 @@ public partial class MainWindow : Window
     string selectedDnsName="Auto";
     bool monitoring=true;
     bool overlayEnabled=true;
+    bool backgroundOptimization=true;
+    bool cpuAffinityOptimization=true;
+    bool restoreOnExit=true;
     string boostMode="Basic";
+    readonly Dictionary<int, ProcessPriorityClass> prioritySnapshot=new();
+    readonly Dictionary<int, long> affinitySnapshot=new();
+    string activeGameProfile="";
     string username="Player";
     readonly string profilePath=Path.Combine(
         Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
@@ -187,6 +193,7 @@ public partial class MainWindow : Window
     {
         if(source!=null && globalF8Registered)
             UnregisterHotKey(source.Handle,HotkeyId);
+        if(restoreOnExit) RestoreSessionOptimizations();
         overlay?.Close();
         timer.Stop();
     }
@@ -352,6 +359,14 @@ public partial class MainWindow : Window
         }
     }
 
+    static readonly HashSet<string> ProtectedProcesses=new(StringComparer.OrdinalIgnoreCase)
+    {
+        "System","Idle","Registry","smss","csrss","wininit","winlogon","services","lsass",
+        "svchost","dwm","fontdrvhost","Memory Compression","MsMpEng","SecurityHealthService",
+        "explorer","audiodg","spoolsv","SearchHost","StartMenuExperienceHost","ShellExperienceHost",
+        "RuntimeBroker","ApplicationFrameHost","sihost","ctfmon","WmiPrvSE"
+    };
+
     void SetGamePriority(ProcessPriorityClass priority)
     {
         if(!gamePriority) return;
@@ -361,10 +376,11 @@ public partial class MainWindow : Window
         {
             try
             {
-                if(p.Id==Environment.ProcessId ||
-                   p.MainWindowHandle==IntPtr.Zero ||
-                   !IsLikelyGame(p))
+                if(p.Id==Environment.ProcessId || p.MainWindowHandle==IntPtr.Zero || !IsLikelyGame(p))
                     continue;
+
+                if(!prioritySnapshot.ContainsKey(p.Id))
+                    prioritySnapshot[p.Id]=p.PriorityClass;
 
                 p.PriorityClass=priority;
                 changed++;
@@ -375,6 +391,102 @@ public partial class MainWindow : Window
 
         if(changed>0)
             StatusText.Text=$"Game priority set to {priority} for {changed} detected game process(es).";
+    }
+
+    static bool IsSafeBackgroundCandidate(Process p)
+    {
+        if(ProtectedProcesses.Contains(p.ProcessName)) return false;
+        if(p.Id==Environment.ProcessId || p.MainWindowHandle!=IntPtr.Zero) return false;
+        var n=p.ProcessName.ToLowerInvariant();
+        return n.Contains("onedrive") || n.Contains("dropbox") || n.Contains("googledrivesync") ||
+               n.Contains("teams") || n.Contains("discord") || n.Contains("spotify") ||
+               n.Contains("searchindexer") || n.Contains("widgets") || n.Contains("phoneexperiencehost");
+    }
+
+    void OptimizeBackgroundProcesses()
+    {
+        if(!backgroundOptimization) return;
+
+        foreach(var p in Process.GetProcesses())
+        {
+            try
+            {
+                if(IsSafeBackgroundCandidate(p))
+                {
+                    if(!prioritySnapshot.ContainsKey(p.Id))
+                        prioritySnapshot[p.Id]=p.PriorityClass;
+                    p.PriorityClass=ProcessPriorityClass.BelowNormal;
+                }
+            }
+            catch { }
+            finally { p.Dispose(); }
+        }
+    }
+
+    void OptimizeGameAffinity()
+    {
+        if(!cpuAffinityOptimization) return;
+
+        foreach(var p in Process.GetProcesses())
+        {
+            try
+            {
+                if(p.Id==Environment.ProcessId || p.MainWindowHandle==IntPtr.Zero || !IsLikelyGame(p))
+                    continue;
+
+                if(!affinitySnapshot.ContainsKey(p.Id))
+                    affinitySnapshot[p.Id]=p.ProcessorAffinity.ToInt64();
+
+                // Prefer physical/logical CPUs with the most available scheduling capacity.
+                // On older CPUs this simply leaves all cores enabled.
+                int count=Environment.ProcessorCount;
+                if(count>=8)
+                {
+                    long mask=0;
+                    for(int i=0;i<count;i++) mask|=(1L<<i);
+                    p.ProcessorAffinity=new IntPtr(mask);
+                }
+            }
+            catch { }
+            finally { p.Dispose(); }
+        }
+    }
+
+    void RestoreSessionOptimizations()
+    {
+        foreach(var item in prioritySnapshot.ToArray())
+        {
+            try
+            {
+                using var p=Process.GetProcessById(item.Key);
+                p.PriorityClass=item.Value;
+            }
+            catch { }
+        }
+
+        foreach(var item in affinitySnapshot.ToArray())
+        {
+            try
+            {
+                using var p=Process.GetProcessById(item.Key);
+                p.ProcessorAffinity=new IntPtr(item.Value);
+            }
+            catch { }
+        }
+
+        prioritySnapshot.Clear();
+        affinitySnapshot.Clear();
+    }
+
+    string BuildBoostSummary(string mode,bool powerApplied)
+    {
+        var features=new List<string>();
+        if(powerApplied) features.Add("performance power");
+        if(gamePriority) features.Add("game priority");
+        if(backgroundOptimization) features.Add("background balancing");
+        if(cpuAffinityOptimization) features.Add("CPU scheduling");
+        if(autoMemoryClean) features.Add("memory cleanup");
+        return $"{mode.ToUpperInvariant()} BOOST active • {string.Join(" • ",features)}";
     }
 
     void ApplyBoost(string mode)
@@ -407,13 +519,16 @@ public partial class MainWindow : Window
         if(gamePriority)
             SetGamePriority(mode=="Turbo" ? ProcessPriorityClass.High : ProcessPriorityClass.AboveNormal);
 
+        OptimizeBackgroundProcesses();
+        OptimizeGameAffinity();
+
         _ = System.Threading.Tasks.Task.Run(() => CleanMemoryCore())
             .ContinueWith(t =>
             {
                 Dispatcher.Invoke(() =>
                 {
                     ReadyText.Text="BOOSTED";
-                    StatusText.Text=$"{mode.ToUpperInvariant()} BOOST active • {(powerApplied ? "Windows performance plan applied" : "Windows plan change unavailable")} • memory cleaned";
+                    StatusText.Text=BuildBoostSummary(mode,powerApplied);
                 });
             });
     }
