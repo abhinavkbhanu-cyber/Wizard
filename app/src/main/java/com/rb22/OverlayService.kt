@@ -151,6 +151,24 @@ class OverlayService : Service() {
         startFpsMonitor()
     }
 
+    private fun startFpsMonitor(){
+        val code=projectionResultCode ?: return
+        val data=projectionData ?: return
+        fpsMonitor?.stop()
+        fpsMonitor=ScreenFpsMonitor(this){fps-> handler.post{if(panelView!=null)statViews["fps"]?.text=fps.toString()} }
+        fpsMonitor?.start(code,data)
+    }
+
+    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        if(intent!=null){
+            val code=intent.getIntExtra(ScreenFpsMonitor.EXTRA_RESULT_CODE,-1)
+            if(code>0)projectionResultCode=code
+            val data=if(Build.VERSION.SDK_INT>=33) intent.getParcelableExtra(ScreenFpsMonitor.EXTRA_RESULT_DATA,Intent::class.java) else intent.getParcelableExtra<Intent>(ScreenFpsMonitor.EXTRA_RESULT_DATA)
+            if(data!=null)projectionData=data
+        }
+        return START_STICKY
+    }
+
     private fun startStats(){
         handler.removeCallbacksAndMessages("stats")
         val tick=object:Runnable{
