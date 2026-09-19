@@ -29,6 +29,7 @@ public partial class MainWindow : Window
     HwndSource? source;
     OverlayWindow? overlay;
     bool globalF8Registered;
+    bool xamlInitialized;
     readonly DispatcherTimer timer=new(){Interval=TimeSpan.FromSeconds(1)};
     readonly (string Name,string Host)[] dns={
         ("Cloudflare","1.1.1.1"),("Google","8.8.8.8"),
@@ -50,6 +51,7 @@ public partial class MainWindow : Window
     public MainWindow()
     {
         InitializeComponent();
+        xamlInitialized=true;
         Loaded+=LoadedHandler;
         PreviewKeyDown+=MainWindow_PreviewKeyDown;
         MouseLeftButtonDown+=WindowDrag;
@@ -220,6 +222,7 @@ public partial class MainWindow : Window
 
     void UpdateStats()
     {
+        if(!xamlInitialized || !IsInitialized) return;
         try
         {
             var cpu=PerformanceCounter("Processor","% Processor Time","_Total");
@@ -435,61 +438,73 @@ public partial class MainWindow : Window
 
     void AutoMemory_Checked(object s,RoutedEventArgs e)
     {
+        if(!xamlInitialized) return;
         autoMemoryClean=true;
         StatusText.Text="Auto Memory Cleanup: ON at 70%";
     }
     void AutoMemory_Unchecked(object s,RoutedEventArgs e)
     {
+        if(!xamlInitialized) return;
         autoMemoryClean=false;
         StatusText.Text="Auto Memory Cleanup: OFF";
     }
     void GamePriority_Checked(object s,RoutedEventArgs e)
     {
+        if(!xamlInitialized) return;
         gamePriority=true;
         StatusText.Text="Game Process Priority: ON";
     }
     void GamePriority_Unchecked(object s,RoutedEventArgs e)
     {
+        if(!xamlInitialized) return;
         gamePriority=false;
         StatusText.Text="Game Process Priority: OFF";
     }
     void LaptopMode_Checked(object s,RoutedEventArgs e)
     {
+        if(!xamlInitialized) return;
         laptopMode=true;
         StatusText.Text="Laptop Mode: ON";
     }
     void LaptopMode_Unchecked(object s,RoutedEventArgs e)
     {
+        if(!xamlInitialized) return;
         laptopMode=false;
         StatusText.Text="Laptop Mode: OFF";
     }
     void Dns_Checked(object s,RoutedEventArgs e)
     {
+        if(!xamlInitialized) return;
         dnsOptimizer=true;
         StatusText.Text="DNS Optimizer: ON";
     }
     void Dns_Unchecked(object s,RoutedEventArgs e)
     {
+        if(!xamlInitialized) return;
         dnsOptimizer=false;
         StatusText.Text="DNS Optimizer: OFF";
     }
     void Monitor_Checked(object s,RoutedEventArgs e)
     {
+        if(!xamlInitialized) return;
         monitoring=true;
-        UpdateStats();
+        if(IsInitialized) UpdateStats();
     }
     void Monitor_Unchecked(object s,RoutedEventArgs e)
     {
+        if(!xamlInitialized) return;
         monitoring=false;
         StatusText.Text="Real-time Monitoring: OFF";
     }
     void Overlay_Checked(object s,RoutedEventArgs e)
     {
+        if(!xamlInitialized) return;
         overlayEnabled=true;
         StatusText.Text="F8 Overlay: ON";
     }
     void Overlay_Unchecked(object s,RoutedEventArgs e)
     {
+        if(!xamlInitialized) return;
         overlayEnabled=false;
         overlay?.Hide();
         StatusText.Text="F8 Overlay: OFF";
