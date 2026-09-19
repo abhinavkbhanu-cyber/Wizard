@@ -88,13 +88,13 @@
    </Border>
 
    <!-- Custom title bar -->
-   <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,17,18,0">
+   <StackPanel Panel.ZIndex="100" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,17,18,0">
     <Button Content="⚙" Width="42" Height="36" Background="Transparent" BorderBrush="Transparent" Click="Settings_Click"/>
     <Button Content="—" Width="42" Height="36" Background="Transparent" BorderBrush="Transparent" Click="Minimize_Click"/>
     <Button Content="×" Width="42" Height="36" Background="Transparent" BorderBrush="Transparent" FontSize="24" Click="Close_Click"/>
    </StackPanel>
 
-   <ScrollViewer Grid.Column="0" Margin="265,0,0,0" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+   <ScrollViewer Panel.ZIndex="1" Grid.Column="0" Margin="265,0,0,0" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
     <StackPanel Margin="45,78,42,30">
      <TextBlock Text="WELCOME BACK" FontSize="14" Foreground="#D0D8FF" Opacity=".9"/>
      <StackPanel Orientation="Horizontal">
