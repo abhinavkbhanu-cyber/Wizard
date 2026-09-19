@@ -56,7 +56,15 @@
     <Grid>
      <Grid.RowDefinitions><RowDefinition Height="115"/><RowDefinition Height="*"/><RowDefinition Height="105"/></Grid.RowDefinitions>
      <StackPanel Margin="28,25,0,0">
-      <StackPanel Orientation="Horizontal">
+      <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+       <Viewbox Width="52" Height="52" Margin="0,0,10,0">
+        <Canvas Width="512" Height="512">
+         <Ellipse Width="512" Height="512" Fill="#111832"/>
+         <Ellipse Width="476" Height="476" Canvas.Left="18" Canvas.Top="18" Stroke="#7B4DFF" StrokeThickness="18"/>
+         <TextBlock Canvas.Left="130" Canvas.Top="145" Text="B" FontSize="170" FontWeight="Bold" Foreground="#7B4DFF"/>
+         <Polygon Points="315,145 380,145 350,235 405,235 300,385 325,285 270,285" Fill="#40A9FF"/>
+        </Canvas>
+       </Viewbox>
        <TextBlock Text="RB" FontSize="40" FontWeight="Bold" Foreground="#7B4DFF"/>
        <TextBlock Text="22" FontSize="40" FontWeight="Bold" Foreground="#40A9FF"/>
       </StackPanel>
