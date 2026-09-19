@@ -5,6 +5,7 @@
  WindowStartupLocation="CenterScreen" WindowStyle="None" AllowsTransparency="True" Background="Transparent"
  Foreground="#EEF3FF" FontFamily="Segoe UI">
 <Window.Resources>
+ <Style TargetType="ScrollViewer"><Setter Property="ScrollViewer.IsDeferredScrollingEnabled" Value="True"/></Style>
  <Style TargetType="Button">
   <Setter Property="Foreground" Value="#EAF1FF"/><Setter Property="Background" Value="#151A38"/>
   <Setter Property="BorderBrush" Value="#2D3B72"/><Setter Property="BorderThickness" Value="1"/>
@@ -30,7 +31,7 @@
    </Grid.Background>
 
    <!-- Aurora / moon / stars -->
-   <Canvas IsHitTestVisible="False" Opacity=".95">
+   <Canvas IsHitTestVisible="False" Opacity=".95" CacheMode="BitmapCache">
     <Ellipse Width="1000" Height="520" Canvas.Left="-250" Canvas.Top="170" Fill="#143B68" Opacity=".20"><Ellipse.Effect><BlurEffect Radius="65"/></Ellipse.Effect></Ellipse>
     <Ellipse Width="850" Height="500" Canvas.Left="720" Canvas.Top="180" Fill="#4C1E80" Opacity=".17"><Ellipse.Effect><BlurEffect Radius="70"/></Ellipse.Effect></Ellipse>
     <Path Stroke="#45E9CF" StrokeThickness="42" Opacity=".11" Data="M -80,500 C 190,250 370,600 650,340 S 1080,200 1650,390"><Path.Effect><BlurEffect Radius="35"/></Path.Effect></Path>
@@ -94,8 +95,8 @@
     <Button Content="×" Width="42" Height="36" Background="Transparent" BorderBrush="Transparent" FontSize="24" Click="Close_Click"/>
    </StackPanel>
 
-   <ScrollViewer Panel.ZIndex="1" Grid.Column="0" Margin="265,0,0,0" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
-    <StackPanel Margin="45,78,42,30">
+   <ScrollViewer Panel.ZIndex="1" Grid.Column="0" Margin="265,0,0,0" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" PanningMode="VerticalOnly" IsDeferredScrollingEnabled="True" CacheMode="BitmapCache">
+    <StackPanel Margin="45,78,42,30" CacheMode="BitmapCache">
      <TextBlock Text="WELCOME BACK" FontSize="14" Foreground="#D0D8FF" Opacity=".9"/>
      <StackPanel Orientation="Horizontal">
       <TextBlock x:Name="UsernameText" Text="Player" FontSize="43" FontWeight="Bold" Margin="0,5,10,0"/>
