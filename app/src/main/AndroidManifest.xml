@@ -4,7 +4,7 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE"/>
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
-    <application android:theme="@style/Theme.RB22" android:label="RB22" android:allowBackup="true" android:supportsRtl="true">
+    <application android:theme="@style/Theme.RB22" android:label="RB22" android:icon="@drawable/rb22_logo" android:roundIcon="@drawable/rb22_logo" android:allowBackup="true" android:supportsRtl="true">
         <activity android:name=".MainActivity" android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
