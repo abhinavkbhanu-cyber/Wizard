@@ -106,7 +106,7 @@
      <!-- Header -->
      <Grid Margin="0,0,0,22">
       <StackPanel>
-       <TextBlock Text="RB22" FontSize="13" FontWeight="Bold" Foreground="#6CEBFF"/>
+       <TextBlock x:Name="UsernameText" Text="RB22" FontSize="13" FontWeight="Bold" Foreground="#6CEBFF"/>
        <TextBlock Text="GAMING CONTROL" FontSize="30" FontWeight="Bold" Margin="0,2,0,0"/>
        <TextBlock Text="READY" FontSize="11" Foreground="#7583A8" Margin="2,2,0,0"/>
       </StackPanel>
