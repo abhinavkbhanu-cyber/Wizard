@@ -206,6 +206,63 @@ public partial class MainWindow : Window
         timer.Stop();
     }
 
+    void LoadGameProfiles()
+    {
+        try
+        {
+            gameProfiles.Clear();
+            if(!File.Exists(ProfilesPath())) return;
+            foreach(var line in File.ReadAllLines(ProfilesPath()))
+            {
+                var parts=line.Split('|',2);
+                if(parts.Length==2 && (parts[1]=="Basic" || parts[1]=="Advanced" || parts[1]=="Turbo"))
+                    gameProfiles[parts[0]]=parts[1];
+            }
+        }
+        catch { }
+    }
+
+    void SaveGameProfile(string exe,string mode)
+    {
+        try
+        {
+            gameProfiles[exe]=mode;
+            var dir=Path.GetDirectoryName(ProfilesPath());
+            if(!string.IsNullOrEmpty(dir)) Directory.CreateDirectory(dir);
+            File.WriteAllLines(ProfilesPath(),gameProfiles.Select(x=>$"{x.Key}|{x.Value}"));
+        }
+        catch { }
+    }
+
+    string GetGameProfile(string exe)
+    {
+        return gameProfiles.TryGetValue(exe,out var mode) ? mode : "Advanced";
+    }
+
+    string GetActivePowerScheme()
+    {
+        try
+        {
+            using var p=Process.Start(new ProcessStartInfo("powercfg","/getactivescheme")
+            {
+                CreateNoWindow=true,UseShellExecute=false,RedirectStandardOutput=true,RedirectStandardError=true
+            });
+            if(p==null) return "";
+            var output=p.StandardOutput.ReadToEnd();
+            p.WaitForExit(2000);
+            var match=System.Text.RegularExpressions.Regex.Match(output,@"([0-9a-fA-F]{8}-[0-9a-fA-F-]{27})");
+            return match.Success ? match.Groups[1].Value : "";
+        }
+        catch { return ""; }
+    }
+
+    void RestorePowerScheme()
+    {
+        if(string.IsNullOrWhiteSpace(originalPowerScheme)) return;
+        RunPowerCfg("/setactive "+originalPowerScheme);
+        originalPowerScheme="";
+    }
+
     void Minimize_Click(object s,RoutedEventArgs e)=>WindowState=WindowState.Minimized;
     void Close_Click(object s,RoutedEventArgs e)=>Close();
 
