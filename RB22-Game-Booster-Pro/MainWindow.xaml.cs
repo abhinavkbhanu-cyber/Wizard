@@ -883,7 +883,6 @@ public partial class MainWindow : Window
             var exe=Path.GetFileNameWithoutExtension(g.Path);
             var p=Process.GetProcessesByName(exe).FirstOrDefault();
             if(p!=null && gamePriority) p.PriorityClass=ProcessPriorityClass.AboveNormal;
- profile.";
             p?.Dispose();
         }catch{StatusText.Text=$"Boost requested for {g.Name}.";}
     }
