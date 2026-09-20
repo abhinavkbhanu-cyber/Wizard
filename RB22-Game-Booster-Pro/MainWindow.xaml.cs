@@ -203,6 +203,7 @@ public partial class MainWindow : Window
             RestorePowerScheme();
         }
         overlay?.Close();
+        telemetry.Dispose();
         timer.Stop();
     }
 
