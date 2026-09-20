@@ -58,7 +58,7 @@ public partial class MainWindow : Window
     readonly Dictionary<int, long> affinitySnapshot=new();
     string activeGameProfile="";
     string originalPowerScheme="";
-    readonly Dictionary<string,string> gameProfiles=new(StringComparer.OrdinalIgnoreCase);
+    readonly Dictionary<string,string> gameProfiles=new(StringComparer.OrdinalIgnoreCase);\n    readonly PresentMonTelemetry telemetry=new();
     string ProfilesPath()=>Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),"RB22","game-profiles.txt");
     string username="Player";
     readonly string profilePath=Path.Combine(
@@ -73,7 +73,7 @@ public partial class MainWindow : Window
         LoadGameProfiles();
         PreviewKeyDown+=MainWindow_PreviewKeyDown;
         MouseLeftButtonDown+=WindowDrag;
-        Closed+=MainWindow_Closed;
+        Closed+=MainWindow_Closed;\n        telemetry.FpsUpdated+=fps=>Dispatcher.BeginInvoke(() => { if(IsInitialized) StatusText.Text=$"RB22 telemetry • {fps:F0} FPS"; });
         timer.Tick+=async (_,_)=>{if(monitoring) await UpdateStatsAsync(); if(adaptiveGameMode) AdaptiveGameTick();};
     }
 
