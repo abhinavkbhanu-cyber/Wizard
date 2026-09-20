@@ -206,21 +206,6 @@ public partial class MainWindow : Window
         timer.Stop();
     }
 
-    void LoadGameProfiles()
-    {
-        try
-        {
-            gameProfiles.Clear();
-            if(!File.Exists(ProfilesPath())) return;
-            foreach(var line in File.ReadAllLines(ProfilesPath()))
-            {
-                var parts=line.Split('|',2);
-                if(parts.Length==2 && (parts[1]=="Basic" || parts[1]=="Advanced" || parts[1]=="Turbo"))
-                    gameProfiles[parts[0]]=parts[1];
-            }
-        }
-        catch { }
-    }
 
     void SaveGameProfile(string exe,string mode)
     {
@@ -256,12 +241,6 @@ public partial class MainWindow : Window
         catch { return ""; }
     }
 
-    void RestorePowerScheme()
-    {
-        if(string.IsNullOrWhiteSpace(originalPowerScheme)) return;
-        RunPowerCfg("/setactive "+originalPowerScheme);
-        originalPowerScheme="";
-    }
 
     void Minimize_Click(object s,RoutedEventArgs e)=>WindowState=WindowState.Minimized;
     void Close_Click(object s,RoutedEventArgs e)=>Close();
@@ -563,15 +542,6 @@ public partial class MainWindow : Window
         bool powerApplied=false;
         try
         {
-            if(string.IsNullOrWhiteSpace(originalPowerScheme))originalPowerScheme=GetActivePowerScheme();
-            powerApplied=RunPowerCfg("/setactive SCHEME_MIN");
-            if(mode=="Advanced" || mode=="Turbo")
-            {
-                RunPowerCfg("/setacvalueindex SCHEME_CURRENT SUB_PROCESSOR PROCTHROTTLEMIN 5");
-                RunPowerCfg("/setacvalueindex SCHEME_CURRENT SUB_PROCESSOR PROCTHROTTLEMAX 100");
-                RunPowerCfg("/setacvalueindex SCHEME_CURRENT SUB_PROCESSOR PERFBOOSTMODE 2");
-                RunPowerCfg("/S SCHEME_CURRENT");
-            }
             if(mode=="Turbo")
             {
                 RunPowerCfg("/setacvalueindex SCHEME_CURRENT SUB_PROCESSOR PROCTHROTTLEMIN 100");
@@ -913,11 +883,7 @@ public partial class MainWindow : Window
             var exe=Path.GetFileNameWithoutExtension(g.Path);
             var p=Process.GetProcessesByName(exe).FirstOrDefault();
             if(p!=null && gamePriority) p.PriorityClass=ProcessPriorityClass.AboveNormal;
-            var mode=GetGameProfile(exe);
-            activeGameProfile=exe;
-            ApplyBoost(mode);
-            SaveGameProfile(exe,mode);
-            StatusText.Text=$"Boost applied for {g.Name} using {mode} profile.";
+ profile.";
             p?.Dispose();
         }catch{StatusText.Text=$"Boost requested for {g.Name}.";}
     }
