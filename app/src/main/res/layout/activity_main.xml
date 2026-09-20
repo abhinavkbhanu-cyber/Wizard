@@ -1,142 +1,112 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent" android:layout_height="match_parent"
-    android:background="@drawable/rb22_bg">
-<LinearLayout android:orientation="vertical" android:padding="22dp"
+    android:background="@drawable/rb22_bg" android:fillViewport="true">
+<LinearLayout android:orientation="vertical" android:padding="18dp"
     android:layout_width="match_parent" android:layout_height="wrap_content">
 
-    <LinearLayout android:orientation="horizontal" android:gravity="center_vertical"
-        android:layout_width="match_parent" android:layout_height="wrap_content">
-        <ImageView android:src="@drawable/rb22_logo" android:contentDescription="RB22 logo"
-            android:layout_width="72dp" android:layout_height="72dp"/>
-        <LinearLayout android:orientation="vertical" android:layout_marginStart="14dp"
-            android:layout_width="wrap_content" android:layout_height="wrap_content">
-            <TextView android:text="RB22" android:textColor="#FFFFFF" android:textSize="34sp"
-                android:textStyle="bold" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
-            <TextView android:text="GAME BOOSTER PRO  •  ULTIMATE v3.0.0" android:textColor="#C9D7FF" android:textSize="13sp"
-                android:textStyle="bold" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+    <LinearLayout android:gravity="center_vertical" android:layout_width="match_parent" android:layout_height="wrap_content">
+        <ImageView android:src="@drawable/rb22_logo" android:contentDescription="RB22"
+            android:layout_width="58dp" android:layout_height="58dp"/>
+        <LinearLayout android:orientation="vertical" android:layout_marginStart="12dp"
+            android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1">
+            <TextView android:text="RB22" android:textColor="#FFFFFF" android:textSize="30sp" android:textStyle="bold"
+                android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+            <TextView android:text="ULTIMATE  •  v3.1.0" android:textColor="#B8FFE7" android:textSize="11sp" android:textStyle="bold"
+                android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+        </LinearLayout>
+        <TextView android:text="● LIVE" android:textColor="#B8FFE7" android:textSize="11sp" android:textStyle="bold"
+            android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+    </LinearLayout>
+
+    <LinearLayout android:orientation="vertical" android:padding="16dp" android:layout_marginTop="16dp"
+        android:background="@drawable/rb22_card" android:layout_width="match_parent" android:layout_height="wrap_content">
+        <TextView android:text="PERFORMANCE" android:textColor="#FFFFFF" android:textSize="13sp" android:textStyle="bold"
+            android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+        <LinearLayout android:orientation="horizontal" android:layout_marginTop="12dp"
+            android:layout_width="match_parent" android:layout_height="wrap_content">
+            <TextView android:id="@+id/ram" android:text="RAM  --" android:textColor="#FFFFFF" android:textSize="17sp" android:textStyle="bold"
+                android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1"/>
+            <TextView android:id="@+id/temp" android:text="TEMP  --" android:textColor="#FFFFFF" android:textSize="17sp" android:textStyle="bold"
+                android:gravity="end" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1"/>
+        </LinearLayout>
+        <LinearLayout android:orientation="horizontal" android:layout_marginTop="9dp"
+            android:layout_width="match_parent" android:layout_height="wrap_content">
+            <TextView android:text="FPS  •  HUD" android:textColor="#C9D7FF" android:textSize="13sp"
+                android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1"/>
+            <TextView android:text="NET  •  READY" android:textColor="#B8FFE7" android:textSize="13sp"
+                android:gravity="end" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1"/>
         </LinearLayout>
     </LinearLayout>
 
-    <TextView android:text="WELCOME BACK" android:textColor="#F0F5FF" android:textSize="13sp"
-        android:textStyle="bold" android:layout_marginTop="22dp" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
-    <TextView android:text="Your games. Our priority." android:textColor="#C8D5F5" android:textSize="18sp"
-        android:layout_marginTop="4dp" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
-
-    <LinearLayout android:orientation="vertical" android:padding="20dp"
-        android:layout_marginTop="20dp" android:background="@drawable/rb22_card"
+    <Button android:id="@+id/extreme" android:text="⚡  TURBO BOOST" android:textAllCaps="false"
+        android:layout_marginTop="14dp" android:layout_width="match_parent" android:layout_height="56dp"/>
+    <LinearLayout android:orientation="horizontal" android:layout_marginTop="8dp"
         android:layout_width="match_parent" android:layout_height="wrap_content">
-        <TextView android:text="⚡  PERFORMANCE MONITOR" android:textColor="#FFFFFF"
-            android:textStyle="bold" android:textSize="15sp" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
-        <TextView android:id="@+id/ram" android:text="RAM     --" android:textColor="#FFFFFF"
-            android:textSize="19sp" android:textStyle="bold" android:layout_marginTop="18dp" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
-        <TextView android:id="@+id/temp" android:text="TEMP    --" android:textColor="#FFFFFF"
-            android:textSize="19sp" android:textStyle="bold" android:layout_marginTop="9dp" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
-        <TextView android:text="FPS     --" android:textColor="#FFFFFF" android:textSize="19sp"
-            android:textStyle="bold" android:layout_marginTop="9dp" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
-        <TextView android:text="NET     --" android:textColor="#FFFFFF" android:textSize="19sp"
-            android:textStyle="bold" android:layout_marginTop="9dp" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
-    </LinearLayout>
-
-    <TextView android:text="BOOST MODE" android:textColor="#D9E4FF" android:textSize="13sp"
-        android:textStyle="bold" android:layout_marginTop="24dp" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
-
-    <LinearLayout android:orientation="horizontal" android:layout_width="match_parent"
-        android:layout_height="wrap_content" android:layout_marginTop="10dp">
-        <Button android:id="@+id/basic" android:text="BASIC" android:textAllCaps="false"
-            android:layout_weight="1" android:layout_width="0dp" android:layout_height="52dp"/>
+        <Button android:id="@+id/basic" android:text="BALANCED" android:textAllCaps="false"
+            android:layout_width="0dp" android:layout_height="48dp" android:layout_weight="1"/>
         <Button android:id="@+id/advanced" android:text="ADVANCED" android:textAllCaps="false"
-            android:layout_weight="1" android:layout_marginStart="10dp"
-            android:layout_width="0dp" android:layout_height="52dp"/>
+            android:layout_marginStart="8dp" android:layout_width="0dp" android:layout_height="48dp" android:layout_weight="1"/>
     </LinearLayout>
-    <Button android:id="@+id/extreme" android:text="🔥  TURBO BOOST" android:textAllCaps="false"
-        android:layout_marginTop="10dp" android:layout_width="match_parent" android:layout_height="52dp"/>
-    <TextView android:id="@+id/boost_status" android:text="NO BOOST SELECTED"
-        android:textColor="#B8FFE7" android:textSize="13sp" android:textStyle="bold"
-        android:layout_marginTop="7dp" android:gravity="center"
+    <TextView android:id="@+id/boost_status" android:text="READY  •  SELECT A MODE"
+        android:textColor="#B8FFE7" android:textSize="11sp" android:textStyle="bold" android:gravity="center"
+        android:layout_marginTop="6dp" android:layout_width="match_parent" android:layout_height="wrap_content"/>
+
+    <Button android:id="@+id/overlay" android:text="◉  START TRANSPARENT HUD" android:textAllCaps="false"
+        android:layout_marginTop="12dp" android:layout_width="match_parent" android:layout_height="52dp"/>
+
+    <LinearLayout android:orientation="vertical" android:padding="15dp" android:layout_marginTop="16dp"
+        android:background="@drawable/rb22_card" android:layout_width="match_parent" android:layout_height="wrap_content">
+        <TextView android:text="SMART ENGINE" android:textColor="#FFFFFF" android:textSize="13sp" android:textStyle="bold"
+            android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+        <TextView android:text="Adaptive • thermal guard • RAM monitor • game profiles"
+            android:textColor="#C9D7FF" android:textSize="12sp" android:layout_marginTop="4dp"
+            android:layout_width="match_parent" android:layout_height="wrap_content"/>
+        <TextView android:id="@+id/ultimate_status" android:text="ENGINE: STARTING…"
+            android:textColor="#B8FFE7" android:textSize="11sp" android:textStyle="bold" android:layout_marginTop="9dp"
+            android:layout_width="match_parent" android:layout_height="wrap_content"/>
+        <Button android:id="@+id/smart_auto" android:text="ENABLE SMART AUTOMATION" android:textAllCaps="false"
+            android:layout_marginTop="9dp" android:layout_width="match_parent" android:layout_height="48dp"/>
+    </LinearLayout>
+
+    <LinearLayout android:orientation="vertical" android:padding="15dp" android:layout_marginTop="12dp"
+        android:background="@drawable/rb22_card" android:layout_width="match_parent" android:layout_height="wrap_content">
+        <TextView android:text="NETWORK  •  DNS" android:textColor="#FFFFFF" android:textSize="13sp" android:textStyle="bold"
+            android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+        <Button android:id="@+id/dns_auto" android:text="⚡ AUTO TEST" android:textAllCaps="false"
+            android:layout_marginTop="8dp" android:layout_width="match_parent" android:layout_height="48dp"/>
+        <LinearLayout android:orientation="horizontal" android:layout_marginTop="6dp"
+            android:layout_width="match_parent" android:layout_height="wrap_content">
+            <Button android:id="@+id/dns_cloudflare" android:text="1.1.1.1" android:textAllCaps="false" android:layout_width="0dp" android:layout_height="44dp" android:layout_weight="1"/>
+            <Button android:id="@+id/dns_google" android:text="8.8.8.8" android:textAllCaps="false" android:layout_marginStart="6dp" android:layout_width="0dp" android:layout_height="44dp" android:layout_weight="1"/>
+            <Button android:id="@+id/dns_quad9" android:text="9.9.9.9" android:textAllCaps="false" android:layout_marginStart="6dp" android:layout_width="0dp" android:layout_height="44dp" android:layout_weight="1"/>
+        </LinearLayout>
+        <LinearLayout android:orientation="horizontal" android:layout_marginTop="6dp"
+            android:layout_width="match_parent" android:layout_height="wrap_content">
+            <Button android:id="@+id/dns_adguard" android:text="AdGuard" android:textAllCaps="false" android:layout_width="0dp" android:layout_height="44dp" android:layout_weight="1"/>
+            <Button android:id="@+id/dns_opendns" android:text="OpenDNS" android:textAllCaps="false" android:layout_marginStart="6dp" android:layout_width="0dp" android:layout_height="44dp" android:layout_weight="1"/>
+        </LinearLayout>
+        <TextView android:id="@+id/dns_status" android:text="DNS: NOT TESTED" android:textColor="#B8FFE7" android:textSize="11sp" android:textStyle="bold"
+            android:layout_marginTop="7dp" android:layout_width="match_parent" android:layout_height="wrap_content"/>
+    </LinearLayout>
+
+    <LinearLayout android:orientation="vertical" android:padding="15dp" android:layout_marginTop="12dp"
+        android:background="@drawable/rb22_card" android:layout_width="match_parent" android:layout_height="wrap_content">
+        <TextView android:text="GAME LIBRARY" android:textColor="#FFFFFF" android:textSize="13sp" android:textStyle="bold"
+            android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+        <TextView android:id="@+id/game_library_status" android:text="No games saved"
+            android:textColor="#C9D7FF" android:textSize="12sp" android:layout_marginTop="4dp"
+            android:layout_width="match_parent" android:layout_height="wrap_content"/>
+        <LinearLayout android:orientation="horizontal" android:layout_marginTop="8dp"
+            android:layout_width="match_parent" android:layout_height="wrap_content">
+            <Button android:id="@+id/add_game" android:text="＋ ADD" android:textAllCaps="false" android:layout_width="0dp" android:layout_height="48dp" android:layout_weight="1"/>
+            <Button android:id="@+id/game_library" android:text="OPEN" android:textAllCaps="false" android:layout_marginStart="8dp" android:layout_width="0dp" android:layout_height="48dp" android:layout_weight="1"/>
+        </LinearLayout>
+    </LinearLayout>
+
+    <TextView android:text="RB22  •  PERFORMANCE-FIRST  •  SAFE SYSTEM CONTROLS"
+        android:textColor="#7182A8" android:textSize="9sp" android:gravity="center"
+        android:layout_marginTop="16dp" android:layout_marginBottom="8dp"
         android:layout_width="match_parent" android:layout_height="wrap_content"/>
-    <Button android:id="@+id/overlay" android:text="F8 / EDGE PERFORMANCE OVERLAY" android:textAllCaps="false"
-        android:layout_marginTop="14dp" android:layout_width="match_parent" android:layout_height="52dp"/>
-
-    <TextView android:text="PRO GAMING ENGINE" android:textColor="#D9E4FF" android:textSize="13sp"
-        android:textStyle="bold" android:layout_marginTop="28dp" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
-    <LinearLayout android:orientation="vertical" android:padding="18dp"
-        android:layout_marginTop="10dp" android:background="@drawable/rb22_card"
-        android:layout_width="match_parent" android:layout_height="wrap_content">
-        <TextView android:text="RB22 Ultimate Adaptive Engine" android:textColor="#FFFFFF"
-            android:textSize="18sp" android:textStyle="bold"
-            android:layout_width="wrap_content" android:layout_height="wrap_content"/>
-        <TextView android:text="Device-aware performance engine with thermal protection, memory pressure monitoring, network telemetry, game profiles and a premium transparent HUD."
-            android:textColor="#E5ECFF" android:textSize="13sp" android:layout_marginTop="6dp"
-            android:layout_width="match_parent" android:layout_height="wrap_content"/>
-        <TextView android:text="✓ Adaptive game profiles&#10;✓ Thermal-aware performance guard&#10;✓ RAM pressure monitoring&#10;✓ Live network telemetry&#10;✓ Battery-aware behavior&#10;✓ Premium movable HUD&#10;✓ Real FPS estimate when screen capture is enabled&#10;✓ Capability-aware Android behavior"
-            android:textColor="#F2F6FF" android:textSize="14sp" android:lineSpacingExtra="5dp"
-            android:layout_marginTop="12dp" android:layout_width="match_parent" android:layout_height="wrap_content"/>
-        <TextView android:id="@+id/ultimate_status" android:text="ULTIMATE ENGINE: STARTING…" android:textColor="#B8FFE7" android:textSize="13sp" android:textStyle="bold" android:layout_marginTop="12dp" android:layout_width="match_parent" android:layout_height="wrap_content"/>
-    </LinearLayout>
-
-    <TextView android:text="NETWORK OPTIMIZER" android:textColor="#D9E4FF" android:textSize="13sp"
-        android:textStyle="bold" android:layout_marginTop="28dp" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
-    <LinearLayout android:orientation="vertical" android:padding="18dp"
-        android:layout_marginTop="10dp" android:background="@drawable/rb22_card"
-        android:layout_width="match_parent" android:layout_height="wrap_content">
-        <TextView android:text="DNS can improve name-resolution time, but it cannot guarantee lower in-game ping."
-            android:textColor="#E5ECFF" android:textSize="12sp" android:layout_width="match_parent" android:layout_height="wrap_content"/>
-        <Button android:id="@+id/dns_auto" android:text="⚡ AUTO TEST — FIND FASTEST DNS"
-            android:textAllCaps="false" android:layout_marginTop="12dp"
-            android:layout_width="match_parent" android:layout_height="52dp"/>
-        <Button android:id="@+id/dns_cloudflare" android:text="1.1.1.1  •  Cloudflare"
-            android:textAllCaps="false" android:layout_marginTop="8dp"
-            android:layout_width="match_parent" android:layout_height="48dp"/>
-        <Button android:id="@+id/dns_google" android:text="8.8.8.8  •  Google"
-            android:textAllCaps="false" android:layout_marginTop="8dp"
-            android:layout_width="match_parent" android:layout_height="48dp"/>
-        <Button android:id="@+id/dns_quad9" android:text="9.9.9.9  •  Quad9"
-            android:textAllCaps="false" android:layout_marginTop="8dp"
-            android:layout_width="match_parent" android:layout_height="48dp"/>
-        <Button android:id="@+id/dns_adguard" android:text="94.140.14.14  •  AdGuard"
-            android:textAllCaps="false" android:layout_marginTop="8dp"
-            android:layout_width="match_parent" android:layout_height="48dp"/>
-        <Button android:id="@+id/dns_opendns" android:text="208.67.222.222  •  OpenDNS"
-            android:textAllCaps="false" android:layout_marginTop="8dp"
-            android:layout_width="match_parent" android:layout_height="48dp"/>
-        <TextView android:id="@+id/dns_status" android:text="DNS: Not tested"
-            android:textColor="#F0F5FF" android:textSize="13sp" android:textStyle="bold" android:layout_marginTop="10dp"
-            android:layout_width="match_parent" android:layout_height="wrap_content"/>
-    </LinearLayout>
-
-    <TextView android:text="GAME LIBRARY" android:textColor="#D9E4FF" android:textSize="13sp" android:textStyle="bold" android:layout_marginTop="28dp" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
-    <LinearLayout android:orientation="vertical" android:padding="18dp" android:layout_marginTop="10dp" android:background="@drawable/rb22_card" android:layout_width="match_parent" android:layout_height="wrap_content">
-        <TextView android:text="🎮  YOUR GAMES" android:textColor="#FFFFFF" android:textSize="18sp" android:textStyle="bold" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
-        <TextView android:id="@+id/game_library_status" android:text="No games added yet" android:textColor="#E5ECFF" android:textSize="13sp" android:layout_marginTop="5dp" android:layout_width="match_parent" android:layout_height="wrap_content"/>
-        <Button android:id="@+id/add_game" android:text="＋ ADD GAME" android:textAllCaps="false" android:layout_marginTop="12dp" android:layout_width="match_parent" android:layout_height="50dp"/>
-        <Button android:id="@+id/game_library" android:text="🎮 OPEN GAME LIBRARY" android:textAllCaps="false" android:layout_marginTop="8dp" android:layout_width="match_parent" android:layout_height="50dp"/>
-        <TextView android:text="Saved games are detected automatically when they become the active app." android:textColor="#E5ECFF" android:textSize="12sp" android:layout_marginTop="9dp" android:layout_width="match_parent" android:layout_height="wrap_content"/>
-    </LinearLayout>
-
-    <TextView android:text="SMART AI AUTOMATION" android:textColor="#D9E4FF" android:textSize="13sp"
-        android:textStyle="bold" android:layout_marginTop="28dp" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
-    <LinearLayout android:orientation="vertical" android:padding="18dp"
-        android:layout_marginTop="10dp" android:background="@drawable/rb22_card"
-        android:layout_width="match_parent" android:layout_height="wrap_content">
-        <TextView android:text="RB22 Smart Engine"
-            android:textColor="#FFFFFF" android:textSize="18sp" android:textStyle="bold"
-            android:layout_width="wrap_content" android:layout_height="wrap_content"/>
-        <TextView android:text="Automatically reacts to RAM pressure, temperature and network conditions."
-            android:textColor="#E5ECFF" android:textSize="13sp" android:layout_marginTop="5dp"
-            android:layout_width="match_parent" android:layout_height="wrap_content"/>
-        <Button android:id="@+id/smart_auto" android:text="🤖 ENABLE SMART AUTOMATION"
-            android:textAllCaps="false" android:layout_marginTop="12dp"
-            android:layout_width="match_parent" android:layout_height="52dp"/>
-        <TextView android:text="• Auto RAM cleanup at 70%+&#10;• Thermal-aware boost adjustment&#10;• Game launch optimization&#10;• Network/DNS recommendation&#10;• Battery-aware mode"
-            android:textColor="#F2F6FF" android:textSize="14sp" android:lineSpacingExtra="5dp"
-            android:layout_marginTop="10dp" android:layout_width="match_parent" android:layout_height="wrap_content"/>
-    </LinearLayout>
-
-    <TextView android:text="QUICK TOOLS" android:textColor="#D9E4FF" android:textSize="13sp"
-        android:textStyle="bold" android:layout_marginTop="28dp" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
-    <TextView android:text="🧹 Smart RAM Cleaner&#10;🎮 Game Profile Manager&#10;🌡️ Thermal Guard&#10;📶 Network Monitor&#10;🔋 Battery Saver while idle"
-        android:textColor="#F2F6FF" android:textSize="15sp" android:lineSpacingExtra="6dp"
-        android:layout_marginTop="10dp" android:layout_width="match_parent" android:layout_height="wrap_content"/>
 </LinearLayout>
 </ScrollView>
