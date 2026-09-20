@@ -10,6 +10,7 @@ internal sealed class PresentMonTelemetry : IDisposable
 {
     Process? process;
     CancellationTokenSource? stopCts;
+    int frameTimeColumn=-1;
 
     public bool IsRunning => process is { HasExited: false };
     public event Action<double>? FpsUpdated;
@@ -74,23 +75,39 @@ internal sealed class PresentMonTelemetry : IDisposable
     void OnOutput(object? sender, DataReceivedEventArgs e)
     {
         var line = e.Data;
-        if (string.IsNullOrWhiteSpace(line) ||
-            line.StartsWith("Application,", StringComparison.OrdinalIgnoreCase))
+        if (string.IsNullOrWhiteSpace(line))
             return;
 
         var parts = line.Split(',');
-        foreach (var part in parts)
+        if (line.StartsWith("Application,", StringComparison.OrdinalIgnoreCase))
         {
-            if (double.TryParse(part.Trim().Trim('\"'),
-                System.Globalization.NumberStyles.Float,
-                System.Globalization.CultureInfo.InvariantCulture, out var ms) &&
-                ms > 0.1 && ms < 200 &&
-                1000.0 / ms >= 5 && 1000.0 / ms <= 1000)
-            {
-                FpsUpdated?.Invoke(1000.0 / ms);
-                break;
-            }
+            frameTimeColumn = FindFrameTimeColumn(parts);
+            return;
         }
+
+        if (frameTimeColumn < 0 || frameTimeColumn >= parts.Length)
+            return;
+
+        if (double.TryParse(parts[frameTimeColumn].Trim().Trim('"'),
+            System.Globalization.NumberStyles.Float,
+            System.Globalization.CultureInfo.InvariantCulture, out var ms) &&
+            ms > 0.1 && ms < 200)
+        {
+            FpsUpdated?.Invoke(1000.0 / ms);
+        }
+    }
+
+    static int FindFrameTimeColumn(string[] header)
+    {
+        for (var i = 0; i < header.Length; i++)
+        {
+            var name = header[i].Trim().Trim('"');
+            if (name.Equals("MsBetweenDisplayChange", StringComparison.OrdinalIgnoreCase) ||
+                name.Equals("MsBetweenPresents", StringComparison.OrdinalIgnoreCase) ||
+                name.Equals("FrameTime", StringComparison.OrdinalIgnoreCase))
+                return i;
+        }
+        return -1;
     }
 
     public void Stop()
