@@ -1,0 +1,59 @@
+name: Build and Release RB22 PC
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'RB22/**'
+      - '.github/workflows/build-rb22-pc.yml'
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+permissions:
+  contents: write
+
+concurrency:
+  group: rb22-pc-release
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: windows-2025
+    steps:
+      - uses: actions/checkout@v5
+      - name: Setup .NET 8
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+      - name: Restore
+        run: dotnet restore RB22/RB22.csproj --runtime win-x64
+      - name: Build
+        run: dotnet build RB22/RB22.csproj -c Release --no-restore --runtime win-x64
+      - name: Publish
+        run: dotnet publish RB22/RB22.csproj -c Release --no-restore -r win-x64 --self-contained true -p:PublishSingleFile=true -p:EnableCompressionInSingleFile=true -o publish
+      - name: Verify executable
+        shell: pwsh
+        run: |
+          $exe = Get-ChildItem publish -Filter *.exe | Select-Object -First 1
+          if (-not $exe) { throw "RB22 executable was not produced." }
+          Write-Host "Built $($exe.Name) size=$($exe.Length)"
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: RB22-Ultimate-Windows-x64
+          path: publish/*.exe
+      - name: Publish latest release
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $exe = Get-ChildItem publish -Filter *.exe | Select-Object -First 1
+          gh release view rb22-latest 2>$null
+          if ($LASTEXITCODE -ne 0) {
+            gh release create rb22-latest $exe.FullName --title "RB22 Ultimate 0.2.0" --notes "RB22 Ultimate PC build with Dark Moonlight UI, AI profiles, game profiles, memory policy, DNS profiles, Input Lab with Auto-Key and Angle Snap profiles, benchmark workspace and safe software-only controls."
+          } else {
+            gh release upload rb22-latest $exe.FullName --clobber
+            gh release edit rb22-latest --title "RB22 Ultimate 0.2.0" --notes "RB22 Ultimate PC build updated from main."
+          }
