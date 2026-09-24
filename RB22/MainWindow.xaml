@@ -1,36 +1,22 @@
 <Window x:Class="RB22.MainWindow" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="RB22" Width="1180" Height="760" MinWidth="980" MinHeight="650" WindowStartupLocation="CenterScreen"
-        Background="{StaticResource Bg}" Foreground="{StaticResource Text}">
+        Title="RB22 — Ultimate" Width="1180" Height="760" MinWidth="980" MinHeight="650"
+        WindowStartupLocation="CenterScreen" Background="{StaticResource Bg}" Foreground="{StaticResource Text}">
   <Grid>
     <Grid.ColumnDefinitions><ColumnDefinition Width="220"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
-    <Border Grid.Column="0" Background="#101C30" Padding="18">
-      <StackPanel>
-        <TextBlock Text="RB22" FontSize="34" FontWeight="Bold"/>
-        <TextBlock Text="PRO PC CONTROL CENTER" Foreground="{StaticResource Accent}" FontSize="11" Margin="0,0,0,24"/>
-        <Button Content="⌂  Dashboard" Click="Dashboard_Click"/>
-        <Button Content="🤖  AI Optimizer" Click="AI_Click"/>
-        <Button Content="🎮  Games" Click="Games_Click"/>
-        <Button Content="⚡  Performance" Click="Performance_Click"/>
-        <Button Content="🧠  Memory" Click="Memory_Click"/>
-        <Button Content="🌐  Network" Click="Network_Click"/>
-        <Button Content="🖱  Input Lab" Click="Input_Click"/>
-        <Button Content="🧪  Benchmark" Click="Benchmark_Click"/>
-        <Button Content="🖥  Hardware" Click="Hardware_Click"/>
-        <Button Content="⚙  Settings" Click="Settings_Click"/>
-      </StackPanel>
-    </Border>
-    <Grid Grid.Column="1" Margin="28">
-      <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="*"/></Grid.RowDefinitions>
-      <DockPanel>
-        <StackPanel>
-          <TextBlock Text="RB22" FontSize="28" FontWeight="SemiBold"/>
-          <TextBlock Text="Premium gaming optimization and input control" Foreground="{StaticResource Muted}"/>
-        </StackPanel>
-        <Button DockPanel.Dock="Right" Content="🤖 AI BOOST" Click="AIBoost_Click" Padding="22,10"/>
+    <Border Grid.Column="0" Background="#0B1729" Padding="18"><StackPanel>
+      <TextBlock Text="RB22" FontSize="34" FontWeight="Bold"/>
+      <TextBlock Text="ULTIMATE PC CONTROL" Foreground="{StaticResource Accent}" FontSize="11" Margin="0,0,0,24"/>
+      <Button Content="⌂  Dashboard" Click="Dashboard_Click"/><Button Content="🤖  AI Optimizer" Click="AI_Click"/>
+      <Button Content="🎮  Games" Click="Games_Click"/><Button Content="⚡  Performance" Click="Performance_Click"/>
+      <Button Content="🧠  Memory" Click="Memory_Click"/><Button Content="🌐  Network" Click="Network_Click"/>
+      <Button Content="🖱  Input Lab" Click="Input_Click"/><Button Content="🧪  Benchmark" Click="Benchmark_Click"/>
+      <Button Content="🖥  Hardware" Click="Hardware_Click"/><Button Content="⚙  Settings" Click="Settings_Click"/>
+    </StackPanel></Border>
+    <Grid Grid.Column="1" Margin="28"><Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="*"/></Grid.RowDefinitions>
+      <DockPanel><StackPanel><TextBlock Text="RB22" FontSize="28" FontWeight="SemiBold"/><TextBlock Text="Dark Moonlight • gaming optimization • input control" Foreground="{StaticResource Muted}"/></StackPanel>
+        <StackPanel DockPanel.Dock="Right" Orientation="Horizontal"><TextBlock x:Name="StatusText" Text="READY" VerticalAlignment="Center" Margin="0,0,14,0" Foreground="{StaticResource Accent}"/><Button Content="🤖 AI BOOST" Click="AIBoost_Click" Padding="22,10"/></StackPanel>
       </DockPanel>
-      <ScrollViewer Grid.Row="1" Margin="0,24,0,0" PanningMode="VerticalOnly" IsDeferredScrollingEnabled="True">
-        <StackPanel x:Name="MainContent" />
-      </ScrollViewer>
+      <ScrollViewer Grid.Row="1" Margin="0,24,0,0" PanningMode="VerticalOnly"><StackPanel x:Name="MainContent"/></ScrollViewer>
     </Grid>
   </Grid>
 </Window>
