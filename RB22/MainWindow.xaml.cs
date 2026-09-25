@@ -15,7 +15,9 @@ public partial class MainWindow : Window
     readonly DispatcherTimer keyTimer = new();
     string mode = "Balanced", dns = "Auto", angle = "Off", autoKey = "F";
     bool keyRunning; int boostCount;
-    readonly PerformanceCounter cpu = new("Processor", "% Processor Time", "_Total");
+    readonly Process currentProcess = Process.GetCurrentProcess();
+    TimeSpan lastCpuTime = TimeSpan.Zero;
+    DateTime lastCpuSample = DateTime.UtcNow;
 
     [DllImport("user32.dll", SetLastError=true)] static extern uint SendInput(uint nInputs, INPUT[] pInputs, int cbSize);
     [StructLayout(LayoutKind.Sequential)] struct INPUT { public uint type; public InputUnion U; }
@@ -27,10 +29,24 @@ public partial class MainWindow : Window
     {
         InitializeComponent();
         keyTimer.Tick += (_,_) => SendKey(autoKey); keyTimer.Interval=TimeSpan.FromMilliseconds(100);
-        Loaded += (_,_) => { ShowDashboard(); try{cpu.NextValue();}catch{} timer.Tick += Timer_Tick; timer.Start(); };
+        Loaded += (_,_) => { ShowDashboard(); timer.Tick += Timer_Tick; timer.Start(); };
         Closed += (_,_) => { keyTimer.Stop(); timer.Stop(); };
     }
-    void Timer_Tick(object? sender, EventArgs e){try{StatusText.Text=$"READY • CPU {cpu.NextValue():0}% • {mode.ToUpper()}";}catch{StatusText.Text=$"READY • {mode.ToUpper()}";}}
+    void Timer_Tick(object? sender, EventArgs e)
+    {
+        try
+        {
+            currentProcess.Refresh();
+            var now = DateTime.UtcNow;
+            var cpu = currentProcess.TotalProcessorTime;
+            var dt = (now - lastCpuSample).TotalMilliseconds;
+            var dcpu = (cpu - lastCpuTime).TotalMilliseconds;
+            var usage = dt > 0 ? Math.Clamp(dcpu / (dt * Environment.ProcessorCount) * 100.0, 0, 100) : 0;
+            lastCpuTime = cpu; lastCpuSample = now;
+            StatusText.Text=$"READY • CPU {usage:0}% • {mode.ToUpper()}";
+        }
+        catch { StatusText.Text=$"READY • {mode.ToUpper()}"; }
+    }
     Button B(string t,RoutedEventHandler c){var b=new Button{Content=t,Margin=new Thickness(0,6,0,6),Padding=new Thickness(12,9,12,9)};b.Click+=c;return b;}
     TextBlock H(string t)=>new(){Text=t,FontSize=22,FontWeight=FontWeights.SemiBold,Margin=new Thickness(0,0,0,14)};
     TextBlock P(string t)=>new(){Text=t,FontSize=14,Foreground=FindResource("Muted") as Brush,TextWrapping=TextWrapping.Wrap,Margin=new Thickness(0,4,0,12)};
