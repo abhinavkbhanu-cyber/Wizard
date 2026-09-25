@@ -76,19 +76,22 @@ public partial class App : Application
         }
     }
 
-    protected override void OnDispatcherUnhandledException(DispatcherUnhandledExceptionEventArgs e)
+    private void HandleDispatcherUnhandledException(object? sender, DispatcherUnhandledExceptionEventArgs e)
     {
         Log("UNHANDLED UI ERROR: " + e.Exception);
         try
         {
             MessageBox.Show(
-                "RB22 encountered a UI error.\n\n" + e.Exception.GetType().Name + ": " + e.Exception.Message +
-                "\n\nStartup log:\n" + LogPath,
-                "RB22 error",
-                MessageBoxButton.OK,
-                MessageBoxImage.Error);
+                "RB22 encountered a UI error.\\n\\n" + e.Exception.GetType().Name + ": " + e.Exception.Message +
+                "\\n\\nStartup log:\\n" + LogPath,
+                "RB22 error", MessageBoxButton.OK, MessageBoxImage.Error);
         }
         catch { }
         e.Handled = true;
+    }
+
+    private void RegisterExceptionHandler()
+    {
+        DispatcherUnhandledException += HandleDispatcherUnhandledException;
     }
 }
