@@ -28,6 +28,7 @@ public partial class App : Application
         try
         {
             base.OnStartup(e);
+            RegisterExceptionHandler();
             ShutdownMode = ShutdownMode.OnMainWindowClose;
 
             Log("Creating MainWindow");
