@@ -104,6 +104,30 @@
         </LinearLayout>
     </LinearLayout>
 
+    <LinearLayout android:orientation="vertical" android:padding="15dp" android:layout_marginTop="12dp"
+        android:background="@drawable/rb22_card" android:layout_width="match_parent" android:layout_height="wrap_content">
+        <TextView android:text="📱 RB22 MOBILE" android:textColor="#FFFFFF" android:textSize="15sp" android:textStyle="bold"
+            android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+        <TextView android:text="Dedicated mobile gaming controls • Dark Moon • independent from PC"
+            android:textColor="#C9D7FF" android:textSize="12sp" android:layout_marginTop="4dp"
+            android:layout_width="match_parent" android:layout_height="wrap_content"/>
+        <TextView android:text="GAME MODE  •  OVERLAY  •  EXTRA TOOLS  •  CHARGING MODE"
+            android:textColor="#B8FFE7" android:textSize="10sp" android:textStyle="bold" android:layout_marginTop="8dp"
+            android:layout_width="match_parent" android:layout_height="wrap_content"/>
+        <LinearLayout android:orientation="horizontal" android:layout_marginTop="9dp"
+            android:layout_width="match_parent" android:layout_height="wrap_content">
+            <Button android:id="@+id/mobile_game_mode" android:text="GAME MODE" android:textAllCaps="false"
+                android:layout_width="0dp" android:layout_height="46dp" android:layout_weight="1"/>
+            <Button android:id="@+id/mobile_tools" android:text="EXTRA TOOLS" android:textAllCaps="false"
+                android:layout_marginStart="8dp" android:layout_width="0dp" android:layout_height="46dp" android:layout_weight="1"/>
+        </LinearLayout>
+        <Button android:id="@+id/mobile_charging" android:text="🔋 CHARGING MODE" android:textAllCaps="false"
+            android:layout_marginTop="7dp" android:layout_width="match_parent" android:layout_height="46dp"/>
+        <TextView android:text="Angel Snap stays PC-only"
+            android:textColor="#7182A8" android:textSize="10sp" android:gravity="center"
+            android:layout_marginTop="6dp" android:layout_width="match_parent" android:layout_height="wrap_content"/>
+    </LinearLayout>
+
     <TextView android:text="RB22  •  PERFORMANCE-FIRST  •  SAFE SYSTEM CONTROLS"
         android:textColor="#7182A8" android:textSize="9sp" android:gravity="center"
         android:layout_marginTop="16dp" android:layout_marginBottom="8dp"
