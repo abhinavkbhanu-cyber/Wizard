@@ -16,8 +16,6 @@ import java.net.InetAddress
 import java.util.concurrent.Executors
 
 class MainActivity : AppCompatActivity() {
-    companion object { private const val REQUEST_SCREEN_CAPTURE = 2201 }
-    private var waitingForOverlay = false
     private val dnsOptions = listOf(
         "Cloudflare" to "one.one.one.one",
         "Google" to "dns.google",
@@ -78,23 +76,11 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun requestOverlayWithFps() {
-        waitingForOverlay = true
-        val manager = getSystemService(android.media.projection.MediaProjectionManager::class.java)
-        startActivityForResult(manager.createScreenCaptureIntent(), REQUEST_SCREEN_CAPTURE)
+        // RB22 requests only the Android overlay permission.
+        // No screen-recording / MediaProjection permission is requested.
+        startForegroundCompat(Intent(this, OverlayService::class.java))
     }
 
-    @Deprecated("Activity result API kept compatible with the existing RB22 project")
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: android.content.Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode != REQUEST_SCREEN_CAPTURE) return
-        waitingForOverlay = false
-        val intent = Intent(this, OverlayService::class.java)
-        if (resultCode == RESULT_OK && data != null) {
-            intent.putExtra(ScreenFpsMonitor.EXTRA_RESULT_CODE, resultCode)
-            intent.putExtra(ScreenFpsMonitor.EXTRA_RESULT_DATA, data)
-        }
-        startForegroundCompat(intent)
-    }
     private fun startUltimateEngine() {
         val engine = AdaptivePerformanceEngine(this)
         val status = findViewById<TextView>(R.id.ultimate_status)
