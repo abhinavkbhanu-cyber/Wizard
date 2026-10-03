@@ -35,7 +35,11 @@ class MainActivity : AppCompatActivity() {
         setupBoostModes()
         startUltimateEngine()
 
-        findViewById<TextView>(R.id.overlay).setOnClickListener {
+        findViewById<Button>(R.id.start_booster).setOnClickListener { startGameBooster() }
+        findViewById<Button>(R.id.stop_booster).setOnClickListener { stopGameBooster() }
+        findViewById<TextView>(R.id.booster_status).text = if (gamePrefs.getBoolean("booster_enabled", false)) "● BOOSTER ON" else "○ BOOSTER OFF"
+
+        findViewById<Button>(R.id.overlay).setOnClickListener {
             if (!Settings.canDrawOverlays(this)) {
                 startActivity(
                     Intent(
@@ -72,7 +76,27 @@ class MainActivity : AppCompatActivity() {
             Toast.makeText(this, "RB22 Smart Automation enabled", Toast.LENGTH_SHORT).show()
         }
 
-        if (savedGames().isNotEmpty()) startAutoBoostMonitor()
+        if (gamePrefs.getBoolean("booster_enabled", false) && savedGames().isNotEmpty()) startAutoBoostMonitor()
+    }
+
+
+    private fun startGameBooster() {
+        gamePrefs.edit().putBoolean("booster_enabled", true).apply()
+        findViewById<TextView>(R.id.booster_status).text = "● BOOSTER ON"
+        if (savedGames().isEmpty()) {
+            Toast.makeText(this, "Booster ON — add a game for automatic detection.", Toast.LENGTH_LONG).show()
+        } else {
+            startAutoBoostMonitor()
+            Toast.makeText(this, "RB22 GAME BOOSTER ON", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    private fun stopGameBooster() {
+        gamePrefs.edit().putBoolean("booster_enabled", false).apply()
+        stopService(Intent(this, GameAutoBoostService::class.java))
+        stopService(Intent(this, OverlayService::class.java))
+        findViewById<TextView>(R.id.booster_status).text = "○ BOOSTER OFF"
+        Toast.makeText(this, "RB22 Game Booster OFF", Toast.LENGTH_SHORT).show()
     }
 
     private fun requestOverlayWithFps() {
@@ -144,31 +168,23 @@ class MainActivity : AppCompatActivity() {
 
     private fun testDns() {
         val status = findViewById<TextView>(R.id.dns_status)
-        status.text = "DNS: Testing..."
+        status.text = "DNS: Testing 5 resolvers…"
         Executors.newSingleThreadExecutor().execute {
-            val results = dnsOptions.map { (name, host) ->
+            val results = dnsOptions.mapNotNull { (name, host) ->
                 val start = System.nanoTime()
-                val ok = try {
-                    InetAddress.getByName(host)
-                    true
-                } catch (_: Exception) {
-                    false
-                }
+                val ok = try { InetAddress.getByName(host); true } catch (_: Exception) { false }
                 val ms = (System.nanoTime() - start) / 1_000_000
-                Triple(name, ms, ok)
-            }.filter { it.third }.sortedBy { it.second }
+                if (ok) name to ms else null
+            }.sortedBy { it.second }
 
             runOnUiThread {
                 if (results.isEmpty()) {
                     status.text = "DNS: Test failed — check your connection."
                 } else {
                     val best = results.first()
-                    status.text = "FASTEST LOOKUP: " + best.first + "  " + best.second + " ms"
-                    Toast.makeText(
-                        this,
-                        "RB22 recommends " + best.first + " for this connection",
-                        Toast.LENGTH_LONG
-                    ).show()
+                    gamePrefs.edit().putString("best_dns_name", best.first).apply()
+                    status.text = "BEST DNS: " + best.first + "  " + best.second + " ms"
+                    openPrivateDns(best.first, best.first)
                 }
             }
         }
