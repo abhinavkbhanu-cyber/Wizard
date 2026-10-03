@@ -184,7 +184,7 @@ class MainActivity : AppCompatActivity() {
                     val best = results.first()
                     gamePrefs.edit().putString("best_dns_name", best.first).apply()
                     status.text = "BEST DNS: " + best.first + "  " + best.second + " ms"
-                    openPrivateDns(best.first, best.first)
+                    openPrivateDns(best.first, dnsOptions.first { it.first == best.first }.second)
                 }
             }
         }
