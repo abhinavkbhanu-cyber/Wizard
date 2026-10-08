@@ -75,6 +75,11 @@ class GameAutoBoostService : Service() {
 
         if (current in games && current != lastGame) {
             lastGame = current
+            getSharedPreferences("rb22_games", Context.MODE_PRIVATE).edit()
+                .putBoolean("game_mode", true)
+                .putBoolean("max_fps", true)
+                .putString("profile", "MAX FPS")
+                .apply()
             val label = runCatching {
                 packageManager.getApplicationLabel(
                     packageManager.getApplicationInfo(current, 0)
@@ -84,7 +89,7 @@ class GameAutoBoostService : Service() {
             val notification = Notification.Builder(this, "rb22_auto")
                 .setSmallIcon(android.R.drawable.ic_media_play)
                 .setContentTitle("RB22 AUTO BOOST")
-                .setContentText("Boost profile active • " + label)
+                .setContentText("MAX FPS profile active • " + label)
                 .setAutoCancel(true)
                 .build()
 
