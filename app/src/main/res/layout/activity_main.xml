@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView android:id="@+id/rb22_root" xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent" android:layout_height="match_parent"
     android:background="@drawable/rb22_bg" android:fillViewport="true">
 <LinearLayout android:orientation="vertical" android:padding="18dp"
@@ -12,7 +12,7 @@
             android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1">
             <TextView android:text="RB22" android:textColor="#FFFFFF" android:textSize="30sp" android:textStyle="bold"
                 android:layout_width="wrap_content" android:layout_height="wrap_content"/>
-            <TextView android:text="ULTIMATE  •  v3.5.0  •  MAX FPS" android:textColor="#B8FFE7" android:textSize="11sp" android:textStyle="bold"
+            <TextView android:text="ULTIMATE  •  v3.6.0  •  MAX FPS" android:textColor="#B8FFE7" android:textSize="11sp" android:textStyle="bold"
                 android:layout_width="wrap_content" android:layout_height="wrap_content"/>
         </LinearLayout>
         <TextView android:text="● LIVE" android:textColor="#B8FFE7" android:textSize="11sp" android:textStyle="bold"
@@ -20,7 +20,7 @@
     </LinearLayout>
 
     <LinearLayout android:orientation="vertical" android:padding="16dp" android:layout_marginTop="16dp"
-        android:background="@drawable/rb22_card" android:layout_width="match_parent" android:layout_height="wrap_content">
+        android:background="@drawable/rb22_card" android:tag="rb22_card" android:layout_width="match_parent" android:layout_height="wrap_content">
         <TextView android:text="PERFORMANCE" android:textColor="#FFFFFF" android:textSize="13sp" android:textStyle="bold"
             android:layout_width="wrap_content" android:layout_height="wrap_content"/>
         <LinearLayout android:orientation="horizontal" android:layout_marginTop="12dp"
