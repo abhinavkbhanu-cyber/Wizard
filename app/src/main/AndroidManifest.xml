@@ -31,10 +31,10 @@
         <service
             android:name=".OverlayService"
             android:exported="false"
-            android:foregroundServiceType="specialUse|mediaProjection">
+            android:foregroundServiceType="specialUse">
             <property
                 android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
-                android:value="Gaming overlay and live screen FPS monitor"/>
+                android:value="Gaming overlay and performance HUD without screen recording"/>
         </service>
         <service
             android:name=".GameAutoBoostService"
