@@ -56,10 +56,10 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: RB22-Ultimate-APK
-          path: RB22-v3.0.0-ultimate-debug.apk
+          path: RB22-v3.3.0-mobile-debug.apk
       - name: Publish latest GitHub Release
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           gh release view latest 2>/dev/null || gh release create latest --title "RB22 — Latest APK" --notes "RB22 Android v3.3.0 MOBILE — adaptive gaming HUD, profiles, thermal/RAM/network telemetry, smart automation and capability-aware monitoring."
-          gh release upload latest RB22-v3.0.0-ultimate-debug.apk --clobber
+          gh release upload latest RB22-v3.3.0-mobile-debug.apk --clobber
