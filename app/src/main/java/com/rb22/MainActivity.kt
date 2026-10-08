@@ -4,6 +4,7 @@ import android.app.AppOpsManager
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import android.net.VpnService
 import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
@@ -18,14 +19,15 @@ import java.util.concurrent.Executors
 
 class MainActivity : AppCompatActivity() {
     private val dnsOptions = listOf(
-        "Cloudflare" to "one.one.one.one",
-        "Google" to "dns.google",
-        "Quad9" to "dns.quad9.net",
-        "AdGuard" to "dns.adguard-dns.com",
-        "OpenDNS" to "dns.opendns.com"
+        "Cloudflare" to ("one.one.one.one" to "1.1.1.1"),
+        "Google" to ("dns.google" to "8.8.8.8"),
+        "Quad9" to ("dns.quad9.net" to "9.9.9.9"),
+        "AdGuard" to ("dns.adguard-dns.com" to "94.140.14.14"),
+        "OpenDNS" to ("dns.opendns.com" to "208.67.222.222")
     )
 
     private val gamingEndpoints = listOf("Cloudflare" to "1.1.1.1", "Google" to "8.8.8.8", "Quad9" to "9.9.9.9")
+    private var pendingDnsIp: String? = null
 
     private val gamePrefs by lazy {
         getSharedPreferences("rb22_games", Context.MODE_PRIVATE)
@@ -69,7 +71,7 @@ class MainActivity : AppCompatActivity() {
         )
         dnsButtons.forEach { (id, dns) ->
             findViewById<Button>(id).setOnClickListener {
-                openPrivateDns(dns.first, dns.second)
+                activateDns(dns.first, dns.second.second)
             }
         }
 
@@ -233,20 +235,28 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun openPrivateDns(name: String, hostname: String) {
-        Toast.makeText(
-            this,
-            "$name selected: $hostname. Set this hostname in Private DNS.",
-            Toast.LENGTH_LONG
-        ).show()
+    private fun activateDns(name: String, ip: String) {
+        pendingDnsIp = ip
+        val prepare = VpnService.prepare(this)
+        if (prepare != null) {
+            Toast.makeText(this, "$name selected — Android will ask once for VPN permission.", Toast.LENGTH_LONG).show()
+            startActivityForResult(prepare, VPN_REQUEST)
+        } else {
+            startDnsService(ip)
+        }
+    }
+
+    private fun startDnsService(ip: String) {
+        gamePrefs.edit().putString("active_dns_ip", ip).apply()
+        val intent = Intent(this, DnsVpnService::class.java)
+            .putExtra(DnsVpnService.EXTRA_DNS_IP, ip)
         try {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-                startActivity(Intent("android.settings.PRIVATE_DNS_SETTINGS"))
-            } else {
-                startActivity(Intent(Settings.ACTION_WIRELESS_SETTINGS))
-            }
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) startForegroundService(intent) else startService(intent)
+            findViewById<TextView>(R.id.dns_status).text = "DNS: ACTIVE • $ip"
+            Toast.makeText(this, "RB22 DNS active: $ip", Toast.LENGTH_SHORT).show()
         } catch (_: Exception) {
-            startActivity(Intent(Settings.ACTION_SETTINGS))
+            findViewById<TextView>(R.id.dns_status).text = "DNS: FAILED TO START"
+            Toast.makeText(this, "Could not start RB22 DNS.", Toast.LENGTH_LONG).show()
         }
     }
 
@@ -254,12 +264,14 @@ class MainActivity : AppCompatActivity() {
         val status = findViewById<TextView>(R.id.dns_status)
         status.text = "DNS: Testing 5 resolvers…"
         Executors.newSingleThreadExecutor().execute {
-            val results = dnsOptions.mapNotNull { (name, host) ->
+            val results = dnsOptions.mapNotNull { (name, pair) ->
+                val hostname = pair.first
+                val ip = pair.second
                 val start = System.nanoTime()
-                val ok = try { InetAddress.getByName(host); true } catch (_: Exception) { false }
+                val ok = try { InetAddress.getByName(hostname); true } catch (_: Exception) { false }
                 val ms = (System.nanoTime() - start) / 1_000_000
-                if (ok) name to ms else null
-            }.sortedBy { it.second }
+                if (ok) Triple(name, ip, ms) else null
+            }.sortedBy { it.third }
 
             runOnUiThread {
                 if (results.isEmpty()) {
@@ -267,11 +279,29 @@ class MainActivity : AppCompatActivity() {
                 } else {
                     val best = results.first()
                     gamePrefs.edit().putString("best_dns_name", best.first).apply()
-                    status.text = "BEST DNS: " + best.first + "  " + best.second + " ms"
-                    openPrivateDns(best.first, dnsOptions.first { it.first == best.first }.second)
+                    status.text = "BEST DNS: " + best.first + "  " + best.third + " ms"
+                    activateDns(best.first, best.second)
                 }
             }
         }
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == VPN_REQUEST) {
+            val ip = pendingDnsIp
+            pendingDnsIp = null
+            if (resultCode == RESULT_OK && ip != null) {
+                startDnsService(ip)
+            } else {
+                findViewById<TextView>(R.id.dns_status).text = "DNS: VPN permission declined"
+                Toast.makeText(this, "DNS was not activated.", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
+    companion object {
+        private const val VPN_REQUEST = 2202
     }
 
     private fun savedGames(): Set<String> =
