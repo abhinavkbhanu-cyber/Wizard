@@ -12,7 +12,7 @@
             android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1">
             <TextView android:text="RB22" android:textColor="#FFFFFF" android:textSize="30sp" android:textStyle="bold"
                 android:layout_width="wrap_content" android:layout_height="wrap_content"/>
-            <TextView android:text="ULTIMATE  •  v3.2.0" android:textColor="#B8FFE7" android:textSize="11sp" android:textStyle="bold"
+            <TextView android:text="ULTIMATE  •  v3.5.0  •  MAX FPS" android:textColor="#B8FFE7" android:textSize="11sp" android:textStyle="bold"
                 android:layout_width="wrap_content" android:layout_height="wrap_content"/>
         </LinearLayout>
         <TextView android:text="● LIVE" android:textColor="#B8FFE7" android:textSize="11sp" android:textStyle="bold"
@@ -61,7 +61,7 @@
         </LinearLayout>
     </LinearLayout>
 
-    <Button android:id="@+id/extreme" android:text="⚡  TURBO BOOST" android:textAllCaps="false"
+    <Button android:id="@+id/extreme" android:text="⚡  MAX FPS" android:textAllCaps="false"
         android:layout_marginTop="14dp" android:layout_width="match_parent" android:layout_height="56dp"/>
     <LinearLayout android:orientation="horizontal" android:layout_marginTop="8dp"
         android:layout_width="match_parent" android:layout_height="wrap_content">
@@ -93,10 +93,12 @@
 
     <LinearLayout android:orientation="vertical" android:padding="15dp" android:layout_marginTop="12dp"
         android:background="@drawable/rb22_card" android:layout_width="match_parent" android:layout_height="wrap_content">
-        <TextView android:text="NETWORK  •  DNS" android:textColor="#FFFFFF" android:textSize="13sp" android:textStyle="bold"
+        <TextView android:text="NETWORK  •  GAMING PING" android:textColor="#FFFFFF" android:textSize="13sp" android:textStyle="bold"
             android:layout_width="wrap_content" android:layout_height="wrap_content"/>
-        <Button android:id="@+id/dns_auto" android:text="⚡ AUTO TEST" android:textAllCaps="false"
+        <Button android:id="@+id/dns_auto" android:text="⚡ AUTO DNS" android:textAllCaps="false"
             android:layout_marginTop="8dp" android:layout_width="match_parent" android:layout_height="48dp"/>
+        <Button android:id="@+id/gaming_ping" android:text="🎯 FIND LOWEST GAMING PING" android:textAllCaps="false"
+            android:layout_marginTop="6dp" android:layout_width="match_parent" android:layout_height="48dp"/>
         <LinearLayout android:orientation="horizontal" android:layout_marginTop="6dp"
             android:layout_width="match_parent" android:layout_height="wrap_content">
             <Button android:id="@+id/dns_cloudflare" android:text="1.1.1.1" android:textAllCaps="false" android:layout_width="0dp" android:layout_height="44dp" android:layout_weight="1"/>
@@ -140,10 +142,10 @@
         android:background="@drawable/rb22_card" android:layout_width="match_parent" android:layout_height="wrap_content">
         <TextView android:text="📱 RB22 MOBILE" android:textColor="#FFFFFF" android:textSize="15sp" android:textStyle="bold"
             android:layout_width="wrap_content" android:layout_height="wrap_content"/>
-        <TextView android:text="Dedicated mobile gaming controls • Dark Moon • independent from PC"
+        <TextView android:text="Dedicated mobile gaming controls • Dark Moon Aurora • independent from PC"
             android:textColor="#C9D7FF" android:textSize="12sp" android:layout_marginTop="4dp"
             android:layout_width="match_parent" android:layout_height="wrap_content"/>
-        <TextView android:text="GAME MODE  •  OVERLAY  •  EXTRA TOOLS  •  CHARGING MODE"
+        <TextView android:text="MAX FPS  •  LOW OVERHEAD  •  GAMING PING  •  DARK AURORA"
             android:textColor="#B8FFE7" android:textSize="10sp" android:textStyle="bold" android:layout_marginTop="8dp"
             android:layout_width="match_parent" android:layout_height="wrap_content"/>
         <LinearLayout android:orientation="horizontal" android:layout_marginTop="9dp"
