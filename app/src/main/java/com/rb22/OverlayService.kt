@@ -113,7 +113,7 @@ class OverlayService : Service() {
         val boosts=LinearLayout(this).apply{orientation=LinearLayout.HORIZONTAL}
         boosts.addView(action("BASIC",false){notifyBoost("Basic")})
         boosts.addView(action("ADVANCED",true){notifyBoost("Advanced")})
-        boosts.addView(action("TURBO",true){notifyBoost("Turbo")})
+        boosts.addView(action("MAX FPS",true){notifyBoost("MAX FPS")})
         box.addView(boosts)
 
         val tools=LinearLayout(this).apply{orientation=LinearLayout.HORIZONTAL}
@@ -176,7 +176,9 @@ class OverlayService : Service() {
             override fun run(){
                 if(panelView==null)return
                 updateSystemStats()
-                handler.postDelayed(this, if (prefs.getBoolean("charging_mode", false)) 3000 else 1500)
+                val maxFps = prefs.getBoolean("max_fps", false)
+                val delay = when { maxFps -> 5000L; prefs.getBoolean("charging_mode", false) -> 3000L; else -> 1500L }
+                handler.postDelayed(this, delay)
             }
         }
         handler.post(tick)
@@ -190,7 +192,8 @@ class OverlayService : Service() {
                     }
                 }.getOrNull()
                 handler.post { if(panelView!=null) statViews["net"]?.text = ms?.let{it.toString()+" ms"} ?: "--" }
-                Thread.sleep(if (prefs.getBoolean("charging_mode", false)) 5000L else 3500L)
+                val maxFps = prefs.getBoolean("max_fps", false)
+                Thread.sleep(if (maxFps) 8000L else if (prefs.getBoolean("charging_mode", false)) 5000L else 3500L)
             }
         }
     }
