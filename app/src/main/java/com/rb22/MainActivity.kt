@@ -25,6 +25,8 @@ class MainActivity : AppCompatActivity() {
         "OpenDNS" to "dns.opendns.com"
     )
 
+    private val gamingEndpoints = listOf("Cloudflare" to "1.1.1.1", "Google" to "8.8.8.8", "Quad9" to "9.9.9.9")
+
     private val gamePrefs by lazy {
         getSharedPreferences("rb22_games", Context.MODE_PRIVATE)
     }
@@ -86,9 +88,9 @@ class MainActivity : AppCompatActivity() {
 
     private fun setupMobileControls() {
         findViewById<Button>(R.id.mobile_game_mode).setOnClickListener {
-            gamePrefs.edit().putBoolean("game_mode", true).putString("profile", "FPS Stability").apply()
-            findViewById<TextView>(R.id.boost_status).text = "✓ GAME MODE ACTIVE • FPS STABILITY"
-            Toast.makeText(this, "Game Mode active — RB22 is using a lightweight performance profile.", Toast.LENGTH_LONG).show()
+            gamePrefs.edit().putBoolean("game_mode", true).putBoolean("max_fps", true).putString("profile", "MAX FPS").apply()
+            findViewById<TextView>(R.id.boost_status).text = "✓ MAX FPS MODE ACTIVE • LOW OVERHEAD"
+            Toast.makeText(this, "MAX FPS mode active — RB22 is minimizing its own background work.", Toast.LENGTH_LONG).show()
         }
 
         findViewById<Button>(R.id.mobile_tools).setOnClickListener { showExtraTools() }
@@ -103,11 +105,11 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun showExtraTools() {
-        val tools = arrayOf("⏱ Gaming Timer", "📡 Quick Ping Test", "📊 Refresh Device Stats")
+        val tools = arrayOf("⏱ Gaming Timer", "📡 Gaming Ping Test", "📊 Refresh Device Stats")
         AlertDialog.Builder(this).setTitle("RB22 Extra Tools").setItems(tools) { _, which ->
             when (which) {
                 0 -> showGamingTimer()
-                1 -> runQuickPing()
+                1 -> runGamingPing()
                 2 -> { updateStats(); Toast.makeText(this, "RAM and temperature refreshed.", Toast.LENGTH_SHORT).show() }
             }
         }.setNegativeButton("CLOSE", null).show()
@@ -134,24 +136,33 @@ class MainActivity : AppCompatActivity() {
         }.setNegativeButton("CLOSE", null).show()
     }
 
-    private fun runQuickPing() {
-        Toast.makeText(this, "Testing network latency…", Toast.LENGTH_SHORT).show()
+    private fun runGamingPing() {
+        Toast.makeText(this, "Testing gaming network latency…", Toast.LENGTH_SHORT).show()
         Executors.newSingleThreadExecutor().execute {
-            val ms = runCatching {
-                java.net.Socket().use { socket ->
-                    val start = System.nanoTime()
-                    socket.connect(java.net.InetSocketAddress("1.1.1.1", 443), 1200)
-                    (System.nanoTime() - start) / 1_000_000
-                }
-            }.getOrNull()
+            val results = gamingEndpoints.mapNotNull { (name, host) ->
+                val ms = runCatching {
+                    java.net.Socket().use { socket ->
+                        val t = System.nanoTime()
+                        socket.connect(java.net.InetSocketAddress(host, 443), 1200)
+                        (System.nanoTime() - t) / 1_000_000
+                    }
+                }.getOrNull()
+                if (ms != null) name to ms else null
+            }.sortedBy { it.second }
             runOnUiThread {
-                val message = if (ms != null) "Ping connection test: " + ms + " ms" else "Ping test failed — check your connection."
-                findViewById<TextView>(R.id.boost_status).text = message
-                Toast.makeText(this, message, Toast.LENGTH_LONG).show()
+                if (results.isEmpty()) {
+                    findViewById<TextView>(R.id.boost_status).text = "GAMING PING: TEST FAILED"
+                    Toast.makeText(this, "Latency test failed — check your connection.", Toast.LENGTH_LONG).show()
+                } else {
+                    val best = results.first()
+                    gamePrefs.edit().putString("best_ping_endpoint", best.first).putLong("best_ping_ms", best.second).apply()
+                    val message = "BEST NETWORK PING: " + best.first + " • " + best.second + " ms"
+                    findViewById<TextView>(R.id.boost_status).text = message
+                    Toast.makeText(this, message, Toast.LENGTH_LONG).show()
+                }
             }
         }
     }
-
     private fun startGameBooster() {
         gamePrefs.edit().putBoolean("booster_enabled", true).apply()
         findViewById<TextView>(R.id.booster_status).text = "● BOOSTER ON"
@@ -194,18 +205,18 @@ class MainActivity : AppCompatActivity() {
         val status = findViewById<TextView>(R.id.boost_status)
         findViewById<Button>(R.id.basic).setOnClickListener {
             status.text = "✓ BASIC BOOST APPLIED"
-            gamePrefs.edit().putString("profile", "Balanced").apply()
+            gamePrefs.edit().putBoolean("max_fps", false).putString("profile", "Balanced").apply()
             Toast.makeText(this, "Basic Boost applied", Toast.LENGTH_SHORT).show()
         }
         findViewById<Button>(R.id.advanced).setOnClickListener {
             status.text = "✓ ADVANCED BOOST APPLIED"
-            gamePrefs.edit().putString("profile", "Performance").apply()
+            gamePrefs.edit().putBoolean("max_fps", false).putString("profile", "Performance").apply()
             Toast.makeText(this, "Advanced Boost applied", Toast.LENGTH_SHORT).show()
         }
         findViewById<Button>(R.id.extreme).setOnClickListener {
-            status.text = "✓ FPS STABILITY PROFILE APPLIED"
-            gamePrefs.edit().putString("profile", "FPS Stability").apply()
-            Toast.makeText(this, "Turbo Boost applied", Toast.LENGTH_SHORT).show()
+            status.text = "✓ MAX FPS PROFILE APPLIED"
+            gamePrefs.edit().putBoolean("max_fps", true).putString("profile", "MAX FPS").apply()
+            Toast.makeText(this, "MAX FPS profile applied — RB22 overhead minimized.", Toast.LENGTH_SHORT).show()
         }
     }
 
