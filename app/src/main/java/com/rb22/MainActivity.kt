@@ -37,6 +37,7 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         updateStats()
+        applyActiveTheme()
         setupDeviceRefresh()
         setupBoostModes()
         setupMobileControls()
@@ -45,6 +46,7 @@ class MainActivity : AppCompatActivity() {
         findViewById<Button>(R.id.start_booster).setOnClickListener { startGameBooster() }
         findViewById<Button>(R.id.stop_booster).setOnClickListener { stopGameBooster() }
         findViewById<TextView>(R.id.booster_status).text = if (gamePrefs.getBoolean("booster_enabled", false)) "● BOOSTER ON" else "○ BOOSTER OFF"
+        applyActiveTheme()
 
         findViewById<Button>(R.id.overlay).setOnClickListener {
             if (!Settings.canDrawOverlays(this)) {
@@ -92,6 +94,7 @@ class MainActivity : AppCompatActivity() {
     private fun setupMobileControls() {
         findViewById<Button>(R.id.mobile_game_mode).setOnClickListener {
             gamePrefs.edit().putBoolean("game_mode", true).putBoolean("max_fps", true).putString("profile", "MAX FPS").apply()
+            applyActiveTheme()
             findViewById<TextView>(R.id.boost_status).text = "✓ MAX FPS MODE ACTIVE • LOW OVERHEAD"
             Toast.makeText(this, "MAX FPS mode active — RB22 is minimizing its own background work.", Toast.LENGTH_LONG).show()
         }
@@ -101,6 +104,7 @@ class MainActivity : AppCompatActivity() {
         findViewById<Button>(R.id.mobile_charging).setOnClickListener {
             val enabled = !gamePrefs.getBoolean("charging_mode", false)
             gamePrefs.edit().putBoolean("charging_mode", enabled).apply()
+            applyActiveTheme()
             findViewById<TextView>(R.id.boost_status).text =
                 if (enabled) "✓ CHARGING MODE ACTIVE • LOW OVERHEAD" else "CHARGING MODE OFF"
             Toast.makeText(this, if (enabled) "Charging Mode active — RB22 will reduce monitoring overhead." else "Charging Mode disabled.", Toast.LENGTH_SHORT).show()
@@ -166,6 +170,27 @@ class MainActivity : AppCompatActivity() {
             }
         }
     }
+    private fun applyActiveTheme() {
+        val active = gamePrefs.getBoolean("max_fps", false) ||
+                gamePrefs.getBoolean("game_mode", false) ||
+                !gamePrefs.getString("active_dns_ip", "").isNullOrEmpty()
+        val root = findViewById<android.view.View>(R.id.rb22_root) ?: return
+        root.setBackgroundResource(if (active) R.drawable.rb22_bg_active else R.drawable.rb22_bg)
+        val windowColor = if (active) android.graphics.Color.rgb(12, 0, 2) else android.graphics.Color.rgb(5, 8, 18)
+        window.statusBarColor = windowColor
+        window.navigationBarColor = windowColor
+        fun style(v: android.view.View) {
+            if (v.tag == "rb22_card") v.setBackgroundResource(if (active) R.drawable.rb22_card_active else R.drawable.rb22_card)
+            if (v is Button) v.setBackgroundResource(if (active) R.drawable.rb22_button_active else R.drawable.rb22_button)
+            if (v is android.view.ViewGroup) {
+                for (i in 0 until v.childCount) style(v.getChildAt(i))
+            }
+        }
+        style(root)
+        findViewById<TextView>(R.id.boost_status)?.setTextColor(if (active) android.graphics.Color.rgb(255, 86, 97) else android.graphics.Color.rgb(184, 255, 231))
+        findViewById<TextView>(R.id.dns_status)?.setTextColor(if (active) android.graphics.Color.rgb(255, 86, 97) else android.graphics.Color.rgb(184, 255, 231))
+    }
+
     private fun startGameBooster() {
         gamePrefs.edit().putBoolean("booster_enabled", true).apply()
         findViewById<TextView>(R.id.booster_status).text = "● BOOSTER ON"
@@ -209,16 +234,19 @@ class MainActivity : AppCompatActivity() {
         findViewById<Button>(R.id.basic).setOnClickListener {
             status.text = "✓ BASIC BOOST APPLIED"
             gamePrefs.edit().putBoolean("max_fps", false).putString("profile", "Balanced").apply()
+            applyActiveTheme()
             Toast.makeText(this, "Basic Boost applied", Toast.LENGTH_SHORT).show()
         }
         findViewById<Button>(R.id.advanced).setOnClickListener {
             status.text = "✓ ADVANCED BOOST APPLIED"
             gamePrefs.edit().putBoolean("max_fps", false).putString("profile", "Performance").apply()
+            applyActiveTheme()
             Toast.makeText(this, "Advanced Boost applied", Toast.LENGTH_SHORT).show()
         }
         findViewById<Button>(R.id.extreme).setOnClickListener {
             status.text = "✓ MAX FPS PROFILE APPLIED"
             gamePrefs.edit().putBoolean("max_fps", true).putString("profile", "MAX FPS").apply()
+            applyActiveTheme()
             Toast.makeText(this, "MAX FPS profile applied — RB22 overhead minimized.", Toast.LENGTH_SHORT).show()
         }
     }
@@ -248,6 +276,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun startDnsService(ip: String) {
         gamePrefs.edit().putString("active_dns_ip", ip).apply()
+        applyActiveTheme()
         val intent = Intent(this, DnsVpnService::class.java)
             .putExtra(DnsVpnService.EXTRA_DNS_IP, ip)
         try {
