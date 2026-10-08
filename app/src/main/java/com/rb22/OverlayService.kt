@@ -29,6 +29,7 @@ class OverlayService : Service() {
     private var startTime=0L
     private val handler = Handler(Looper.getMainLooper())
     private val io = Executors.newSingleThreadExecutor()
+    private val prefs by lazy { getSharedPreferences("rb22_games", MODE_PRIVATE) }
     private var statViews = mutableMapOf<String, TextView>()
     private var fpsMonitor: ScreenFpsMonitor? = null
     private var projectionResultCode: Int? = null
@@ -175,7 +176,7 @@ class OverlayService : Service() {
             override fun run(){
                 if(panelView==null)return
                 updateSystemStats()
-                handler.postDelayed(this,1000)
+                handler.postDelayed(this, if (prefs.getBoolean("charging_mode", false)) 3000 else 1500)
             }
         }
         handler.post(tick)
@@ -189,7 +190,7 @@ class OverlayService : Service() {
                     }
                 }.getOrNull()
                 handler.post { if(panelView!=null) statViews["net"]?.text = ms?.let{it.toString()+" ms"} ?: "--" }
-                Thread.sleep(2500)
+                Thread.sleep(if (prefs.getBoolean("charging_mode", false)) 5000L else 3500L)
             }
         }
     }
