@@ -58,6 +58,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         findViewById<Button>(R.id.dns_auto).setOnClickListener { testDns() }
+        findViewById<Button>(R.id.gaming_ping).setOnClickListener { runGamingPing() }
 
         val dnsButtons = listOf(
             R.id.dns_cloudflare to dnsOptions[0],
