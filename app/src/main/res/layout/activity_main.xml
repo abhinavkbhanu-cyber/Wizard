@@ -32,7 +32,8 @@
         </LinearLayout>
         <LinearLayout android:orientation="horizontal" android:layout_marginTop="9dp"
             android:layout_width="match_parent" android:layout_height="wrap_content">
-            <TextView android:text="FPS  •  HUD" android:textColor="#C9D7FF" android:textSize="13sp"
+            <Button android:id="@+id/device_refresh" android:text="REFRESH" android:textAllCaps="false" android:layout_width="wrap_content" android:layout_height="40dp"/>
+        <TextView android:text="FPS  •  HUD" android:textColor="#C9D7FF" android:textSize="13sp"
                 android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1"/>
             <TextView android:text="NET  •  READY" android:textColor="#B8FFE7" android:textSize="13sp"
                 android:gravity="end" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1"/>
@@ -123,6 +124,16 @@
             <Button android:id="@+id/add_game" android:text="＋ ADD" android:textAllCaps="false" android:layout_width="0dp" android:layout_height="48dp" android:layout_weight="1"/>
             <Button android:id="@+id/game_library" android:text="OPEN" android:textAllCaps="false" android:layout_marginStart="8dp" android:layout_width="0dp" android:layout_height="48dp" android:layout_weight="1"/>
         </LinearLayout>
+    </LinearLayout>
+
+    <LinearLayout android:orientation="vertical" android:padding="15dp" android:layout_marginTop="12dp"
+        android:background="@drawable/rb22_card" android:layout_width="match_parent" android:layout_height="wrap_content">
+        <TextView android:text="DEVICE HEALTH" android:textColor="#FFFFFF" android:textSize="13sp" android:textStyle="bold"
+            android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+        <TextView android:text="Lightweight check — no background cleanup tricks or forced CPU changes." android:textColor="#A8B4C9" android:textSize="11sp" android:layout_marginTop="4dp"
+            android:layout_width="match_parent" android:layout_height="wrap_content"/>
+        <TextView android:text="Refresh RAM and temperature from the current device state." android:textColor="#B8FFE7" android:textSize="10sp" android:layout_marginTop="6dp"
+            android:layout_width="match_parent" android:layout_height="wrap_content"/>
     </LinearLayout>
 
     <LinearLayout android:orientation="vertical" android:padding="15dp" android:layout_marginTop="12dp"
