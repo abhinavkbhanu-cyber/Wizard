@@ -10,6 +10,7 @@ import android.provider.Settings
 import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
+import android.os.CountDownTimer
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import java.net.InetAddress
@@ -34,6 +35,7 @@ class MainActivity : AppCompatActivity() {
         updateStats()
         setupDeviceRefresh()
         setupBoostModes()
+        setupMobileControls()
         startUltimateEngine()
 
         findViewById<Button>(R.id.start_booster).setOnClickListener { startGameBooster() }
@@ -81,6 +83,75 @@ class MainActivity : AppCompatActivity() {
     }
 
 
+
+    private fun setupMobileControls() {
+        findViewById<Button>(R.id.mobile_game_mode).setOnClickListener {
+            gamePrefs.edit().putBoolean("game_mode", true).putString("profile", "FPS Stability").apply()
+            findViewById<TextView>(R.id.boost_status).text = "✓ GAME MODE ACTIVE • FPS STABILITY"
+            Toast.makeText(this, "Game Mode active — RB22 is using a lightweight performance profile.", Toast.LENGTH_LONG).show()
+        }
+
+        findViewById<Button>(R.id.mobile_tools).setOnClickListener { showExtraTools() }
+
+        findViewById<Button>(R.id.mobile_charging).setOnClickListener {
+            val enabled = !gamePrefs.getBoolean("charging_mode", false)
+            gamePrefs.edit().putBoolean("charging_mode", enabled).apply()
+            findViewById<TextView>(R.id.boost_status).text =
+                if (enabled) "✓ CHARGING MODE ACTIVE • LOW OVERHEAD" else "CHARGING MODE OFF"
+            Toast.makeText(this, if (enabled) "Charging Mode active — RB22 will reduce monitoring overhead." else "Charging Mode disabled.", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    private fun showExtraTools() {
+        val tools = arrayOf("⏱ Gaming Timer", "📡 Quick Ping Test", "📊 Refresh Device Stats")
+        AlertDialog.Builder(this).setTitle("RB22 Extra Tools").setItems(tools) { _, which ->
+            when (which) {
+                0 -> showGamingTimer()
+                1 -> runQuickPing()
+                2 -> { updateStats(); Toast.makeText(this, "RAM and temperature refreshed.", Toast.LENGTH_SHORT).show() }
+            }
+        }.setNegativeButton("CLOSE", null).show()
+    }
+
+    private fun showGamingTimer() {
+        val options = arrayOf("15 minutes", "30 minutes", "60 minutes")
+        val minutes = intArrayOf(15, 30, 60)
+        AlertDialog.Builder(this).setTitle("Gaming Timer").setItems(options) { _, which ->
+            val totalMs = minutes[which] * 60_000L
+            object : CountDownTimer(totalMs, 1_000L) {
+                override fun onTick(ms: Long) {
+                    val m = ms / 60_000L
+                    val s = (ms / 1_000L) % 60
+                    findViewById<TextView>(R.id.boost_status).text =
+                        String.format("⏱ GAMING TIMER • %02d:%02d", m, s)
+                }
+                override fun onFinish() {
+                    Toast.makeText(this@MainActivity, "Gaming timer finished.", Toast.LENGTH_LONG).show()
+                    findViewById<TextView>(R.id.boost_status).text = "READY • TIMER FINISHED"
+                }
+            }.start()
+            Toast.makeText(this, "Gaming timer started.", Toast.LENGTH_SHORT).show()
+        }.setNegativeButton("CLOSE", null).show()
+    }
+
+    private fun runQuickPing() {
+        Toast.makeText(this, "Testing network latency…", Toast.LENGTH_SHORT).show()
+        Executors.newSingleThreadExecutor().execute {
+            val ms = runCatching {
+                java.net.Socket().use { socket ->
+                    val start = System.nanoTime()
+                    socket.connect(java.net.InetSocketAddress("1.1.1.1", 443), 1200)
+                    (System.nanoTime() - start) / 1_000_000
+                }
+            }.getOrNull()
+            runOnUiThread {
+                val message = if (ms != null) "Ping connection test: " + ms + " ms" else "Ping test failed — check your connection."
+                findViewById<TextView>(R.id.boost_status).text = message
+                Toast.makeText(this, message, Toast.LENGTH_LONG).show()
+            }
+        }
+    }
+
     private fun startGameBooster() {
         gamePrefs.edit().putBoolean("booster_enabled", true).apply()
         findViewById<TextView>(R.id.booster_status).text = "● BOOSTER ON"
@@ -123,17 +194,17 @@ class MainActivity : AppCompatActivity() {
         val status = findViewById<TextView>(R.id.boost_status)
         findViewById<Button>(R.id.basic).setOnClickListener {
             status.text = "✓ BASIC BOOST APPLIED"
-            gamePrefs.edit().putString("profile", "Basic").apply()
+            gamePrefs.edit().putString("profile", "Balanced").apply()
             Toast.makeText(this, "Basic Boost applied", Toast.LENGTH_SHORT).show()
         }
         findViewById<Button>(R.id.advanced).setOnClickListener {
             status.text = "✓ ADVANCED BOOST APPLIED"
-            gamePrefs.edit().putString("profile", "Advanced").apply()
+            gamePrefs.edit().putString("profile", "Performance").apply()
             Toast.makeText(this, "Advanced Boost applied", Toast.LENGTH_SHORT).show()
         }
         findViewById<Button>(R.id.extreme).setOnClickListener {
-            status.text = "✓ TURBO BOOST APPLIED"
-            gamePrefs.edit().putString("profile", "Turbo").apply()
+            status.text = "✓ FPS STABILITY PROFILE APPLIED"
+            gamePrefs.edit().putString("profile", "FPS Stability").apply()
             Toast.makeText(this, "Turbo Boost applied", Toast.LENGTH_SHORT).show()
         }
     }
