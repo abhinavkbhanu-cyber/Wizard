@@ -20,7 +20,7 @@
     </LinearLayout>
 
     <LinearLayout android:orientation="vertical" android:padding="16dp" android:layout_marginTop="16dp"
-        android:background="@drawable/rb22_card" android:tag="rb22_card" android:layout_width="match_parent" android:layout_height="wrap_content">
+        android:background="@drawable/rb22_card" android:tag="rb22_card" android:tag="rb22_card" android:layout_width="match_parent" android:layout_height="wrap_content">
         <TextView android:text="PERFORMANCE" android:textColor="#FFFFFF" android:textSize="13sp" android:textStyle="bold"
             android:layout_width="wrap_content" android:layout_height="wrap_content"/>
         <LinearLayout android:orientation="horizontal" android:layout_marginTop="12dp"
@@ -41,7 +41,7 @@
     </LinearLayout>
 
     <LinearLayout android:orientation="vertical" android:padding="15dp" android:layout_marginTop="14dp"
-        android:background="@drawable/rb22_card" android:layout_width="match_parent" android:layout_height="wrap_content">
+        android:background="@drawable/rb22_card" android:tag="rb22_card" android:layout_width="match_parent" android:layout_height="wrap_content">
         <LinearLayout android:orientation="horizontal" android:gravity="center_vertical"
             android:layout_width="match_parent" android:layout_height="wrap_content">
             <TextView android:text="GAME BOOSTER" android:textColor="#FFFFFF" android:textSize="15sp" android:textStyle="bold"
@@ -78,7 +78,7 @@
         android:layout_marginTop="12dp" android:layout_width="match_parent" android:layout_height="52dp"/>
 
     <LinearLayout android:orientation="vertical" android:padding="15dp" android:layout_marginTop="16dp"
-        android:background="@drawable/rb22_card" android:layout_width="match_parent" android:layout_height="wrap_content">
+        android:background="@drawable/rb22_card" android:tag="rb22_card" android:layout_width="match_parent" android:layout_height="wrap_content">
         <TextView android:text="SMART ENGINE" android:textColor="#FFFFFF" android:textSize="13sp" android:textStyle="bold"
             android:layout_width="wrap_content" android:layout_height="wrap_content"/>
         <TextView android:text="Adaptive • thermal guard • RAM monitor • game profiles"
@@ -92,7 +92,7 @@
     </LinearLayout>
 
     <LinearLayout android:orientation="vertical" android:padding="15dp" android:layout_marginTop="12dp"
-        android:background="@drawable/rb22_card" android:layout_width="match_parent" android:layout_height="wrap_content">
+        android:background="@drawable/rb22_card" android:tag="rb22_card" android:layout_width="match_parent" android:layout_height="wrap_content">
         <TextView android:text="NETWORK  •  GAMING PING" android:textColor="#FFFFFF" android:textSize="13sp" android:textStyle="bold"
             android:layout_width="wrap_content" android:layout_height="wrap_content"/>
         <Button android:id="@+id/dns_auto" android:text="⚡ AUTO DNS" android:textAllCaps="false"
@@ -115,7 +115,7 @@
     </LinearLayout>
 
     <LinearLayout android:orientation="vertical" android:padding="15dp" android:layout_marginTop="12dp"
-        android:background="@drawable/rb22_card" android:layout_width="match_parent" android:layout_height="wrap_content">
+        android:background="@drawable/rb22_card" android:tag="rb22_card" android:layout_width="match_parent" android:layout_height="wrap_content">
         <TextView android:text="GAME LIBRARY" android:textColor="#FFFFFF" android:textSize="13sp" android:textStyle="bold"
             android:layout_width="wrap_content" android:layout_height="wrap_content"/>
         <TextView android:id="@+id/game_library_status" android:text="No games saved"
@@ -129,7 +129,7 @@
     </LinearLayout>
 
     <LinearLayout android:orientation="vertical" android:padding="15dp" android:layout_marginTop="12dp"
-        android:background="@drawable/rb22_card" android:layout_width="match_parent" android:layout_height="wrap_content">
+        android:background="@drawable/rb22_card" android:tag="rb22_card" android:layout_width="match_parent" android:layout_height="wrap_content">
         <TextView android:text="DEVICE HEALTH" android:textColor="#FFFFFF" android:textSize="13sp" android:textStyle="bold"
             android:layout_width="wrap_content" android:layout_height="wrap_content"/>
         <TextView android:text="Lightweight check — no background cleanup tricks or forced CPU changes." android:textColor="#A8B4C9" android:textSize="11sp" android:layout_marginTop="4dp"
@@ -139,7 +139,7 @@
     </LinearLayout>
 
     <LinearLayout android:orientation="vertical" android:padding="15dp" android:layout_marginTop="12dp"
-        android:background="@drawable/rb22_card" android:layout_width="match_parent" android:layout_height="wrap_content">
+        android:background="@drawable/rb22_card" android:tag="rb22_card" android:layout_width="match_parent" android:layout_height="wrap_content">
         <TextView android:text="📱 RB22 MOBILE" android:textColor="#FFFFFF" android:textSize="15sp" android:textStyle="bold"
             android:layout_width="wrap_content" android:layout_height="wrap_content"/>
         <TextView android:text="Dedicated mobile gaming controls • Dark Moon Aurora • independent from PC"
