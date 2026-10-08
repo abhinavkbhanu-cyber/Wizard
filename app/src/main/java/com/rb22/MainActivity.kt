@@ -32,6 +32,7 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         updateStats()
+        setupDeviceRefresh()
         setupBoostModes()
         startUltimateEngine()
 
@@ -295,6 +296,10 @@ class MainActivity : AppCompatActivity() {
 
         startForegroundCompat(Intent(this, GameAutoBoostService::class.java))
         updateGameLibraryText()
+    }
+
+    private fun setupDeviceRefresh() {
+        findViewById<Button>(R.id.device_refresh)?.setOnClickListener { updateStats(); Toast.makeText(this, "Device stats refreshed", Toast.LENGTH_SHORT).show() }
     }
 
     private fun updateStats() {
