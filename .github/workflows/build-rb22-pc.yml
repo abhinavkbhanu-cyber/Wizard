@@ -2,6 +2,10 @@ name: Build and Release RB22 PC
 
 on:
   workflow_dispatch:
+  pull_request:
+    paths:
+      - 'RB22/**'
+      - '.github/workflows/build-rb22-pc.yml'
   push:
     branches: [main]
     paths:
@@ -15,7 +19,7 @@ permissions:
   contents: write
 
 concurrency:
-  group: rb22-pc-release
+  group: rb22-pc-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: false
 
 jobs:
@@ -39,12 +43,29 @@ jobs:
           $exe = Get-ChildItem publish -Filter *.exe | Select-Object -First 1
           if (-not $exe) { throw "RB22 executable was not produced." }
           Write-Host "Built $($exe.Name) size=$($exe.Length)"
+      - name: Smoke-test application startup
+        shell: pwsh
+        run: |
+          $exe = Get-ChildItem publish -Filter *.exe | Select-Object -First 1
+          $process = Start-Process -FilePath $exe.FullName -ArgumentList "--smoke-test" -PassThru
+          if (-not $process.WaitForExit(20000)) {
+            Stop-Process -Id $process.Id -Force -ErrorAction SilentlyContinue
+            throw "RB22 startup smoke test timed out after 20 seconds."
+          }
+          if ($process.ExitCode -ne 0) {
+            $log = Join-Path $env:LOCALAPPDATA "RB22\rb22-startup.log"
+            if (Test-Path $log) { Get-Content $log -Tail 100 }
+            throw "RB22 startup smoke test failed with exit code $($process.ExitCode)."
+          }
+          Write-Host "RB22 startup smoke test passed."
       - name: Upload artifact
+        if: github.event_name != 'pull_request'
         uses: actions/upload-artifact@v4
         with:
-          name: RB22-Ultimate-Windows-x64
+          name: RB22-PC-Performance-Suite-Windows-x64
           path: publish/*.exe
       - name: Publish latest release
+        if: github.event_name != 'pull_request'
         shell: pwsh
         env:
           GH_TOKEN: ${{ github.token }}
@@ -52,8 +73,8 @@ jobs:
           $exe = Get-ChildItem publish -Filter *.exe | Select-Object -First 1
           gh release view rb22-latest 2>$null
           if ($LASTEXITCODE -ne 0) {
-            gh release create rb22-latest $exe.FullName --title "RB22 Ultimate 0.2.0" --notes "RB22 Ultimate PC build with Dark Moonlight UI, AI profiles, game profiles, memory policy, DNS profiles, Input Lab with Auto-Key and Angle Snap profiles, benchmark workspace and safe software-only controls."
+            gh release create rb22-latest $exe.FullName --title "RB22 PC Performance Suite 0.3.0" --notes "RB22 PC v0.3.0: live system CPU/RAM telemetry, known-game detection, confirmed reversible Above Normal process-priority control, system snapshot reports, rule-based analysis, startup smoke tests. FPS/frametime, GPU telemetry and actual adapter DNS changes are not included."
           } else {
             gh release upload rb22-latest $exe.FullName --clobber
-            gh release edit rb22-latest --title "RB22 Ultimate 0.2.0" --notes "RB22 Ultimate PC build updated from main."
+            gh release edit rb22-latest --title "RB22 PC Performance Suite 0.3.0" --notes "RB22 PC v0.3.0 performance suite. Live CPU/RAM telemetry, game detection, reversible process priority control and system snapshot reports. FPS/GPU metrics are not fabricated."
           }

@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Linq;
 using System.Windows;
 using System.Windows.Threading;
 
@@ -11,6 +12,8 @@ public partial class App : Application
         Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
         "RB22",
         "rb22-startup.log");
+    private bool smokeTest;
+    private bool uiError;
 
     private static void Log(string message)
     {
@@ -25,9 +28,9 @@ public partial class App : Application
 
     protected override void OnStartup(StartupEventArgs e)
     {
+        smokeTest = e.Args.Any(a => string.Equals(a, "--smoke-test", StringComparison.OrdinalIgnoreCase));
         Log("=== RB22 STARTUP ===");
         Log("Args: " + string.Join(" ", e.Args));
-
         DispatcherUnhandledException += HandleDispatcherUnhandledException;
         AppDomain.CurrentDomain.UnhandledException += (_, args) =>
             Log("APPDOMAIN ERROR: " + args.ExceptionObject);
@@ -41,7 +44,6 @@ public partial class App : Application
             Log("Constructing MainWindow");
             var window = new MainWindow();
             MainWindow = window;
-
             Log("MainWindow constructed successfully");
             window.WindowState = WindowState.Normal;
             window.Visibility = Visibility.Visible;
@@ -59,25 +61,42 @@ public partial class App : Application
             {
                 try
                 {
-                    if (MainWindow is Window w)
+                    if (MainWindow is not Window w)
+                        throw new InvalidOperationException("MainWindow was not assigned.");
+                    w.WindowState = WindowState.Normal;
+                    w.Visibility = Visibility.Visible;
+                    w.Activate();
+                    w.Focus();
+                    w.Topmost = false;
+                    Log($"Visibility check: IsVisible={w.IsVisible}, State={w.WindowState}");
+
+                    if (smokeTest)
                     {
-                        w.WindowState = WindowState.Normal;
-                        w.Visibility = Visibility.Visible;
-                        w.Activate();
-                        w.Focus();
-                        w.Topmost = false;
-                        Log($"Visibility check: IsVisible={w.IsVisible}, State={w.WindowState}");
+                        // Let the Loaded event build the dashboard before validating it.
+                        Dispatcher.BeginInvoke(DispatcherPriority.ApplicationIdle, new Action(() =>
+                        {
+                            var content = w.FindName("MainContent") as System.Windows.Controls.StackPanel;
+                            bool ready = !uiError && w.IsVisible && content is not null && content.Children.Count > 0;
+                            Log($"SMOKE TEST {(ready ? "PASS" : "FAIL")}: visible={w.IsVisible}, contentChildren={content?.Children.Count ?? -1}, uiError={uiError}");
+                            Shutdown(ready ? 0 : 2);
+                        }));
                     }
                 }
                 catch (Exception ex)
                 {
-                    Log("Visibility check ERROR: " + ex);
+                    Log("Visibility/smoke check ERROR: " + ex);
+                    if (smokeTest) Shutdown(2);
                 }
             }));
         }
         catch (Exception ex)
         {
             Log("STARTUP ERROR: " + ex);
+            if (smokeTest)
+            {
+                Shutdown(1);
+                return;
+            }
 
             try
             {
@@ -100,7 +119,6 @@ public partial class App : Application
                         VerticalScrollBarVisibility = System.Windows.Controls.ScrollBarVisibility.Auto
                     }
                 };
-
                 MainWindow = fallback;
                 fallback.Show();
                 Log("Fallback error window shown");
@@ -113,11 +131,16 @@ public partial class App : Application
         }
     }
 
-    private static void HandleDispatcherUnhandledException(
-        object? sender,
-        DispatcherUnhandledExceptionEventArgs e)
+    private void HandleDispatcherUnhandledException(object? sender, DispatcherUnhandledExceptionEventArgs e)
     {
+        uiError = true;
         Log("UI ERROR: " + e.Exception);
+        if (smokeTest)
+        {
+            e.Handled = true;
+            Shutdown(2);
+            return;
+        }
 
         try
         {
@@ -130,7 +153,6 @@ public partial class App : Application
                 MessageBoxImage.Error);
         }
         catch { }
-
         e.Handled = true;
     }
 }
