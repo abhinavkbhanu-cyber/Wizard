@@ -64,17 +64,20 @@ jobs:
         with:
           name: RB22-PC-Performance-Suite-Windows-x64
           path: publish/*.exe
+      # This is the only workflow that publishes rb22-latest.
       - name: Publish latest release
         if: github.event_name != 'pull_request'
         shell: pwsh
         env:
           GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
         run: |
           $exe = Get-ChildItem publish -Filter *.exe | Select-Object -First 1
-          gh release view rb22-latest 2>$null
+          gh release view rb22-latest --repo $env:REPO 2>$null
           if ($LASTEXITCODE -ne 0) {
-            gh release create rb22-latest $exe.FullName --title "RB22 PC Performance Suite 0.3.0" --notes "RB22 PC v0.3.0: live system CPU/RAM telemetry, known-game detection, confirmed reversible Above Normal process-priority control, system snapshot reports, rule-based analysis, startup smoke tests. FPS/frametime, GPU telemetry and actual adapter DNS changes are not included."
+            gh release create rb22-latest $exe.FullName --repo $env:REPO --title "RB22 PC Performance Suite 0.3.0" --notes "RB22 PC v0.3.0: live system CPU/RAM telemetry, known-game detection, confirmed reversible Above Normal process-priority control, system snapshot reports, rule-based analysis, startup smoke tests. FPS/frametime, GPU telemetry and actual adapter DNS changes are not included."
           } else {
-            gh release upload rb22-latest $exe.FullName --clobber
-            gh release edit rb22-latest --title "RB22 PC Performance Suite 0.3.0" --notes "RB22 PC v0.3.0 performance suite. Live CPU/RAM telemetry, game detection, reversible process priority control and system snapshot reports. FPS/GPU metrics are not fabricated."
+            gh release upload rb22-latest $exe.FullName --repo $env:REPO --clobber
+            if ($LASTEXITCODE -ne 0) { throw "Could not upload RB22.exe to rb22-latest." }
+            gh release edit rb22-latest --repo $env:REPO --title "RB22 PC Performance Suite 0.3.0" --notes "RB22 PC v0.3.0 performance suite. Live CPU/RAM telemetry, game detection, reversible process priority control and system snapshot reports. FPS/GPU metrics are not fabricated."
           }
