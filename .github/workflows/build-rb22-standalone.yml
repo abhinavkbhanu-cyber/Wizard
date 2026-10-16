@@ -1,6 +1,7 @@
 name: RB22 Standalone Build
 on:
   push:
+    branches: [main]
     paths:
       - 'RB22/**'
       - '.github/workflows/build-rb22-standalone.yml'
@@ -39,18 +40,20 @@ jobs:
 
       - uses: actions/upload-artifact@v4
         with:
-          name: RB22-v0.1.0-alpha
+          name: RB22-PC-Performance-Suite-Windows-x64
           path: RB22/publish/RB22.exe
 
       - name: Create or update GitHub Release
+        if: github.ref == 'refs/heads/main'
         shell: pwsh
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          TAG: v0.1.0-alpha
+          TAG: rb22-latest
         run: |
           gh release view $env:TAG *> $null
           if ($LASTEXITCODE -eq 0) {
             gh release upload $env:TAG RB22/publish/RB22.exe --clobber
+            gh release edit $env:TAG --title "RB22 PC Performance Suite 0.3.0" --notes "RB22 PC v0.3.0. Live CPU/RAM telemetry, known-game detection, confirmed reversible process-priority control and system snapshot reports. The build must pass CI before release."
           } else {
-            gh release create $env:TAG RB22/publish/RB22.exe --title "RB22 v0.1.0 Alpha" --notes "RB22 standalone PC control center alpha build." --prerelease --target $env:GITHUB_SHA
+            gh release create $env:TAG RB22/publish/RB22.exe --title "RB22 PC Performance Suite 0.3.0" --notes "RB22 PC v0.3.0. Live CPU/RAM telemetry, known-game detection, confirmed reversible process-priority control and system snapshot reports." --target $env:GITHUB_SHA
           }
