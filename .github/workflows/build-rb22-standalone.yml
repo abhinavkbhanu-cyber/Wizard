@@ -7,8 +7,11 @@ on:
       - '.github/workflows/build-rb22-standalone.yml'
   workflow_dispatch:
 
+# This workflow is artifact-only. build-rb22-pc.yml is the single owner of
+# publishing the rb22-latest release, preventing two workflows from racing
+# to upload the same RB22.exe asset.
 permissions:
-  contents: write
+  contents: read
 
 jobs:
   build:
@@ -42,18 +45,3 @@ jobs:
         with:
           name: RB22-PC-Performance-Suite-Windows-x64
           path: RB22/publish/RB22.exe
-
-      - name: Create or update GitHub Release
-        if: github.ref == 'refs/heads/main'
-        shell: pwsh
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          TAG: rb22-latest
-        run: |
-          gh release view $env:TAG *> $null
-          if ($LASTEXITCODE -eq 0) {
-            gh release upload $env:TAG RB22/publish/RB22.exe --clobber
-            gh release edit $env:TAG --title "RB22 PC Performance Suite 0.3.0" --notes "RB22 PC v0.3.0. Live CPU/RAM telemetry, known-game detection, confirmed reversible process-priority control and system snapshot reports. The build must pass CI before release."
-          } else {
-            gh release create $env:TAG RB22/publish/RB22.exe --title "RB22 PC Performance Suite 0.3.0" --notes "RB22 PC v0.3.0. Live CPU/RAM telemetry, known-game detection, confirmed reversible process-priority control and system snapshot reports." --target $env:GITHUB_SHA
-          }
