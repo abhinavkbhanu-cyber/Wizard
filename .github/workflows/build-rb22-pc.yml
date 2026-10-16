@@ -62,7 +62,7 @@ jobs:
         if: github.event_name != 'pull_request'
         uses: actions/upload-artifact@v4
         with:
-          name: RB22-Ultimate-Windows-x64
+          name: RB22-PC-Performance-Suite-Windows-x64
           path: publish/*.exe
       - name: Publish latest release
         if: github.event_name != 'pull_request'
@@ -73,8 +73,8 @@ jobs:
           $exe = Get-ChildItem publish -Filter *.exe | Select-Object -First 1
           gh release view rb22-latest 2>$null
           if ($LASTEXITCODE -ne 0) {
-            gh release create rb22-latest $exe.FullName --title "RB22 Ultimate 0.2.0" --notes "RB22 Ultimate PC build with Dark Moonlight UI, AI profiles, game profiles, memory policy, DNS profiles, Input Lab with Auto-Key and Angle Snap profiles, benchmark workspace and safe software-only controls."
+            gh release create rb22-latest $exe.FullName --title "RB22 PC Performance Suite 0.3.0" --notes "RB22 PC v0.3.0: live system CPU/RAM telemetry, known-game detection, confirmed reversible Above Normal process-priority control, system snapshot reports, rule-based analysis, startup smoke tests. FPS/frametime, GPU telemetry and actual adapter DNS changes are not included."
           } else {
             gh release upload rb22-latest $exe.FullName --clobber
-            gh release edit rb22-latest --title "RB22 Ultimate 0.2.0" --notes "RB22 Ultimate PC build updated from main."
+            gh release edit rb22-latest --title "RB22 PC Performance Suite 0.3.0" --notes "RB22 PC v0.3.0 performance suite. Live CPU/RAM telemetry, game detection, reversible process priority control and system snapshot reports. FPS/GPU metrics are not fabricated."
           }
