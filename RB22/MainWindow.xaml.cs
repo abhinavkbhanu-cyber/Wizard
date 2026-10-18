@@ -1,6 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Net.Http;
+using System.Text.Json;
+using System.Text.RegularExpressions;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
@@ -71,6 +74,7 @@ public partial class MainWindow : Window
             timer.Tick += Timer_Tick;
             timer.Start();
             SampleSystemMetrics();
+            _ = CheckForUpdatesAsync();
         };
         Closed += (_, _) =>
         {
@@ -78,6 +82,35 @@ public partial class MainWindow : Window
             timer.Stop();
             RestoreChangedPriorities(showMessage: false);
         };
+    }
+
+
+    private async System.Threading.Tasks.Task CheckForUpdatesAsync()
+    {
+        try
+        {
+            using var client = new HttpClient { Timeout = TimeSpan.FromSeconds(6) };
+            client.DefaultRequestHeaders.UserAgent.ParseAdd("RB22-PC");
+            var json = await client.GetStringAsync("https://api.github.com/repos/abhinavkbhanu-cyber/Wizard/releases/tags/rb22-latest");
+            using var document = JsonDocument.Parse(json);
+            var releaseName = document.RootElement.GetProperty("name").GetString() ?? "";
+            var match = Regex.Match(releaseName, @"(\d+\.\d+\.\d+)");
+            if (!match.Success || !Version.TryParse(match.Groups[1].Value, out var latest)) return;
+            var installed = typeof(MainWindow).Assembly.GetName().Version ?? new Version(0, 3, 0);
+            installed = new Version(installed.Major, installed.Minor, Math.Max(0, installed.Build));
+            if (latest > installed)
+            {
+                var answer = MessageBox.Show(this,
+                    $"RB22 PC {latest} is available. Open the official release page to review it?",
+                    "RB22 update available", MessageBoxButton.YesNo, MessageBoxImage.Information);
+                if (answer == MessageBoxResult.Yes)
+                    Process.Start(new ProcessStartInfo("https://github.com/abhinavkbhanu-cyber/Wizard/releases/tag/rb22-latest") { UseShellExecute = true });
+            }
+        }
+        catch
+        {
+            // A failed update check must never block app startup.
+        }
     }
 
     private void Timer_Tick(object? sender, EventArgs e)
