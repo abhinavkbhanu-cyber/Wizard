@@ -123,7 +123,7 @@ class MainActivity : AppCompatActivity() {
                     if (match != null) { releaseVersion = match.groupValues[1]; break }
                 }
                 val latest = releaseVersion ?: return@execute
-                val current = BuildConfig.VERSION_NAME.substringBefore("-").split(".").map { it.toIntOrNull() ?: 0 }
+                val current = packageManager.getPackageInfo(packageName, 0).versionName.orEmpty().substringBefore("-").split(".").map { it.toIntOrNull() ?: 0 }
                 val available = latest.split(".").map { it.toIntOrNull() ?: 0 }
                 val isNewer = (0..2).firstNotNullOfOrNull { i ->
                     val difference = (available.getOrElse(i) { 0 }).compareTo(current.getOrElse(i) { 0 })
