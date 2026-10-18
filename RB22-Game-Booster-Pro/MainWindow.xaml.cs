@@ -4,6 +4,9 @@ using System.IO;
 using System.Linq;
 using System.Media;
 using System.Net.NetworkInformation;
+using System.Net.Http;
+using System.Text.Json;
+using System.Text.RegularExpressions;
 using Microsoft.Win32;
 using System.Collections.Generic;
 using System.Windows.Controls;
@@ -104,6 +107,7 @@ public partial class MainWindow : Window
             }
 
             _ = UpdateStatsAsync();
+            _ = CheckForUpdatesAsync();
             timer.Start();
         }
         catch(Exception ex)
@@ -118,6 +122,42 @@ public partial class MainWindow : Window
                     $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] {ex}\n");
             }
             catch { }
+        }
+    }
+
+
+    private async System.Threading.Tasks.Task CheckForUpdatesAsync()
+    {
+        try
+        {
+            using var client = new HttpClient { Timeout = TimeSpan.FromSeconds(6) };
+            client.DefaultRequestHeaders.UserAgent.ParseAdd("RB22-Game-Booster-Pro");
+            var json = await client.GetStringAsync("https://api.github.com/repos/abhinavkbhanu-cyber/Wizard/releases/tags/latest");
+            using var document = JsonDocument.Parse(json);
+            var root = document.RootElement;
+            var assets = root.GetProperty("assets");
+            string? latestText = null;
+            foreach (var asset in assets.EnumerateArray())
+            {
+                var name = asset.GetProperty("name").GetString() ?? "";
+                var match = Regex.Match(name, @"RB22-v(\d+\.\d+\.\d+)-mobile-debug\.apk");
+                if (match.Success) { latestText = match.Groups[1].Value; break; }
+            }
+            if (!Version.TryParse(latestText, out var latest)) return;
+            var current = typeof(MainWindow).Assembly.GetName().Version ?? new Version(3, 6, 0);
+            current = new Version(current.Major, current.Minor, Math.Max(0, current.Build));
+            if (latest > current)
+            {
+                var answer = MessageBox.Show(this,
+                    $"RB22 Game Booster Pro {latest} is available. Open the official release page to review it?",
+                    "RB22 update available", MessageBoxButton.YesNo, MessageBoxImage.Information);
+                if (answer == MessageBoxResult.Yes)
+                    Process.Start(new ProcessStartInfo("https://github.com/abhinavkbhanu-cyber/Wizard/releases/tag/latest") { UseShellExecute = true });
+            }
+        }
+        catch
+        {
+            // A failed update check must never block app startup.
         }
     }
 
