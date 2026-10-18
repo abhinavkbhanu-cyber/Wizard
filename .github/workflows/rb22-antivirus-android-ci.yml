@@ -6,17 +6,19 @@ on:
     paths:
       - 'mobile/rb22-antivirus/**'
       - '.github/workflows/rb22-antivirus-android-ci.yml'
+      - '.github/workflows/release-rb22-antivirus.yml'
   pull_request:
     paths:
       - 'mobile/rb22-antivirus/**'
       - '.github/workflows/rb22-antivirus-android-ci.yml'
+      - '.github/workflows/release-rb22-antivirus.yml'
   workflow_dispatch:
 
 permissions:
   contents: read
 
 concurrency:
-  group: rb22-antivirus-android-ci
+  group: rb22-antivirus-android-ci-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
 jobs:
