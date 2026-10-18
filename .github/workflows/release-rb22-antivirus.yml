@@ -51,9 +51,6 @@ jobs:
           echo "RB22_VERSION_NAME=$VERSION" >> "$GITHUB_ENV"
           echo "RB22_VERSION_CODE=$VERSION_CODE" >> "$GITHUB_ENV"
       - name: Run release unit tests
-        env:
-          RB22_VERSION_NAME: ${{ env.RB22_VERSION_NAME }}
-          RB22_VERSION_CODE: ${{ env.RB22_VERSION_CODE }}
         run: gradle :app:testReleaseUnitTest --stacktrace --no-daemon --console=plain
       - name: Build signed developer-preview APK
         env:
@@ -61,8 +58,6 @@ jobs:
           RB22_KEYSTORE_PASSWORD: ${{ secrets.RB22_KEYSTORE_PASSWORD }}
           RB22_KEY_ALIAS: ${{ secrets.RB22_KEY_ALIAS }}
           RB22_KEY_PASSWORD: ${{ secrets.RB22_KEY_PASSWORD }}
-          RB22_VERSION_NAME: ${{ env.RB22_VERSION_NAME }}
-          RB22_VERSION_CODE: ${{ env.RB22_VERSION_CODE }}
         run: |
           gradle :app:assembleRelease --stacktrace --no-daemon --console=plain
           APK="$RUNNER_TEMP/RB22-Antivirus-${GITHUB_REF_NAME#rb22-antivirus-v}.apk"
