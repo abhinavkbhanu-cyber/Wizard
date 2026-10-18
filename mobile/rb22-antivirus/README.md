@@ -14,6 +14,14 @@ This build **does not detect malware**. A SHA-256 fingerprint is an identifier, 
 
 The updater checks for a newer published version and directs the user to the official release page. It does not silently install APKs. Android installation requires user action, and a real update channel needs a stable, protected release-signing key so updates match the installed app. Never publish a production release until signing is configured and verified.
 
+## Signed alpha release
+
+The tag-triggered release workflow publishes a signed alpha APK only when all four repository Actions secrets are configured: `RB22_ANTIVIRUS_KEYSTORE_BASE64`, `RB22_KEYSTORE_PASSWORD`, `RB22_KEY_ALIAS`, and `RB22_KEY_PASSWORD`. Keep the keystore and passwords private; never commit them.
+
+Create a release keystore locally with Android's `keytool`, convert the keystore file to Base64, and add its contents plus the three passwords/alias as Actions secrets in GitHub repository Settings. Back up the keystore securely: future Android updates must use the same signing key. The workflow intentionally fails rather than publishing an unsigned or randomly signed release if secrets are missing.
+
+Even a signed alpha is **not a malware detector** and must not be used as a security product.
+
 ## Build
 Open this folder in Android Studio with JDK 17 and Android SDK platform 35 installed. Allow Gradle to sync, then run the `app` configuration on an Android 9+ emulator/device. GitHub Actions builds a debug APK and keeps it as a 14-day CI artifact; this is not a production release.
 
