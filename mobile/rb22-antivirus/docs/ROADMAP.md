@@ -33,6 +33,10 @@ Build a privacy-first Android security app that can be evaluated fairly against 
 ### Phase 3 — User-facing protection
 
 - [ ] Add an installed-app audit using Android APIs and permissions the OS actually allows.
+- [ ] Build real-time protection in layers: (1) monitor supported app-install/update events and inspect accessible APK metadata against verified local threat definitions; (2) offer an optional, user-enabled local `VpnService` for DNS/domain reputation filtering against a signed, regularly updated phishing feed.
+- [ ] Show a persistent, truthful protection status and notification while real-time filtering is active; explain when protection is paused, offline, or definitions are stale.
+- [ ] For local VPN filtering, request explicit Android VPN consent, process DNS only, do not decrypt HTTPS or collect browsing history, and provide a clear one-tap stop/disable control. Define safe behavior for VPN interruption and test battery/network impact before release.
+- [ ] Document that app-install monitoring and DNS filtering cannot guarantee detection of all malware or inspect encrypted app traffic; do not call these universal system-wide protection.
 - [ ] Add a manual scan history, scan details, and exportable privacy-safe reports.
 - [ ] Add scheduled scans with Android WorkManager, battery/network constraints, and visible last-scan time.
 - [ ] Offer user-controlled handling of files they selected. Never silently delete, disable, or upload files.
@@ -57,4 +61,4 @@ Do not call a build production-ready until the scanner and signed definitions ar
 - No automatic upload of APKs, file contents, or personal reports.
 - If reputation lookups are added, disclose exactly what leaves the device and require an explicit choice.
 - Request the minimum Android permissions needed.
-- Never request accessibility, VPN, device-admin, or broad storage privileges merely to make the feature list look stronger.
+- Request sensitive capabilities (including VPN, accessibility, device-admin, or broad storage access) only when essential to a clearly explained, user-enabled feature, after a security and privacy review.
