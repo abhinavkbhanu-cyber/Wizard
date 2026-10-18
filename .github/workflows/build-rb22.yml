@@ -7,6 +7,10 @@ on:
     paths:
       - 'RB22-Game-Booster-Pro/**'
       - '.github/workflows/build-rb22.yml'
+  pull_request:
+    paths:
+      - 'RB22-Game-Booster-Pro/**'
+      - '.github/workflows/build-rb22.yml'
 
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
@@ -72,6 +76,7 @@ jobs:
           path: publish/*.exe
 
       - name: Publish latest GitHub Release
+        if: github.event_name != 'pull_request'
         shell: pwsh
         env:
           GH_TOKEN: ${{ github.token }}
