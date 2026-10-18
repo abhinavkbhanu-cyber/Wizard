@@ -40,7 +40,20 @@ jobs:
           test -n "$RB22_KEY_PASSWORD" || (echo "Missing RB22_KEY_PASSWORD repository secret" && exit 1)
           echo "$RB22_ANTIVIRUS_KEYSTORE_BASE64" | base64 --decode > "$RUNNER_TEMP/rb22-antivirus-release.jks"
           test -s "$RUNNER_TEMP/rb22-antivirus-release.jks"
+      - name: Derive Android version from release tag
+        run: |
+          VERSION="${GITHUB_REF_NAME#rb22-antivirus-v}"
+          IFS=.- read -r MAJOR MINOR PATCH CHANNEL <<< "$VERSION"
+          MAJOR="${MAJOR:-0}"; MINOR="${MINOR:-0}"; PATCH="${PATCH:-0}"
+          case "$CHANNEL" in alpha) CHANNEL_CODE=1 ;; beta) CHANNEL_CODE=2 ;; rc) CHANNEL_CODE=3 ;; "") CHANNEL_CODE=99 ;; *) CHANNEL_CODE=10 ;; esac
+          VERSION_CODE=$((MAJOR * 1000000 + MINOR * 10000 + PATCH * 100 + CHANNEL_CODE))
+          test "$VERSION_CODE" -gt 0
+          echo "RB22_VERSION_NAME=$VERSION" >> "$GITHUB_ENV"
+          echo "RB22_VERSION_CODE=$VERSION_CODE" >> "$GITHUB_ENV"
       - name: Run release unit tests
+        env:
+          RB22_VERSION_NAME: ${{ env.RB22_VERSION_NAME }}
+          RB22_VERSION_CODE: ${{ env.RB22_VERSION_CODE }}
         run: gradle :app:testReleaseUnitTest --stacktrace --no-daemon --console=plain
       - name: Build signed developer-preview APK
         env:
@@ -48,6 +61,8 @@ jobs:
           RB22_KEYSTORE_PASSWORD: ${{ secrets.RB22_KEYSTORE_PASSWORD }}
           RB22_KEY_ALIAS: ${{ secrets.RB22_KEY_ALIAS }}
           RB22_KEY_PASSWORD: ${{ secrets.RB22_KEY_PASSWORD }}
+          RB22_VERSION_NAME: ${{ env.RB22_VERSION_NAME }}
+          RB22_VERSION_CODE: ${{ env.RB22_VERSION_CODE }}
         run: |
           gradle :app:assembleRelease --stacktrace --no-daemon --console=plain
           APK="$RUNNER_TEMP/RB22-Antivirus-${GITHUB_REF_NAME#rb22-antivirus-v}.apk"
