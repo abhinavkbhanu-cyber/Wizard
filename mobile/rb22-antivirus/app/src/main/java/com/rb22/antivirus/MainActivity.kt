@@ -1,12 +1,16 @@
 package com.rb22.antivirus
 
+import android.Manifest
 import android.content.Intent
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
+import android.content.pm.PackageManager
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.content.ContextCompat
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -31,6 +35,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.Dispatchers
@@ -41,7 +46,6 @@ import java.net.HttpURLConnection
 import java.net.URL
 import java.security.MessageDigest
 
-private const val CURRENT_VERSION = "0.1.0-alpha"
 private const val RELEASE_TAG_PREFIX = "rb22-antivirus-v"
 private const val RELEASES_API = "https://api.github.com/repos/abhinavkbhanu-cyber/Wizard/releases?per_page=100"
 private const val RELEASES_PAGE = "https://github.com/abhinavkbhanu-cyber/Wizard/releases"
@@ -53,6 +57,7 @@ private val RbWhite = Color(0xFFF4F4F4)
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        UpdateCheckWorker.schedule(this)
         setContent {
             MaterialTheme(colorScheme = darkColorScheme(primary = RbRed, background = RbBlack, surface = RbPanel, onPrimary = Color.White, onBackground = RbWhite, onSurface = RbWhite)) {
                 Surface(modifier = Modifier.fillMaxSize(), color = RbBlack) {
@@ -97,10 +102,10 @@ class MainActivity : ComponentActivity() {
                         }
                         when {
                             newestVersion == null -> "No Antivirus release is published yet. This app is still an alpha prototype."
-                            newestVersion == CURRENT_VERSION -> "You're using the latest published Antivirus version ($CURRENT_VERSION)."
-                            compareVersions(newestVersion, CURRENT_VERSION) > 0 ->
+                            newestVersion == BuildConfig.VERSION_NAME -> "You're using the latest published Antivirus version ($BuildConfig.VERSION_NAME)."
+                            compareVersions(newestVersion, BuildConfig.VERSION_NAME) > 0 ->
                                 "Update available: $newestVersion. Open Releases to review and install it."
-                            else -> "Installed version: $CURRENT_VERSION. The release feed is older; no downgrade offered."
+                            else -> "Installed version: $BuildConfig.VERSION_NAME. The release feed is older; no downgrade offered."
                         }
                     } finally {
                         connection.disconnect()
@@ -176,7 +181,16 @@ private fun AntivirusHome(
     val picker = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
         if (uri != null) { result = "Calculating fingerprint locally…"; onPick(uri) { result = it } }
     }
+    val context = LocalContext.current
+    val notificationPermissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { }
     LaunchedEffect(Unit) {
+        if (Build.VERSION.SDK_INT >= 33 &&
+            ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED
+        ) {
+            notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+        }
         onCheckUpdates { updateStatus = it }
     }
     Column(Modifier.fillMaxSize().padding(20.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
@@ -197,7 +211,7 @@ private fun AntivirusHome(
                 Text(updateStatus, color = Color.LightGray)
                 OutlinedButton(onClick = { onCheckUpdates { updateStatus = it } }) { Text("Check now") }
                 OutlinedButton(onClick = onOpenReleases) { Text("Open official releases") }
-                Text("Android will ask you to confirm app installation. Automatic background installation is not supported by ordinary apps.", color = Color.Gray, style = MaterialTheme.typography.bodySmall)
+                Text("Background checks can notify you when a newer release is published. Downloads are not installed silently: Android requires supported installer confirmation. Update authenticity verification and automatic APK download are not implemented yet.", color = Color.Gray, style = MaterialTheme.typography.bodySmall)
             }
         }
         Spacer(Modifier.height(2.dp))
