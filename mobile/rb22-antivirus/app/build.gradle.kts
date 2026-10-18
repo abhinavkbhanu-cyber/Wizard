@@ -27,8 +27,8 @@ android {
         applicationId = "com.rb22.antivirus"
         minSdk = 28
         targetSdk = 35
-        versionCode = 2
-        versionName = "0.2.0-alpha"
+        versionCode = System.getenv("RB22_VERSION_CODE")?.toIntOrNull() ?: 2
+        versionName = System.getenv("RB22_VERSION_NAME") ?: "0.2.0-alpha"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
