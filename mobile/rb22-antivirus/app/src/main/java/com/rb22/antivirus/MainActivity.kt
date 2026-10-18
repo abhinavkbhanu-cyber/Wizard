@@ -44,7 +44,6 @@ import kotlinx.coroutines.withContext
 import org.json.JSONArray
 import java.net.HttpURLConnection
 import java.net.URL
-import java.security.MessageDigest
 
 private const val RELEASE_TAG_PREFIX = "rb22-antivirus-v"
 private const val RELEASES_API = "https://api.github.com/repos/abhinavkbhanu-cyber/Wizard/releases?per_page=100"
@@ -90,13 +89,11 @@ class MainActivity : ComponentActivity() {
                         val body = connection.inputStream.bufferedReader().use { it.readText() }
                         val releases = JSONArray(body)
                         var newestVersion: String? = null
-                        var releaseUrl: String? = null
                         for (i in 0 until releases.length()) {
                             val release = releases.getJSONObject(i)
                             val tag = release.optString("tag_name")
                             if (tag.startsWith(RELEASE_TAG_PREFIX) && !release.optBoolean("draft", true)) {
                                 newestVersion = tag.removePrefix(RELEASE_TAG_PREFIX)
-                                releaseUrl = release.optString("html_url", RELEASES_PAGE)
                                 break
                             }
                         }
@@ -151,19 +148,16 @@ class MainActivity : ComponentActivity() {
             val result = withContext(Dispatchers.IO) {
                 try {
                     contentResolver.openInputStream(uri)?.use { input ->
-                        val digest = MessageDigest.getInstance("SHA-256")
-                        val buffer = ByteArray(64 * 1024)
-                        var total = 0L
-                        while (true) {
-                            val n = input.read(buffer)
-                            if (n < 0) break
-                            total += n
-                            if (total > 200L * 1024 * 1024) return@withContext "File exceeds this prototype's 200 MB limit. No fingerprint produced."
-                            digest.update(buffer, 0, n)
+                        when (val fingerprint = ApkFingerprint.calculate(input)) {
+                            is FingerprintResult.Success ->
+                                "SHA-256 fingerprint:\n${fingerprint.sha256}\n\nBytes read: ${fingerprint.bytesRead}\n\nA fingerprint is not a malware verdict."
+                            is FingerprintResult.TooLarge ->
+                                "File exceeds this prototype's ${fingerprint.limitBytes / (1024 * 1024)} MB limit. No fingerprint produced."
                         }
-                        "SHA-256 fingerprint:\n" + digest.digest().joinToString("") { "%02x".format(it) } + "\n\nA fingerprint is not a malware verdict."
                     } ?: "Unable to open selected file."
-                } catch (e: Exception) { "Could not inspect file (${e.javaClass.simpleName})." }
+                } catch (e: Exception) {
+                    "Could not inspect file (${e.javaClass.simpleName})."
+                }
             }
             report(result)
         }
