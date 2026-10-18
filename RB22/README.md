@@ -26,3 +26,7 @@ GitHub Actions builds a self-contained Windows x64 executable and launches it wi
 
 ## Separation
 Only files under `RB22/` and the RB22 PC workflow are changed by the PC performance-suite work. The Android/mobile source is not edited.
+
+
+## Update checks
+On startup, RB22 checks the public GitHub release tagged `rb22-latest`. If a newer version is published, it offers to open the official release page. It does not silently download or replace the running executable; review the release and install it yourself.

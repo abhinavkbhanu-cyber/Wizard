@@ -15,3 +15,6 @@ GitHub Actions automatically publishes a self-contained Windows x64 single EXE o
 - No ads or analytics
 
 FPS is reported only when a reliable frame source is available; this starter build does not invent FPS values. Network endpoint latency is not the same thing as game-server latency.
+
+## Update checks
+On startup, RB22 Game Booster Pro checks the public `latest` GitHub release for the published mobile version marker. If it detects a newer version, it offers to open the official release page. It does not silently download or replace the running executable; review the release and install it yourself.

@@ -15,6 +15,9 @@ import android.os.CountDownTimer
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import java.net.InetAddress
+import java.net.HttpURLConnection
+import java.net.URL
+import org.json.JSONObject
 import java.util.concurrent.Executors
 
 class MainActivity : AppCompatActivity() {
@@ -36,6 +39,7 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+        checkForUpdates()
         updateStats()
         applyActiveTheme()
         setupDeviceRefresh()
@@ -90,6 +94,56 @@ class MainActivity : AppCompatActivity() {
     }
 
 
+
+
+    /**
+     * Checks the published RB22 Android release on a background thread.
+     * Installation remains user-confirmed by Android; this never silently installs an APK.
+     */
+    private fun checkForUpdates() {
+        Thread {
+            try {
+                val connection = (URL("https://api.github.com/repos/abhinavkbhanu-cyber/Wizard/releases/tags/latest").openConnection() as HttpURLConnection).apply {
+                    connectTimeout = 6000
+                    readTimeout = 6000
+                    setRequestProperty("Accept", "application/vnd.github+json")
+                    setRequestProperty("User-Agent", "RB22-Mobile")
+                }
+                val release = try {
+                    if (connection.responseCode != HttpURLConnection.HTTP_OK) return@Thread
+                    JSONObject(connection.inputStream.bufferedReader().use { it.readText() })
+                } finally {
+                    connection.disconnect()
+                }
+                val assets = release.optJSONArray("assets") ?: return@Thread
+                var releaseVersion: String? = null
+                for (i in 0 until assets.length()) {
+                    val name = assets.optJSONObject(i)?.optString("name").orEmpty()
+                    val match = Regex("""RB22-v(\d+\.\d+\.\d+)-mobile-debug\.apk""").find(name)
+                    if (match != null) { releaseVersion = match.groupValues[1]; break }
+                }
+                val latest = releaseVersion ?: return@Thread
+                val current = packageManager.getPackageInfo(packageName, 0).versionName.orEmpty().substringBefore("-").split(".").map { it.toIntOrNull() ?: 0 }
+                val available = latest.split(".").map { it.toIntOrNull() ?: 0 }
+                val isNewer = (0..2).firstNotNullOfOrNull { i ->
+                    val difference = (available.getOrElse(i) { 0 }).compareTo(current.getOrElse(i) { 0 })
+                    if (difference == 0) null else difference > 0
+                } ?: false
+                if (isNewer) runOnUiThread {
+                    AlertDialog.Builder(this)
+                        .setTitle("RB22 update available")
+                        .setMessage("Version $latest is available. Open the official release page to review and install it.")
+                        .setPositiveButton("OPEN RELEASE") { _, _ ->
+                            startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/abhinavkbhanu-cyber/Wizard/releases/tag/latest")))
+                        }
+                        .setNegativeButton("LATER", null)
+                        .show()
+                }
+            } catch (_: Exception) {
+                // Update checks are best-effort and must not block app startup.
+            }
+        }.start()
+    }
 
     private fun setupMobileControls() {
         findViewById<Button>(R.id.mobile_game_mode).setOnClickListener {
