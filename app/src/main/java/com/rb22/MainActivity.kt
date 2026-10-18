@@ -119,7 +119,7 @@ class MainActivity : AppCompatActivity() {
                 var releaseVersion: String? = null
                 for (i in 0 until assets.length()) {
                     val name = assets.optJSONObject(i)?.optString("name").orEmpty()
-                    val match = Regex("""RB22-v(\\d+\\.\\d+\\.\\d+)-mobile-debug\\.apk""").find(name)
+                    val match = Regex("""RB22-v(\d+\.\d+\.\d+)-mobile-debug\.apk""").find(name)
                     if (match != null) { releaseVersion = match.groupValues[1]; break }
                 }
                 val latest = releaseVersion ?: return@execute
