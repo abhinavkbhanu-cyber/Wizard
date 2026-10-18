@@ -22,4 +22,4 @@ Use unique WorkManager jobs with network constraints, bounded retries/backoff, c
 3. Integrate the verified shared protocol into each discovered Android mobile project.
 4. Audit PC repositories separately for a Windows-appropriate update mechanism; do not share Android installer code with Windows.
 
-**Current state:** updater is specified but not implemented. The UI's update button is a placeholder.
+**Current state (0.2.0-alpha):** the app checks the public GitHub release feed on launch and schedules a network-constrained WorkManager check approximately every 24 hours. If a newer tagged release is found, it posts a notification when Android notification permission is granted. This is a release notice only: it does not download APKs, verify a signed update manifest, verify APK signing identity, or install updates. The notification opens the official release page. WorkManager timing is best-effort, not exact. Silent installation is not supported for ordinary Android apps.
