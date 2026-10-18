@@ -101,7 +101,7 @@ class MainActivity : AppCompatActivity() {
      * Installation remains user-confirmed by Android; this never silently installs an APK.
      */
     private fun checkForUpdates() {
-        Executors.newSingleThreadExecutor().execute {
+        Thread {
             try {
                 val connection = (URL("https://api.github.com/repos/abhinavkbhanu-cyber/Wizard/releases/tags/latest").openConnection() as HttpURLConnection).apply {
                     connectTimeout = 6000
@@ -142,7 +142,7 @@ class MainActivity : AppCompatActivity() {
             } catch (_: Exception) {
                 // Update checks are best-effort and must not block app startup.
             }
-        }
+        }.start()
     }
 
     private fun setupMobileControls() {
