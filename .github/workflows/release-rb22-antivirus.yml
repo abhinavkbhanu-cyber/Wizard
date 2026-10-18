@@ -1,4 +1,4 @@
-name: Release RB22 Antivirus Alpha
+name: Release RB22 Antivirus Developer Preview
 
 on:
   push:
@@ -40,7 +40,9 @@ jobs:
           test -n "$RB22_KEY_PASSWORD" || (echo "Missing RB22_KEY_PASSWORD repository secret" && exit 1)
           echo "$RB22_ANTIVIRUS_KEYSTORE_BASE64" | base64 --decode > "$RUNNER_TEMP/rb22-antivirus-release.jks"
           test -s "$RUNNER_TEMP/rb22-antivirus-release.jks"
-      - name: Build signed release APK
+      - name: Run release unit tests
+        run: gradle :app:testReleaseUnitTest --stacktrace --no-daemon --console=plain
+      - name: Build signed developer-preview APK
         env:
           RB22_KEYSTORE_PATH: ${{ runner.temp }}/rb22-antivirus-release.jks
           RB22_KEYSTORE_PASSWORD: ${{ secrets.RB22_KEYSTORE_PASSWORD }}
@@ -48,13 +50,18 @@ jobs:
           RB22_KEY_PASSWORD: ${{ secrets.RB22_KEY_PASSWORD }}
         run: |
           gradle :app:assembleRelease --stacktrace --no-daemon --console=plain
-          cp app/build/outputs/apk/release/app-release.apk RB22-Antivirus-alpha.apk
-          sha256sum RB22-Antivirus-alpha.apk > RB22-Antivirus-alpha.apk.sha256
-      - name: Publish prototype prerelease
+          APK="$RUNNER_TEMP/RB22-Antivirus-${GITHUB_REF_NAME#rb22-antivirus-v}.apk"
+          cp app/build/outputs/apk/release/app-release.apk "$APK"
+          "$ANDROID_HOME/build-tools/35.0.0/apksigner" verify --verbose "$APK"
+          sha256sum "$APK" > "$APK.sha256"
+          echo "APK_PATH=$APK" >> "$GITHUB_ENV"
+          echo "CHECKSUM_PATH=$APK.sha256" >> "$GITHUB_ENV"
+      - name: Publish clearly labelled prerelease
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh release create "$GITHUB_REF_NAME" RB22-Antivirus-alpha.apk RB22-Antivirus-alpha.apk.sha256 \
-            --title "RB22 Antivirus 0.1.0-alpha — Prototype" \
+          VERSION="${GITHUB_REF_NAME#rb22-antivirus-v}"
+          gh release create "$GITHUB_REF_NAME" "$APK_PATH" "$CHECKSUM_PATH" \
+            --title "RB22 Antivirus $VERSION — Developer Preview" \
             --prerelease \
-            --notes "Alpha prototype only. This build calculates a selected APK's SHA-256 fingerprint; it does NOT detect malware or provide real-time protection. Install only for testing. Updates require the same protected release-signing key and Android will require user confirmation."
+            --notes "Developer preview only. This build calculates a selected APK's SHA-256 fingerprint and checks for updates. It does NOT detect malware, provide real-time protection, or scan all installed apps. Do not rely on it to protect a device. Review the SHA-256 checksum before installing. Android requires user confirmation to install updates. This release is published only after signed-build verification and unit tests."
