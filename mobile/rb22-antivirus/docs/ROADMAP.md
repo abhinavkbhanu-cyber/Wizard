@@ -53,7 +53,9 @@ Build a privacy-first Android security app that can be evaluated fairly against 
 
 ## Release gates
 
-Do not call a build production-ready until the scanner and signed definitions are implemented, automated tests pass, update authenticity is verified, privacy behavior is documented, and the known limitations are visible in the app. A successful APK build alone is not evidence of malware protection.
+**Release requirement:** as soon as the working detection milestone passes its required automated and controlled tests, prepare and publish a signed test release without waiting for unrelated roadmap features. The release must include the tested detection engine, verified signed threat definitions, clear Inconclusive results, a test summary, and a SHA-256 checksum. Publish only after the CI run for the exact release commit is green and the release-signing secrets are configured. If either condition is missing, report the blocker rather than claiming a release happened.
+
+Do not call a build production-ready until the scanner and signed definitions are implemented, automated tests pass, update authenticity is verified, privacy behavior is documented, and the known limitations are visible in the app. A successful APK build alone is not evidence of malware protection. The existing green CI run validates only the current alpha prototype build; it does not validate malware detection, which has not yet been implemented.
 
 ## Privacy principles
 
