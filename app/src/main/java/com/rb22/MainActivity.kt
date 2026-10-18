@@ -110,19 +110,19 @@ class MainActivity : AppCompatActivity() {
                     setRequestProperty("User-Agent", "RB22-Mobile")
                 }
                 val release = try {
-                    if (connection.responseCode != HttpURLConnection.HTTP_OK) return@execute
+                    if (connection.responseCode != HttpURLConnection.HTTP_OK) return@Thread
                     JSONObject(connection.inputStream.bufferedReader().use { it.readText() })
                 } finally {
                     connection.disconnect()
                 }
-                val assets = release.optJSONArray("assets") ?: return@execute
+                val assets = release.optJSONArray("assets") ?: return@Thread
                 var releaseVersion: String? = null
                 for (i in 0 until assets.length()) {
                     val name = assets.optJSONObject(i)?.optString("name").orEmpty()
                     val match = Regex("""RB22-v(\d+\.\d+\.\d+)-mobile-debug\.apk""").find(name)
                     if (match != null) { releaseVersion = match.groupValues[1]; break }
                 }
-                val latest = releaseVersion ?: return@execute
+                val latest = releaseVersion ?: return@Thread
                 val current = packageManager.getPackageInfo(packageName, 0).versionName.orEmpty().substringBefore("-").split(".").map { it.toIntOrNull() ?: 0 }
                 val available = latest.split(".").map { it.toIntOrNull() ?: 0 }
                 val isNewer = (0..2).firstNotNullOfOrNull { i ->
