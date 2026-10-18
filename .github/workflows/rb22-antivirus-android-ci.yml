@@ -43,6 +43,8 @@ jobs:
           java -version
           gradle --version
           test -d "$ANDROID_HOME/platforms/android-35"
+      - name: Run JVM unit tests
+        run: gradle :app:testDebugUnitTest --stacktrace --no-daemon --console=plain
       - name: Build debug APK
         run: gradle :app:assembleDebug --stacktrace --no-daemon --console=plain
       - name: Verify APK output
