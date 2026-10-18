@@ -102,10 +102,10 @@ class MainActivity : ComponentActivity() {
                         }
                         when {
                             newestVersion == null -> "No Antivirus release is published yet. This app is still an alpha prototype."
-                            newestVersion == BuildConfig.VERSION_NAME -> "You're using the latest published Antivirus version ($BuildConfig.VERSION_NAME)."
+                            newestVersion == BuildConfig.VERSION_NAME -> "You're using the latest published Antivirus version (${BuildConfig.VERSION_NAME})."
                             compareVersions(newestVersion, BuildConfig.VERSION_NAME) > 0 ->
                                 "Update available: $newestVersion. Open Releases to review and install it."
-                            else -> "Installed version: $BuildConfig.VERSION_NAME. The release feed is older; no downgrade offered."
+                            else -> "Installed version: ${BuildConfig.VERSION_NAME}. The release feed is older; no downgrade offered."
                         }
                     } finally {
                         connection.disconnect()
