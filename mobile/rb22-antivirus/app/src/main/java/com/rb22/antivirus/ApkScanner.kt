@@ -48,7 +48,7 @@ internal object ApkScanner {
                 @Suppress("DEPRECATION")
                 pm.getPackageInfo(packageName, flags)
             }
-            val app = info.applicationInfo
+            val app = info.applicationInfo ?: throw IllegalStateException("Application metadata unavailable")
             val label = try { app.loadLabel(pm).toString() } catch (_: Exception) { packageName }
             analyze(File(app.sourceDir), info, label, inspectDex = true)
         } catch (_: Exception) {
@@ -68,19 +68,19 @@ internal object ApkScanner {
         return packages.asSequence()
             .filter { it.packageName != context.packageName && it.applicationInfo != null }
             .map { info ->
-                val label = try { info.applicationInfo.loadLabel(pm).toString() } catch (_: Exception) { info.packageName }
-                analyze(File(info.applicationInfo.sourceDir), info, label, inspectDex = false)
+                val app = info.applicationInfo ?: return@map ScanReport(info.packageName, info.packageName, null, ScanVerdict.UNABLE_TO_SCAN, emptyList(), listOf("Application metadata unavailable."))
+                val label = try { app.loadLabel(pm).toString() } catch (_: Exception) { info.packageName }
+                analyze(File(app.sourceDir), info, label, inspectDex = false)
             }.toList()
     }
 
     private fun analyze(file: File, info: PackageInfo, label: String, inspectDex: Boolean): ScanReport {
         val findings = analyzeIndicators(info.requestedPermissions?.toSet().orEmpty())
         val appInfo = info.applicationInfo
-        if (appInfo != null && appInfo.flags and android.content.pm.ApplicationInfo.FLAG_DEBUGGABLE != 0) {
-            findings.toMutableList().also { it.add(ScanFinding("Debug build", "The APK is marked debuggable; production apps normally disable this", 1)) }
-                .let { return finish(file, info, label, it, inspectDex) }
-        }
         val allFindings = findings.toMutableList()
+        if (appInfo != null && appInfo.flags and android.content.pm.ApplicationInfo.FLAG_DEBUGGABLE != 0) {
+            allFindings += ScanFinding("Debug build", "The APK is marked debuggable; production apps normally disable this", 1)
+        }
         if (inspectDex && file.isFile) {
             val indicators = inspectDexStrings(file)
             if ("process-execution" in indicators) allFindings += ScanFinding("Code indicator", "DEX contains a process-execution API reference", 2)
