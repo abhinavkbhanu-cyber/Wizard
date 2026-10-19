@@ -1,0 +1,77 @@
+name: Release RB22 Antivirus Developer Preview
+
+on:
+  push:
+    tags:
+      - 'rb22-antivirus-v*'
+
+permissions:
+  contents: write
+
+jobs:
+  signed-release:
+    runs-on: ubuntu-24.04
+    defaults:
+      run:
+        working-directory: mobile/rb22-antivirus
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: gradle/actions/setup-gradle@v5
+        with:
+          gradle-version: '8.9'
+      - name: Prepare Android SDK
+        run: |
+          yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --licenses >/dev/null || true
+          "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" "platform-tools" "platforms;android-35" "build-tools;35.0.0"
+      - name: Validate release signing secrets
+        env:
+          RB22_ANTIVIRUS_KEYSTORE_BASE64: ${{ secrets.RB22_ANTIVIRUS_KEYSTORE_BASE64 }}
+          RB22_KEYSTORE_PASSWORD: ${{ secrets.RB22_KEYSTORE_PASSWORD }}
+          RB22_KEY_ALIAS: ${{ secrets.RB22_KEY_ALIAS }}
+          RB22_KEY_PASSWORD: ${{ secrets.RB22_KEY_PASSWORD }}
+        run: |
+          test -n "$RB22_ANTIVIRUS_KEYSTORE_BASE64" || (echo "Missing RB22_ANTIVIRUS_KEYSTORE_BASE64 repository secret" && exit 1)
+          test -n "$RB22_KEYSTORE_PASSWORD" || (echo "Missing RB22_KEYSTORE_PASSWORD repository secret" && exit 1)
+          test -n "$RB22_KEY_ALIAS" || (echo "Missing RB22_KEY_ALIAS repository secret" && exit 1)
+          test -n "$RB22_KEY_PASSWORD" || (echo "Missing RB22_KEY_PASSWORD repository secret" && exit 1)
+          echo "$RB22_ANTIVIRUS_KEYSTORE_BASE64" | base64 --decode > "$RUNNER_TEMP/rb22-antivirus-release.jks"
+          test -s "$RUNNER_TEMP/rb22-antivirus-release.jks"
+      - name: Derive Android version from release tag
+        run: |
+          VERSION="${GITHUB_REF_NAME#rb22-antivirus-v}"
+          IFS=.- read -r MAJOR MINOR PATCH CHANNEL <<< "$VERSION"
+          MAJOR="${MAJOR:-0}"; MINOR="${MINOR:-0}"; PATCH="${PATCH:-0}"
+          case "$CHANNEL" in alpha) CHANNEL_CODE=1 ;; beta) CHANNEL_CODE=2 ;; rc) CHANNEL_CODE=3 ;; "") CHANNEL_CODE=99 ;; *) CHANNEL_CODE=10 ;; esac
+          VERSION_CODE=$((MAJOR * 1000000 + MINOR * 10000 + PATCH * 100 + CHANNEL_CODE))
+          test "$VERSION_CODE" -gt 0
+          echo "RB22_VERSION_NAME=$VERSION" >> "$GITHUB_ENV"
+          echo "RB22_VERSION_CODE=$VERSION_CODE" >> "$GITHUB_ENV"
+      - name: Run release unit tests
+        run: gradle :app:testReleaseUnitTest --stacktrace --no-daemon --console=plain
+      - name: Build signed developer-preview APK
+        env:
+          RB22_KEYSTORE_PATH: ${{ runner.temp }}/rb22-antivirus-release.jks
+          RB22_KEYSTORE_PASSWORD: ${{ secrets.RB22_KEYSTORE_PASSWORD }}
+          RB22_KEY_ALIAS: ${{ secrets.RB22_KEY_ALIAS }}
+          RB22_KEY_PASSWORD: ${{ secrets.RB22_KEY_PASSWORD }}
+        run: |
+          gradle :app:assembleRelease --stacktrace --no-daemon --console=plain
+          APK="$RUNNER_TEMP/RB22-Antivirus-${GITHUB_REF_NAME#rb22-antivirus-v}.apk"
+          cp app/build/outputs/apk/release/app-release.apk "$APK"
+          "$ANDROID_HOME/build-tools/35.0.0/apksigner" verify --verbose "$APK"
+          sha256sum "$APK" > "$APK.sha256"
+          echo "APK_PATH=$APK" >> "$GITHUB_ENV"
+          echo "CHECKSUM_PATH=$APK.sha256" >> "$GITHUB_ENV"
+      - name: Publish clearly labelled prerelease
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          VERSION="${GITHUB_REF_NAME#rb22-antivirus-v}"
+          gh release create "$GITHUB_REF_NAME" "$APK_PATH" "$CHECKSUM_PATH" \
+            --title "RB22 Antivirus $VERSION — Developer Preview" \
+            --prerelease \
+            --notes "Developer preview only. This build calculates a selected APK's SHA-256 fingerprint and checks for updates. It does NOT detect malware, provide real-time protection, or scan all installed apps. Do not rely on it to protect a device. Review the SHA-256 checksum before installing. Android requires user confirmation to install updates. This release is published only after signed-build verification and unit tests."
