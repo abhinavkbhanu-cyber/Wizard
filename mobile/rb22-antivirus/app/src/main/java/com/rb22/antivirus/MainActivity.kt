@@ -11,6 +11,7 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -38,8 +39,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -232,9 +236,9 @@ private fun AntivirusHome(
         onCheckUpdates { updateStatus = it }
     }
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(20.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
-        Text("RB22", color = RbRed, style = MaterialTheme.typography.labelLarge)
-        Text("ANTIVIRUS", color = RbWhite, style = MaterialTheme.typography.headlineLarge)
-        Text("On-device app checks • Privacy first", color = Color.LightGray)
+        RB22ShieldLogo()
+        Text("RB22 ANTIVIRUS", color = RbWhite, style = MaterialTheme.typography.headlineLarge)
+        Text("On-device app checks • Privacy first", color = Color.LightGray, fontSize = 14.sp)
         Card(Modifier.fillMaxWidth(), shape = RoundedCornerShape(20.dp), colors = CardDefaults.cardColors(containerColor = RbPanel)) {
             Column(Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 Text("APK security scan", style = MaterialTheme.typography.titleLarge)
@@ -275,5 +279,29 @@ private fun AntivirusHome(
         }
         Spacer(Modifier.height(2.dp))
         Text("Developer alpha • Android 9+ • Scans stay on device • False positives and missed threats are possible", color = Color.Gray, style = MaterialTheme.typography.bodySmall)
+    }
+}
+
+
+@Composable
+private fun RB22ShieldLogo() {
+    Canvas(Modifier.fillMaxWidth().height(92.dp)) {
+        val shield = Path().apply {
+            moveTo(size.width * 0.5f, size.height * 0.04f)
+            lineTo(size.width * 0.79f, size.height * 0.16f)
+            lineTo(size.width * 0.76f, size.height * 0.57f)
+            quadraticTo(size.width * 0.72f, size.height * 0.82f, size.width * 0.5f, size.height * 0.96f)
+            quadraticTo(size.width * 0.28f, size.height * 0.82f, size.width * 0.24f, size.height * 0.57f)
+            lineTo(size.width * 0.21f, size.height * 0.16f)
+            close()
+        }
+        drawPath(shield, color = RbRed)
+        val check = Path().apply {
+            moveTo(size.width * 0.39f, size.height * 0.48f)
+            lineTo(size.width * 0.47f, size.height * 0.58f)
+            lineTo(size.width * 0.64f, size.height * 0.37f)
+        }
+        drawPath(check, color = Color.White, style = Stroke(width = 5.dp.toPx(), cap = androidx.compose.ui.graphics.StrokeCap.Round, join = androidx.compose.ui.graphics.StrokeJoin.Round))
+        drawPath(shield, color = Color.White.copy(alpha = 0.7f), style = Stroke(width = 1.5.dp.toPx()))
     }
 }
