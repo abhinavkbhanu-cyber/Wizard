@@ -13,8 +13,6 @@ import java.io.FileOutputStream
 import java.net.DatagramPacket
 import java.net.DatagramSocket
 import java.net.InetAddress
-import java.nio.ByteBuffer
-import java.nio.ByteOrder
 import java.util.concurrent.atomic.AtomicBoolean
 
 /**
@@ -187,7 +185,7 @@ class AdBlockVpnService : VpnService() {
             manager.createNotificationChannel(NotificationChannel(CHANNEL_ID, "RB22 DNS ad and tracker protection", NotificationManager.IMPORTANCE_LOW))
         }
         return NotificationCompat.Builder(this, CHANNEL_ID)
-            .setSmallIcon(android.R.drawable.ic_secure)
+            .setSmallIcon(android.R.drawable.stat_sys_warning)
             .setContentTitle("RB22 DNS protection is active")
             .setContentText("Filtering known ad and tracker domains")
             .setOngoing(true)
