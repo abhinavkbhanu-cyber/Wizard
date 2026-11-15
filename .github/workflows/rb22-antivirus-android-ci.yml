@@ -87,8 +87,9 @@ jobs:
           else
             gh release create "$TAG" "$APK#RB22-Antivirus-0.4.0-alpha-debug.apk" "$SUM#SHA-256 checksum" \
               --target "$GITHUB_SHA" \
-              --title "RB22 Antivirus rb22-antivirus-v0.4.0-alpha" \
+              --title "RB22 Antivirus v0.4.0-alpha" \
               --notes "Fresh Android debug build from the av branch. This is an early test build, not a production-signed release. Android will ask the user to approve installation. Verify the APK with the included SHA-256 checksum."
+          fi
       - name: Remove superseded RB22 AV release
         env:
           GH_TOKEN: ${{ github.token }}
