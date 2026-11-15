@@ -6,7 +6,7 @@
 - Local APK scan: SHA-256, Android APK metadata and requested permissions, plus bounded inspection of selected DEX strings for a few risky API indicators.
 - Full installed-app batch scan: processes accessible installed APKs sequentially, reviewing permissions, debuggable status and bounded DEX string indicators; shows progress and a summary of apps needing review.
 - Install/update event alerts: a manifest receiver queues a WorkManager scan for an app reported as newly installed or replaced; suspicious heuristic findings can trigger a notification.
-- Toggle to enable/disable those install/update alerts.
+- Toggle to enable/disable those install/update alerts.\n- Optional DNS ad/tracker filtering through Android's user-approved local VPN permission.
 - Unit tests for SHA-256 and several heuristic indicators.
 - Checks the public GitHub release feed on launch and on demand; WorkManager also checks approximately every 24 hours when network is available and posts a notification for a newer Antivirus release. Users review the release page and install through Android’s normal user-confirmed installer flow; there is no silent installation or verified in-app APK download yet.
 
