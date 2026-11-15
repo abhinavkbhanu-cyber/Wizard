@@ -56,7 +56,14 @@ internal object ApkScanner {
         }
     }
 
-    fun scanInstalledInventory(context: Context): List<ScanReport> {
+    /**
+     * User-initiated batch scan. Each installed package is processed sequentially to
+     * avoid loading every APK into memory at once. DEX inspection is bounded per APK.
+     */
+    fun scanInstalledInventory(
+        context: Context,
+        onProgress: (completed: Int, total: Int, appName: String) -> Unit = { _, _, _ -> }
+    ): List<ScanReport> {
         val pm = context.packageManager
         val flags = PackageManager.GET_PERMISSIONS or PackageManager.GET_ACTIVITIES or PackageManager.GET_SERVICES or PackageManager.GET_RECEIVERS
         val packages = try {
@@ -65,13 +72,20 @@ internal object ApkScanner {
                 pm.getInstalledPackages(flags)
             }
         } catch (_: Exception) { emptyList() }
-        return packages.asSequence()
-            .filter { it.packageName != context.packageName && it.applicationInfo != null }
-            .map { info ->
-                val app = info.applicationInfo ?: return@map ScanReport(info.packageName, info.packageName, null, ScanVerdict.UNABLE_TO_SCAN, emptyList(), listOf("Application metadata unavailable."))
-                val label = try { app.loadLabel(pm).toString() } catch (_: Exception) { info.packageName }
-                analyze(File(app.sourceDir), info, label, inspectDex = false)
-            }.toList()
+        val targets = packages.filter { it.packageName != context.packageName && it.applicationInfo != null }
+        val reports = ArrayList<ScanReport>(targets.size)
+        targets.forEachIndexed { index, info ->
+            val app = info.applicationInfo
+            val label = try { app?.loadLabel(pm)?.toString() ?: info.packageName } catch (_: Exception) { info.packageName }
+            val report = if (app == null) {
+                ScanReport(label, info.packageName, null, ScanVerdict.UNABLE_TO_SCAN, emptyList(), listOf("Application metadata unavailable."))
+            } else {
+                analyze(File(app.sourceDir), info, label, inspectDex = true)
+            }
+            reports += report
+            onProgress(index + 1, targets.size, label)
+        }
+        return reports
     }
 
     private fun analyze(file: File, info: PackageInfo, label: String, inspectDex: Boolean): ScanReport {
