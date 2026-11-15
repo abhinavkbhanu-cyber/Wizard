@@ -8,7 +8,7 @@ internal object DnsBlocklist {
         "adroll.com", "adsafeprotected.com", "advertising.com", "amazon-adsystem.com",
         "criteo.com", "criteo.net", "outbrain.com", "taboola.com",
         "scorecardresearch.com", "quantserve.com", "moatads.com", "rubiconproject.com",
-        "pubmatic.com", "openx.net", "casalemedia.com", " lijit.com",
+        "pubmatic.com", "openx.net", "casalemedia.com", "lijit.com",
         "branch.io", "appsflyer.com", "adjust.com", "kochava.com",
         "unityads.unity3d.com", "ads.unity.com", "applovin.com", "ironsrc.com",
         "vungle.com", "chartboost.com", "inmobi.com", "mopub.com",
