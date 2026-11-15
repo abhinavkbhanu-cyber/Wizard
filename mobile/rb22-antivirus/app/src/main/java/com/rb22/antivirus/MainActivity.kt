@@ -119,19 +119,24 @@ class MainActivity : ComponentActivity() {
             report("Reviewing installed-app permissions and metadata…")
             val result = withContext(Dispatchers.IO) {
                 try {
-                    val reports = ApkScanner.scanInstalledInventory(this@MainActivity)
+                    val reports = ApkScanner.scanInstalledInventory(this@MainActivity) { done, total, appName ->
+                        runOnUiThread { report("Scanning installed apps: $done/$total\\n$appName") }
+                    }
                     val flagged = reports.filter { it.verdict == ScanVerdict.SUSPICIOUS }
+                    val unable = reports.count { it.verdict == ScanVerdict.UNABLE_TO_SCAN }
                     buildString {
-                        appendLine("Installed apps reviewed: ${reports.size}")
-                        appendLine("Apps with indicators to review: ${flagged.size}")
+                        appendLine("FULL INSTALLED-APP SCAN COMPLETE")
+                        appendLine("Apps scanned: ${reports.size}")
+                        appendLine("Apps needing review: ${flagged.size}")
+                        appendLine("Apps Android did not allow RB22 to inspect: $unable")
                         appendLine()
-                        if (flagged.isEmpty()) appendLine("No known heuristic indicators were found in accessible app metadata. This is not proof that installed apps are safe.")
-                        flagged.take(12).forEach { item ->
+                        if (flagged.isEmpty()) appendLine("No known heuristic indicators were detected in the inspected apps. This does NOT prove they are safe.")
+                        flagged.take(20).forEach { item ->
                             appendLine("• ${item.appName} (${item.packageName})")
-                            item.findings.take(3).forEach { appendLine("  - ${it.detail}") }
+                            item.findings.take(4).forEach { appendLine("  - ${it.detail}") }
                         }
                         appendLine()
-                        append("Inventory mode checks permissions and app metadata only; it does not inspect every app's code.")
+                        append("RB22 inspected accessible APK metadata and bounded DEX content sequentially. Findings are heuristic; unknown malware can be missed and legitimate apps can be flagged.")
                     }
                 } catch (e: Exception) {
                     "Installed-app inventory scan failed (${e.javaClass.simpleName})."
@@ -249,8 +254,8 @@ private fun AntivirusHome(
         }
         Card(Modifier.fillMaxWidth(), colors = CardDefaults.cardColors(containerColor = RbPanel)) {
             Column(Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                Text("Installed-app review", style = MaterialTheme.typography.titleLarge)
-                Text("Review installed app permissions and metadata. Inventory mode does not inspect all app code.")
+                Text("Full device app scan", style = MaterialTheme.typography.titleLarge)
+                Text("Scan all visible installed apps in one run. RB22 checks permissions and bounded APK code indicators sequentially, then lists apps that need review.")
                 OutlinedButton(onClick = { scanResult = "Reviewing installed apps…"; onScanInventory { scanResult = it } }) { Text("Scan installed apps") }
             }
         }
