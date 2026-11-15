@@ -8,7 +8,7 @@ internal object DomainFilter {
         "app-measurement.com", "unityads.unity3d.com", "applovin.com",
         "ironsrc.com", "supersonicads.com", "vungle.com", "inmobi.com",
         "chartboost.com", "mopub.com", "startapp.com", "tapjoy.com",
-        " fyber.com", "mintegral.com", "liftoff.io", "bigo.sg",
+        "fyber.com", "mintegral.com", "liftoff.io", "bigo.sg",
         "admob.com", "ads.google.com", "pagead2.googlesyndication.com",
         "securepubads.g.doubleclick.net", "adform.net", "criteo.com",
         "criteo.net", "outbrain.com", "taboola.com", "zedo.com",
