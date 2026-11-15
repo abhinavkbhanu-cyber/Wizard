@@ -15,7 +15,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 concurrency:
   group: rb22-antivirus-android-ci-${{ github.event.pull_request.number || github.ref }}
@@ -58,3 +58,35 @@ jobs:
           path: mobile/rb22-antivirus/app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
           retention-days: 30
+
+  publish-release:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/av'
+    needs: debug-build
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Download freshly built APK
+        uses: actions/download-artifact@v4
+        with:
+          name: RB22-Antivirus-0.3.0-alpha-debug
+          path: dist
+      - name: Prepare checksum
+        run: |
+          cd dist
+          mv app-debug.apk RB22-Antivirus-0.3.0-alpha-debug.apk
+          sha256sum RB22-Antivirus-0.3.0-alpha-debug.apk > SHA256SUMS.txt
+      - name: Publish versioned GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          TAG: v0.3.0-alpha
+        run: |
+          APK="dist/RB22-Antivirus-0.3.0-alpha-debug.apk"
+          SUM="dist/SHA256SUMS.txt"
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            gh release upload "$TAG" "$APK" "$SUM" --clobber
+          else
+            gh release create "$TAG" "$APK#RB22-Antivirus-0.3.0-alpha-debug.apk" "$SUM#SHA-256 checksum" \
+              --target "$GITHUB_SHA" \
+              --title "RB22 Antivirus v0.3.0-alpha" \
+              --notes "Fresh Android debug build from the av branch. This is an early test build, not a production-signed release. Android will ask the user to approve installation. Verify the APK with the included SHA-256 checksum."
+          fi
