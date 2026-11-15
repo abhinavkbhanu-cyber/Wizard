@@ -9,8 +9,8 @@ android {
         applicationId = "com.rb22.antivirus"
         minSdk = 28
         targetSdk = 35
-        versionCode = 1
-        versionName = "0.1.0-alpha"
+        versionCode = 2
+        versionName = "0.2.0-alpha"
     }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
