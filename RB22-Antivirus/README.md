@@ -2,24 +2,22 @@
 
 Standalone Android security project, separate from RB22 Game Booster.
 
-## Alpha 0.2.0 — RB22 Shield preview
+## Alpha 0.3.0 — RB22 Shield stronger starter list
 - Opt-in local DNS filtering VPN, requiring Android's VPN approval.
-- Captures only DNS packets routed to the app's virtual DNS endpoint.
-- Checks hostnames against a small bundled denylist and returns NXDOMAIN for listed hosts.
-- Forwards other DNS queries to Cloudflare DNS (1.1.1.1).
-- Does not upload or store app inventory, browsing history, or DNS query logs.
-- Uses a low-importance foreground notification while active.
+- Expanded built-in list covering common ad networks, mobile-game ad SDKs, trackers, and advertising exchanges.
+- Exact-domain and subdomain matching; listed domains receive NXDOMAIN.
+- Other IPv4 UDP DNS queries are forwarded to Cloudflare DNS (1.1.1.1).
+- No browsing history or DNS query logs are stored or uploaded by this filtering module.
 
 ## Important limitations
-This is a preview, not a complete system-wide ad blocker:
-- The starter denylist is small and misses many ads and malicious domains.
-- DNS filtering cannot remove ads served from the same host as wanted content.
-- DNS-over-HTTPS, DNS-over-TLS, hard-coded IPs, app proxies, and other VPNs can bypass this DNS filter.
-- It does not inspect HTTPS page paths, remove webpage pop-up elements, or guarantee every redirect is blocked.
-- This preview handles IPv4 DNS only; IPv6 and encrypted-DNS coverage need further work.
+This is still a DNS-level alpha, not a complete ad blocker:
+- It may block some third-party ad domains used by mobile games, but cannot guarantee every in-game ad is removed.
+- YouTube video ads commonly share delivery infrastructure with wanted video content; DNS filtering cannot reliably separate them.
+- DNS filtering cannot remove webpage pop-up elements or ads served from the same host as wanted content.
+- DNS-over-HTTPS, DNS-over-TLS, hard-coded IPs, app proxies, and other VPNs can bypass this filter.
+- It handles IPv4 UDP DNS only; IPv6 and TCP DNS fallback still need work.
 - A VPN-based filter cannot run at the same time as another VPN on Android.
-
-Do not claim that this preview blocks all ads or all unsafe redirects.
+- The list is a manually curated starter list and is not comprehensive; some apps may malfunction if a required domain is blocked.
 
 ## Battery and privacy
 - No periodic polling or wake lock.
@@ -35,7 +33,7 @@ gradle :app:assembleDebug --no-daemon
 
 ## Next milestones
 1. Add automated tests for DNS parsing, NXDOMAIN generation, and domain suffix matching.
-2. Add signed blocklist updates and rollback protection.
-3. Add allowlist, block counters, and per-category switches.
-4. Add IPv6 and encrypted-DNS handling strategy.
+2. Add a safe allowlist, block counters, and per-category switches.
+3. Add validated community blocklist updates with rollback protection.
+4. Add IPv6 and TCP DNS support with safe packet handling.
 5. Test on Android 9–16, VPN conflicts, sleep, and network reconnect.
