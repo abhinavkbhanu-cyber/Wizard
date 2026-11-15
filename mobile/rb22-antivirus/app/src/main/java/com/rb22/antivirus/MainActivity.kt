@@ -3,6 +3,7 @@ package com.rb22.antivirus
 import android.Manifest
 import android.content.Intent
 import android.net.Uri
+import android.net.VpnService
 import android.os.Build
 import android.os.Bundle
 import android.content.pm.PackageManager
@@ -65,6 +66,11 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         UpdateCheckWorker.schedule(this)
+        val vpnPermissionLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            if (result.resultCode == RESULT_OK) {
+                ContextCompat.startForegroundService(this, Intent(this, AdBlockVpnService::class.java).setAction(AdBlockVpnService.ACTION_START))
+            }
+        }
         setContent {
             MaterialTheme(colorScheme = darkColorScheme(primary = RbRed, background = RbBlack, surface = RbPanel, onPrimary = Color.White, onBackground = RbWhite, onSurface = RbWhite)) {
                 Surface(modifier = Modifier.fillMaxSize(), color = RbBlack) {
@@ -73,6 +79,18 @@ class MainActivity : ComponentActivity() {
                         onScanInventory = { report -> scanInstalledApps(report) },
                         onProtectionChanged = { enabled ->
                             getSharedPreferences(PROTECTION_PREFS, MODE_PRIVATE).edit().putBoolean(PROTECTION_ENABLED, enabled).apply()
+                        },
+                        onToggleAdBlock = { enabled ->
+                            if (enabled) {
+                                val permissionIntent = VpnService.prepare(this)
+                                if (permissionIntent == null) {
+                                    ContextCompat.startForegroundService(this, Intent(this, AdBlockVpnService::class.java).setAction(AdBlockVpnService.ACTION_START))
+                                } else {
+                                    vpnPermissionLauncher.launch(permissionIntent)
+                                }
+                            } else {
+                                startService(Intent(this, AdBlockVpnService::class.java).setAction(AdBlockVpnService.ACTION_STOP))
+                            }
                         },
                         onCheckUpdates = { report -> checkForUpdates(report) },
                         onOpenReleases = { openReleases() }
@@ -221,6 +239,7 @@ private fun AntivirusHome(
     onScanApk: (Uri, (String) -> Unit) -> Unit,
     onScanInventory: ((String) -> Unit) -> Unit,
     onProtectionChanged: (Boolean) -> Unit,
+    onToggleAdBlock: (Boolean) -> Unit,
     onCheckUpdates: ((String) -> Unit) -> Unit,
     onOpenReleases: () -> Unit
 ) {
@@ -257,6 +276,15 @@ private fun AntivirusHome(
                 Text("Full device app scan", style = MaterialTheme.typography.titleLarge)
                 Text("Scan all visible installed apps in one run. RB22 checks permissions and bounded APK code indicators sequentially, then lists apps that need review.")
                 OutlinedButton(onClick = { scanResult = "Reviewing installed apps…"; onScanInventory { scanResult = it } }) { Text("Scan installed apps") }
+            }
+        }
+        Card(Modifier.fillMaxWidth(), colors = CardDefaults.cardColors(containerColor = RbPanel)) {
+            Column(Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Text("Ad & tracker blocker", style = MaterialTheme.typography.titleLarge)
+                Text("Optional DNS filtering blocks a starter list of known ad and tracking domains. Android will ask permission to create a local VPN connection.")
+                Button(onClick = { onToggleAdBlock(true) }) { Text("Enable DNS blocker") }
+                OutlinedButton(onClick = { onToggleAdBlock(false) }) { Text("Disable DNS blocker") }
+                Text("Limits: DNS filtering cannot reliably remove YouTube video ads or ads served from the same domain as wanted content. It may conflict with another VPN and some apps or sites may need an allowlist.", color = Color.Gray, style = MaterialTheme.typography.bodySmall)
             }
         }
         Card(Modifier.fillMaxWidth(), colors = CardDefaults.cardColors(containerColor = RbPanel)) {
