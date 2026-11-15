@@ -2,7 +2,7 @@ name: RB22 Antivirus Android CI
 
 on:
   push:
-    branches: [main, feature/rb22-antivirus-android]
+    branches: [main, feature/rb22-antivirus-android, av]
     paths:
       - 'mobile/rb22-antivirus/**'
       - '.github/workflows/rb22-antivirus-android-ci.yml'
@@ -54,7 +54,7 @@ jobs:
       - name: Upload CI APK (not a production release)
         uses: actions/upload-artifact@v4
         with:
-          name: RB22-Antivirus-Alpha-debug
+          name: RB22-Antivirus-0.3.0-alpha-debug
           path: mobile/rb22-antivirus/app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
-          retention-days: 14
+          retention-days: 30
