@@ -4,7 +4,7 @@
     <!-- Broad visibility is needed for a user-requested installed-app inventory scan.
          Google Play restricts QUERY_ALL_PACKAGES; distribution policy review is required. -->
     <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES" />
-    <application android:allowBackup="false" android:label="RB22 Antivirus" android:supportsRtl="true" android:theme="@android:style/Theme.Material.Light.NoActionBar">
+    <application android:allowBackup="false" android:icon="@drawable/ic_rb22_launcher" android:roundIcon="@drawable/ic_rb22_launcher" android:label="RB22 Antivirus" android:supportsRtl="true" android:theme="@android:style/Theme.Material.Light.NoActionBar">
         <activity android:name=".MainActivity" android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
