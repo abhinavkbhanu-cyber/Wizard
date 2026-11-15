@@ -1,6 +1,6 @@
 # RB22 Antivirus for Android
 
-**Status: experimental developer alpha. Not a replacement for Google Play Protect or a production antivirus.** This is a separate Android project at `mobile/rb22-antivirus/`; it does not merge with RB22 Game Booster or either Windows app. Minimum OS: Android 9 (API 28).
+**Status: experimental developer alpha (0.3.0-alpha). Not a replacement for Google Play Protect or a production antivirus.** This is a separate Android project at `mobile/rb22-antivirus/`; it does not merge with RB22 Game Booster or either Windows app. Minimum OS: Android 9 (API 28).
 
 ## Implemented prototype features
 - Local APK scan: SHA-256, Android APK metadata and requested permissions, plus bounded inspection of selected DEX strings for a few risky API indicators.
@@ -8,7 +8,7 @@
 - Install/update event alerts: a manifest receiver queues a WorkManager scan for an app reported as newly installed or replaced; suspicious heuristic findings can trigger a notification.
 - Toggle to enable/disable those install/update alerts.
 - Unit tests for SHA-256 and several heuristic indicators.
-- Checks the public GitHub release feed on launch/on demand; background update notices still require manual review and installation.
+- Checks the public GitHub release feed on launch and on demand; WorkManager also checks approximately every 24 hours when network is available and posts a notification for a newer Antivirus release. Users review the release page and install through Android’s normal user-confirmed installer flow; there is no silent installation or verified in-app APK download yet.
 
 ## Detection limitations — read before use
 This is **not a full antivirus engine**. It has no trusted malware signature/hash feed, no signed threat-intelligence update channel, no cloud reputation service, no behavior monitoring, no system-wide install blocking, and no quarantine/removal. Static indicators are weak signals: legitimate apps can use SMS, accessibility, dynamic-loading or process APIs, and malware can evade these checks. A “No known indicators found” result does not mean an app is safe. Continue using Google Play Protect and install apps only from trusted sources.
