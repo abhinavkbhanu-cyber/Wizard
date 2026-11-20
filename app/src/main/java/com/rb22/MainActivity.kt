@@ -77,7 +77,7 @@ class MainActivity : AppCompatActivity() {
         findViewById<Button>(R.id.gaming_ping).setOnClickListener { runGamingPing() }
         findViewById<Button>(R.id.network_focus_select).setOnClickListener { showNetworkAppPicker() }
         findViewById<Button>(R.id.network_focus_start).setOnClickListener { startNetworkFocus() }
-        findViewById<Button>(R.id.network_focus_stop).setOnClickListener { stopNetworkFocus() }
+        findViewById<Button>(R.id.network_focus_stop).setOnClickListener { stopNetworkFocus() }\n        findViewById<Button>(R.id.check_updates).setOnClickListener {\n            UpdateCheckWorker.checkNow(this)\n            findViewById<TextView>(R.id.update_status).text = "Checking official RB22 releases… Connect to the internet and wait a moment."\n            Toast.makeText(this, "Update check queued", Toast.LENGTH_SHORT).show()\n        }
         refreshNetworkFocusSelection()
 
         val dnsButtons = listOf(
