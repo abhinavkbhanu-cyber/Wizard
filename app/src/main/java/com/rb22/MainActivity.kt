@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.net.VpnService
+import android.net.TrafficStats
 import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
@@ -28,6 +29,17 @@ class MainActivity : AppCompatActivity() {
 
     private val gamingEndpoints = listOf("Cloudflare" to "1.1.1.1", "Google" to "8.8.8.8", "Quad9" to "9.9.9.9")
     private var pendingDnsIp: String? = null
+    private val networkHandler by lazy { android.os.Handler(mainLooper) }
+    private var networkFocusRunning = false
+    private var previousRxBytes = TrafficStats.UNSUPPORTED.toLong()
+    private var previousTxBytes = TrafficStats.UNSUPPORTED.toLong()
+    private var previousNetworkSampleTime = 0L
+    private val networkFocusTick = object : Runnable {
+        override fun run() {
+            updateNetworkFocusStats()
+            if (networkFocusRunning) networkHandler.postDelayed(this, 2000L)
+        }
+    }
 
     private val gamePrefs by lazy {
         getSharedPreferences("rb22_games", Context.MODE_PRIVATE)
@@ -63,7 +75,10 @@ class MainActivity : AppCompatActivity() {
 
         findViewById<Button>(R.id.dns_auto).setOnClickListener { testDns() }
         findViewById<Button>(R.id.gaming_ping).setOnClickListener { runGamingPing() }
-        findViewById<Button>(R.id.network_overdrive_test).setOnClickListener { runNetworkOverdrive() }
+        findViewById<Button>(R.id.network_focus_select).setOnClickListener { showNetworkAppPicker() }
+        findViewById<Button>(R.id.network_focus_start).setOnClickListener { startNetworkFocus() }
+        findViewById<Button>(R.id.network_focus_stop).setOnClickListener { stopNetworkFocus() }
+        refreshNetworkFocusSelection()
 
         val dnsButtons = listOf(
             R.id.dns_cloudflare to dnsOptions[0],
@@ -171,28 +186,73 @@ class MainActivity : AppCompatActivity() {
             }
         }
     }
-    private fun runNetworkOverdrive() {
-        val button = findViewById<Button>(R.id.network_overdrive_test)
-        val status = findViewById<TextView>(R.id.network_overdrive_status)
-        button.isEnabled = false
-        button.text = "TESTING…"
-        status.text = "4 parallel connections • maximum 10 MB test"
-        NetworkOverdrive.run { result, error ->
-            runOnUiThread {
-                button.isEnabled = true
-                button.text = "⚡ RUN MAX BANDWIDTH TEST"
-                if (result == null) {
-                    status.text = "TEST FAILED • ${error ?: "Check connection"}"
-                } else {
-                    status.text = String.format(
-                        java.util.Locale.US,
-                        "DOWNLOAD  %.2f Mbps   •   UPLOAD  %.2f Mbps\n4 parallel streams • %.1f MB transferred",
-                        result.downloadMbps, result.uploadMbps,
-                        (result.downloadBytes + result.uploadBytes) / (1024.0 * 1024.0)
-                    )
-                }
-            }
+    private fun showNetworkAppPicker() {
+        val intent = Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_LAUNCHER)
+        val apps = packageManager.queryIntentActivities(intent, 0)
+            .filter { it.activityInfo.packageName != packageName }
+            .distinctBy { it.activityInfo.packageName }
+            .sortedBy { it.loadLabel(packageManager).toString().lowercase() }
+        if (apps.isEmpty()) { Toast.makeText(this, "No launchable apps found", Toast.LENGTH_SHORT).show(); return }
+        val labels = apps.map { it.loadLabel(packageManager).toString() }.toTypedArray()
+        AlertDialog.Builder(this).setTitle("Choose any app for Network Focus")
+            .setItems(labels) { _, which ->
+                gamePrefs.edit().putString("network_focus_package", apps[which].activityInfo.packageName).apply()
+                refreshNetworkFocusSelection()
+                Toast.makeText(this, "Selected " + labels[which], Toast.LENGTH_SHORT).show()
+            }.setNegativeButton("CANCEL", null).show()
+    }
+
+    private fun refreshNetworkFocusSelection() {
+        val pkg = gamePrefs.getString("network_focus_package", null)
+        val label = if (pkg.isNullOrEmpty()) null else runCatching {
+            packageManager.getApplicationLabel(packageManager.getApplicationInfo(pkg, 0)).toString()
+        }.getOrNull()
+        findViewById<TextView>(R.id.network_focus_status).text =
+            if (label == null) "Choose an app to monitor its network usage." else "SELECTED: $label • Ready to monitor"
+    }
+
+    private fun startNetworkFocus() {
+        val pkg = gamePrefs.getString("network_focus_package", null)
+        if (pkg.isNullOrEmpty()) { showNetworkAppPicker(); return }
+        val uid = runCatching { packageManager.getApplicationInfo(pkg, 0).uid }.getOrNull()
+        if (uid == null) { Toast.makeText(this, "That app is no longer installed.", Toast.LENGTH_SHORT).show(); return }
+        previousRxBytes = TrafficStats.getUidRxBytes(uid)
+        previousTxBytes = TrafficStats.getUidTxBytes(uid)
+        previousNetworkSampleTime = System.currentTimeMillis()
+        networkFocusRunning = true
+        networkHandler.removeCallbacks(networkFocusTick)
+        networkHandler.post(networkFocusTick)
+    }
+
+    private fun stopNetworkFocus() {
+        networkFocusRunning = false
+        networkHandler.removeCallbacks(networkFocusTick)
+        findViewById<TextView>(R.id.network_focus_status).text = "NETWORK FOCUS PAUSED"
+    }
+
+    private fun updateNetworkFocusStats() {
+        val pkg = gamePrefs.getString("network_focus_package", null) ?: return
+        val uid = runCatching { packageManager.getApplicationInfo(pkg, 0).uid }.getOrNull() ?: return
+        val rx = TrafficStats.getUidRxBytes(uid)
+        val tx = TrafficStats.getUidTxBytes(uid)
+        if (rx == TrafficStats.UNSUPPORTED.toLong() || tx == TrafficStats.UNSUPPORTED.toLong() ||
+            previousRxBytes == TrafficStats.UNSUPPORTED.toLong() || previousTxBytes == TrafficStats.UNSUPPORTED.toLong()) {
+            findViewById<TextView>(R.id.network_focus_status).text = "Per-app traffic statistics are not supported on this device."
+            networkFocusRunning = false
+            return
         }
+        val now = System.currentTimeMillis()
+        val elapsed = ((now - previousNetworkSampleTime).coerceAtLeast(1L)) / 1000.0
+        val down = ((rx - previousRxBytes).coerceAtLeast(0L) * 8.0 / elapsed) / 1000000.0
+        val up = ((tx - previousTxBytes).coerceAtLeast(0L) * 8.0 / elapsed) / 1000000.0
+        val totalDown = rx / (1024.0 * 1024.0)
+        val totalUp = tx / (1024.0 * 1024.0)
+        val label = runCatching { packageManager.getApplicationLabel(packageManager.getApplicationInfo(pkg, 0)).toString() }.getOrDefault("Selected app")
+        findViewById<TextView>(R.id.network_focus_status).text = String.format(java.util.Locale.US,
+            "%s • ↓ %.2f Mbps  ↑ %.2f Mbps\nTOTAL • ↓ %.1f MB  ↑ %.1f MB", label, down, up, totalDown, totalUp)
+        previousRxBytes = rx
+        previousTxBytes = tx
+        previousNetworkSampleTime = now
     }
 
     private fun applyActiveTheme() {
