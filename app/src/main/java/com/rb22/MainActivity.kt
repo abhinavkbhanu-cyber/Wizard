@@ -63,6 +63,7 @@ class MainActivity : AppCompatActivity() {
 
         findViewById<Button>(R.id.dns_auto).setOnClickListener { testDns() }
         findViewById<Button>(R.id.gaming_ping).setOnClickListener { runGamingPing() }
+        findViewById<Button>(R.id.network_overdrive_test).setOnClickListener { runNetworkOverdrive() }
 
         val dnsButtons = listOf(
             R.id.dns_cloudflare to dnsOptions[0],
@@ -170,6 +171,30 @@ class MainActivity : AppCompatActivity() {
             }
         }
     }
+    private fun runNetworkOverdrive() {
+        val button = findViewById<Button>(R.id.network_overdrive_test)
+        val status = findViewById<TextView>(R.id.network_overdrive_status)
+        button.isEnabled = false
+        button.text = "TESTING…"
+        status.text = "4 parallel connections • maximum 10 MB test"
+        NetworkOverdrive.run { result, error ->
+            runOnUiThread {
+                button.isEnabled = true
+                button.text = "⚡ RUN MAX BANDWIDTH TEST"
+                if (result == null) {
+                    status.text = "TEST FAILED • ${error ?: "Check connection"}"
+                } else {
+                    status.text = String.format(
+                        java.util.Locale.US,
+                        "DOWNLOAD  %.2f Mbps   •   UPLOAD  %.2f Mbps\n4 parallel streams • %.1f MB transferred",
+                        result.downloadMbps, result.uploadMbps,
+                        (result.downloadBytes + result.uploadBytes) / (1024.0 * 1024.0)
+                    )
+                }
+            }
+        }
+    }
+
     private fun applyActiveTheme() {
         val active = gamePrefs.getBoolean("max_fps", false) ||
                 gamePrefs.getBoolean("game_mode", false) ||
