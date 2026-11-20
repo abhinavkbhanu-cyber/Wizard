@@ -11,8 +11,8 @@ android {
         applicationId = "com.rb22"
         minSdk = 24
         targetSdk = 35
-        versionCode = 8
-        versionName = "3.6.0"
+        versionCode = 9
+        versionName = "3.7.0"
     }
 
     compileOptions {
