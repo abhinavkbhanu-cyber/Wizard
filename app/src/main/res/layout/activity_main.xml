@@ -12,7 +12,7 @@
             android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1">
             <TextView android:text="RB22" android:textColor="#FFFFFF" android:textSize="30sp" android:textStyle="bold"
                 android:layout_width="wrap_content" android:layout_height="wrap_content"/>
-            <TextView android:text="ULTIMATE  •  v3.7.0  •  NETWORK OVERDRIVE" android:textColor="#B8FFE7" android:textSize="11sp" android:textStyle="bold"
+            <TextView android:text="ULTIMATE  •  v3.8.0  •  NETWORK FOCUS" android:textColor="#B8FFE7" android:textSize="11sp" android:textStyle="bold"
                 android:layout_width="wrap_content" android:layout_height="wrap_content"/>
         </LinearLayout>
         <TextView android:text="● LIVE" android:textColor="#B8FFE7" android:textSize="11sp" android:textStyle="bold"
@@ -116,20 +116,27 @@
 
     <LinearLayout android:orientation="vertical" android:padding="15dp" android:layout_marginTop="12dp"
         android:background="@drawable/rb22_card" android:tag="rb22_card" android:layout_width="match_parent" android:layout_height="wrap_content">
-        <TextView android:text="NETWORK OVERDRIVE" android:textColor="#FFFFFF" android:textSize="13sp" android:textStyle="bold"
+        <TextView android:text="UNIVERSAL NETWORK FOCUS" android:textColor="#FFFFFF" android:textSize="13sp" android:textStyle="bold"
             android:layout_width="wrap_content" android:layout_height="wrap_content"/>
-        <TextView android:text="Controlled multi-connection bandwidth test • 4 parallel streams"
+        <TextView android:text="Choose any installed app and monitor its real network traffic. No speed-test downloads or artificial traffic."
             android:textColor="#C9D7FF" android:textSize="11sp" android:layout_marginTop="4dp"
             android:layout_width="match_parent" android:layout_height="wrap_content"/>
-        <Button android:id="@+id/network_overdrive_test" android:text="⚡ RUN MAX BANDWIDTH TEST" android:textAllCaps="false"
+        <Button android:id="@+id/network_focus_select" android:text="▣ CHOOSE ANY APP" android:textAllCaps="false"
             android:layout_marginTop="8dp" android:layout_width="match_parent" android:layout_height="48dp"/>
-        <TextView android:id="@+id/network_overdrive_status" android:text="READY • Uses up to 10 MB of data"
+        <LinearLayout android:orientation="horizontal" android:layout_marginTop="6dp"
+            android:layout_width="match_parent" android:layout_height="wrap_content">
+            <Button android:id="@+id/network_focus_start" android:text="▶ START" android:textAllCaps="false"
+                android:layout_width="0dp" android:layout_height="46dp" android:layout_weight="1"/>
+            <Button android:id="@+id/network_focus_stop" android:text="■ STOP" android:textAllCaps="false"
+                android:layout_marginStart="8dp" android:layout_width="0dp" android:layout_height="46dp" android:layout_weight="1"/>
+        </LinearLayout>
+        <TextView android:id="@+id/network_focus_status" android:text="Choose an app to monitor its network usage."
             android:textColor="#B8FFE7" android:textSize="11sp" android:textStyle="bold" android:layout_marginTop="7dp"
             android:layout_width="match_parent" android:layout_height="wrap_content"/>
-        <TextView android:text="Measures available speed; it cannot increase ISP plan speed or force Android to reserve bandwidth for a game."
+        <TextView android:text="Android does not let ordinary apps force another app to use more bandwidth or reserve network priority. This tool measures per-app traffic; it does not inject extra traffic."
             android:textColor="#A8B4C9" android:textSize="10sp" android:layout_marginTop="5dp"
             android:layout_width="match_parent" android:layout_height="wrap_content"/>
-    </LinearLayout>
+
 
     <LinearLayout android:orientation="vertical" android:padding="15dp" android:layout_marginTop="12dp"
         android:background="@drawable/rb22_card" android:tag="rb22_card" android:layout_width="match_parent" android:layout_height="wrap_content">
