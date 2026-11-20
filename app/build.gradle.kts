@@ -15,7 +15,11 @@ android {
         versionName = "3.9.0"
     }
 
-    buildFeatures {\n        buildConfig = true\n    }\n\n    compileOptions {
+    buildFeatures {
+        buildConfig = true
+    }
+
+    compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
@@ -33,5 +37,6 @@ android {
 
 dependencies {
     implementation("androidx.core:core-ktx:1.15.0")
-    implementation("androidx.appcompat:appcompat:1.7.0")\n    implementation("androidx.work:work-runtime-ktx:2.10.0")
+    implementation("androidx.appcompat:appcompat:1.7.0")
+    implementation("androidx.work:work-runtime-ktx:2.10.0")
 }
