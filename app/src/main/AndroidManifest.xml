@@ -38,8 +38,6 @@
             <intent-filter><action android:name="android.net.VpnService"/></intent-filter>
             <meta-data android:name="android.net.VpnService.SUPPORTS_ALWAYS_ON" android:value="false"/>
         </service>
-        <provider android:name="androidx.core.content.FileProvider" android:authorities="${applicationId}.fileprovider" android:exported="false" android:grantUriPermissions="true">
-            <meta-data android:name="android.support.FILE_PROVIDER_PATHS" android:resource="@xml/rb22_file_paths"/>
-        </provider>
+
     </application>
 </manifest>
