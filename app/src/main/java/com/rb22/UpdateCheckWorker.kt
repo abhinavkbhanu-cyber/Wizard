@@ -46,10 +46,10 @@ class UpdateCheckWorker(context: Context, params: WorkerParameters) : CoroutineW
             if (connection.responseCode != HttpURLConnection.HTTP_OK) return Result.retry()
             val releases = JSONArray(connection.inputStream.bufferedReader().use { it.readText() })
             val versions = mutableListOf<Pair<String, String>>()
-            val apkVersionPattern = Regex("^RB22-v([0-9]+(?:\\.[0-9]+){1,3})-mobile-debug\\.apk$")
+            val apkVersionPattern = Regex("^RB22-v([0-9]+(?:\\.[0-9]+){1,3}(?:-[A-Za-z0-9.-]+)?)-mobile-debug\\.apk$")
             for (i in 0 until releases.length()) {
                 val release = releases.getJSONObject(i)
-                if (release.optBoolean("draft", true) || release.optBoolean("prerelease", false)) continue
+                if (release.optBoolean("draft", true)) continue
                 val assets = release.optJSONArray("assets") ?: continue
                 for (assetIndex in 0 until assets.length()) {
                     val assetName = assets.getJSONObject(assetIndex).optString("name")

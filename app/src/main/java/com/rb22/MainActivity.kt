@@ -196,15 +196,6 @@ class MainActivity : AppCompatActivity() {
             }
         }
     }
-    private fun hasUsageAccess(): Boolean {
-        val appOps = getSystemService(Context.APP_OPS_SERVICE) as AppOpsManager
-        return appOps.checkOpNoThrow(
-            AppOpsManager.OPSTR_GET_USAGE_STATS,
-            android.os.Process.myUid(),
-            packageName
-        ) == AppOpsManager.MODE_ALLOWED
-    }
-
     override fun onResume() {
         super.onResume()
         if (pendingNetworkFocusStart && hasUsageAccess()) {
