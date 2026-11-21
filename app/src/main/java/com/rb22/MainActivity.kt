@@ -417,26 +417,61 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    private fun probeDnsResolver(ip: String): Long? {
+        val id = java.security.SecureRandom().nextInt(65536)
+        val name = "www.google.com"
+        val query = java.io.ByteArrayOutputStream().apply {
+            write(byteArrayOf((id ushr 8).toByte(), id.toByte(), 0x01, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00))
+            name.split(".").forEach { label ->
+                val bytes = label.toByteArray(Charsets.US_ASCII)
+                write(bytes.size)
+                write(bytes)
+            }
+            write(0)
+            write(byteArrayOf(0x00, 0x01, 0x00, 0x01))
+        }.toByteArray()
+        return try {
+            java.net.DatagramSocket().use { socket ->
+                socket.soTimeout = 1400
+                socket.connect(InetAddress.getByName(ip), 53)
+                val start = System.nanoTime()
+                socket.send(DatagramPacket(query, query.size))
+                val response = ByteArray(2048)
+                val reply = DatagramPacket(response, response.size)
+                socket.receive(reply)
+                val elapsed = (System.nanoTime() - start) / 1_000_000
+                if (reply.length < 12) return null
+                val responseId = ((response[0].toInt() and 255) shl 8) or (response[1].toInt() and 255)
+                val flags = ((response[2].toInt() and 255) shl 8) or (response[3].toInt() and 255)
+                val rcode = flags and 0x000F
+                if (responseId == id && (flags and 0x8000) != 0 && rcode == 0) elapsed else null
+            }
+        } catch (_: Exception) {
+            null
+        }
+    }
+
     private fun testDns() {
         val status = findViewById<TextView>(R.id.dns_status)
-        status.text = "DNS: Testing 5 resolvers…"
+        status.text = "NETWORK OPTIMIZER: Testing DNS response times…"
+        // Stop an existing RB22 DNS tunnel so probes go directly to each resolver,
+        // rather than being measured through the resolver currently under test.
+        stopService(Intent(this, DnsVpnService::class.java))
+        gamePrefs.edit().remove("active_dns_ip").apply()
+        applyActiveTheme()
         Executors.newSingleThreadExecutor().execute {
             val results = dnsOptions.mapNotNull { (name, pair) ->
-                val hostname = pair.first
-                val ip = pair.second
-                val start = System.nanoTime()
-                val ok = try { InetAddress.getByName(hostname); true } catch (_: Exception) { false }
-                val ms = (System.nanoTime() - start) / 1_000_000
-                if (ok) Triple(name, ip, ms) else null
+                val ms = probeDnsResolver(pair.second)
+                if (ms != null) Triple(name, pair.second, ms) else null
             }.sortedBy { it.third }
 
             runOnUiThread {
                 if (results.isEmpty()) {
-                    status.text = "DNS: Test failed — check your connection."
+                    status.text = "NETWORK OPTIMIZER: No DNS resolver responded. Your current network may block direct DNS tests."
                 } else {
                     val best = results.first()
                     gamePrefs.edit().putString("best_dns_name", best.first).apply()
-                    status.text = "BEST DNS: " + best.first + "  " + best.third + " ms"
+                    status.text = "BEST DNS: " + best.first + " • " + best.third + " ms • activating"
                     activateDns(best.first, best.second)
                 }
             }
