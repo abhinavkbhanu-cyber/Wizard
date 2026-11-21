@@ -12,12 +12,200 @@
             android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1">
             <TextView android:text="RB22" android:textColor="#FFFFFF" android:textSize="30sp" android:textStyle="bold"
                 android:layout_width="wrap_content" android:layout_height="wrap_content"/>
-            <TextView android:text="ANDROID BETA • v1.0 • BOOST / NETWORK / PROTECT" android:textColor="#FFB8C0" android:textSize="10sp" android:textStyle="bold"
+            <TextView android:text="ANDROID BETA  •  v1.0  •  BOOST / NETWORK / PROTECT" android:textColor="#B8FFE7" android:textSize="11sp" android:textStyle="bold"
                 android:layout_width="wrap_content" android:layout_height="wrap_content"/>
         </LinearLayout>
         <TextView android:text="● BETA" android:textColor="#FF6472" android:textSize="11sp" android:textStyle="bold"
             android:layout_width="wrap_content" android:layout_height="wrap_content"/>
     </LinearLayout>
-<!-- Remaining dashboard content retained from the existing Android layout. -->
+
+    <LinearLayout android:orientation="vertical" android:padding="16dp" android:layout_marginTop="16dp"
+        android:background="@drawable/rb22_card" android:tag="rb22_card" android:layout_width="match_parent" android:layout_height="wrap_content">
+        <TextView android:text="PERFORMANCE" android:textColor="#FFFFFF" android:textSize="13sp" android:textStyle="bold"
+            android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+        <LinearLayout android:orientation="horizontal" android:layout_marginTop="12dp"
+            android:layout_width="match_parent" android:layout_height="wrap_content">
+            <TextView android:id="@+id/ram" android:text="RAM  --" android:textColor="#FFFFFF" android:textSize="17sp" android:textStyle="bold"
+                android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1"/>
+            <TextView android:id="@+id/temp" android:text="TEMP  --" android:textColor="#FFFFFF" android:textSize="17sp" android:textStyle="bold"
+                android:gravity="end" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1"/>
+        </LinearLayout>
+        <LinearLayout android:orientation="horizontal" android:layout_marginTop="9dp"
+            android:layout_width="match_parent" android:layout_height="wrap_content">
+            <Button android:id="@+id/device_refresh" android:text="REFRESH" android:textAllCaps="false" android:layout_width="wrap_content" android:layout_height="40dp"/>
+        <TextView android:text="FPS  •  HUD" android:textColor="#C9D7FF" android:textSize="13sp"
+                android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1"/>
+            <TextView android:text="NET  •  READY" android:textColor="#B8FFE7" android:textSize="13sp"
+                android:gravity="end" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1"/>
+        </LinearLayout>
+    </LinearLayout>
+
+    <LinearLayout android:orientation="vertical" android:padding="15dp" android:layout_marginTop="14dp"
+        android:background="@drawable/rb22_card" android:tag="rb22_card" android:layout_width="match_parent" android:layout_height="wrap_content">
+        <LinearLayout android:orientation="horizontal" android:gravity="center_vertical"
+            android:layout_width="match_parent" android:layout_height="wrap_content">
+            <TextView android:text="GAME BOOSTER" android:textColor="#FFFFFF" android:textSize="15sp" android:textStyle="bold"
+                android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1"/>
+            <TextView android:id="@+id/booster_status" android:text="○ BOOSTER OFF" android:textColor="#B8FFE7"
+                android:textSize="10sp" android:textStyle="bold" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+        </LinearLayout>
+        <TextView android:text="Master control for RB22 automation and the gaming overlay"
+            android:textColor="#A8B4C9" android:textSize="11sp" android:layout_marginTop="4dp"
+            android:layout_width="match_parent" android:layout_height="wrap_content"/>
+        <LinearLayout android:orientation="horizontal" android:layout_marginTop="9dp"
+            android:layout_width="match_parent" android:layout_height="wrap_content">
+            <Button android:id="@+id/start_booster" android:text="▶ START BOOSTER" android:textAllCaps="false"
+                android:layout_width="0dp" android:layout_height="50dp" android:layout_weight="1"/>
+            <Button android:id="@+id/stop_booster" android:text="■ TURN OFF" android:textAllCaps="false"
+                android:layout_marginStart="8dp" android:layout_width="0dp" android:layout_height="50dp" android:layout_weight="1"/>
+        </LinearLayout>
+    </LinearLayout>
+
+    <Button android:id="@+id/extreme" android:text="⚡  MAX FPS" android:textAllCaps="false"
+        android:layout_marginTop="14dp" android:layout_width="match_parent" android:layout_height="56dp"/>
+    <LinearLayout android:orientation="horizontal" android:layout_marginTop="8dp"
+        android:layout_width="match_parent" android:layout_height="wrap_content">
+        <Button android:id="@+id/basic" android:text="BALANCED" android:textAllCaps="false"
+            android:layout_width="0dp" android:layout_height="48dp" android:layout_weight="1"/>
+        <Button android:id="@+id/advanced" android:text="ADVANCED" android:textAllCaps="false"
+            android:layout_marginStart="8dp" android:layout_width="0dp" android:layout_height="48dp" android:layout_weight="1"/>
+    </LinearLayout>
+    <TextView android:id="@+id/boost_status" android:text="READY  •  SELECT A MODE"
+        android:textColor="#B8FFE7" android:textSize="11sp" android:textStyle="bold" android:gravity="center"
+        android:layout_marginTop="6dp" android:layout_width="match_parent" android:layout_height="wrap_content"/>
+
+    <Button android:id="@+id/overlay" android:text="◉  START TRANSPARENT HUD" android:textAllCaps="false"
+        android:layout_marginTop="12dp" android:layout_width="match_parent" android:layout_height="52dp"/>
+
+    <LinearLayout android:orientation="vertical" android:padding="15dp" android:layout_marginTop="16dp"
+        android:background="@drawable/rb22_card" android:tag="rb22_card" android:layout_width="match_parent" android:layout_height="wrap_content">
+        <TextView android:text="SMART ENGINE" android:textColor="#FFFFFF" android:textSize="13sp" android:textStyle="bold"
+            android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+        <TextView android:text="Adaptive • thermal guard • RAM monitor • game profiles"
+            android:textColor="#C9D7FF" android:textSize="12sp" android:layout_marginTop="4dp"
+            android:layout_width="match_parent" android:layout_height="wrap_content"/>
+        <TextView android:id="@+id/ultimate_status" android:text="ENGINE: STARTING…"
+            android:textColor="#B8FFE7" android:textSize="11sp" android:textStyle="bold" android:layout_marginTop="9dp"
+            android:layout_width="match_parent" android:layout_height="wrap_content"/>
+        <Button android:id="@+id/smart_auto" android:text="ENABLE SMART AUTOMATION" android:textAllCaps="false"
+            android:layout_marginTop="9dp" android:layout_width="match_parent" android:layout_height="48dp"/>
+    </LinearLayout>
+
+    <LinearLayout android:orientation="vertical" android:padding="15dp" android:layout_marginTop="12dp"
+        android:background="@drawable/rb22_card" android:tag="rb22_card" android:layout_width="match_parent" android:layout_height="wrap_content">
+        <TextView android:text="NETWORK BOOSTER  •  DNS OPTIMIZER" android:textColor="#FFFFFF" android:textSize="13sp" android:textStyle="bold"
+            android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+        <Button android:id="@+id/dns_auto" android:text="⚡ AUTO OPTIMIZE NETWORK" android:textAllCaps="false"
+            android:layout_marginTop="8dp" android:layout_width="match_parent" android:layout_height="48dp"/>
+        <Button android:id="@+id/gaming_ping" android:text="🎯 FIND LOWEST GAMING PING" android:textAllCaps="false"
+            android:layout_marginTop="6dp" android:layout_width="match_parent" android:layout_height="48dp"/>
+        <LinearLayout android:orientation="horizontal" android:layout_marginTop="6dp"
+            android:layout_width="match_parent" android:layout_height="wrap_content">
+            <Button android:id="@+id/dns_cloudflare" android:text="1.1.1.1" android:textAllCaps="false" android:layout_width="0dp" android:layout_height="44dp" android:layout_weight="1"/>
+            <Button android:id="@+id/dns_google" android:text="8.8.8.8" android:textAllCaps="false" android:layout_marginStart="6dp" android:layout_width="0dp" android:layout_height="44dp" android:layout_weight="1"/>
+            <Button android:id="@+id/dns_quad9" android:text="9.9.9.9" android:textAllCaps="false" android:layout_marginStart="6dp" android:layout_width="0dp" android:layout_height="44dp" android:layout_weight="1"/>
+        </LinearLayout>
+        <LinearLayout android:orientation="horizontal" android:layout_marginTop="6dp"
+            android:layout_width="match_parent" android:layout_height="wrap_content">
+            <Button android:id="@+id/dns_adguard" android:text="AdGuard" android:textAllCaps="false" android:layout_width="0dp" android:layout_height="44dp" android:layout_weight="1"/>
+            <Button android:id="@+id/dns_opendns" android:text="OpenDNS" android:textAllCaps="false" android:layout_marginStart="6dp" android:layout_width="0dp" android:layout_height="44dp" android:layout_weight="1"/>
+        </LinearLayout>
+        <TextView android:id="@+id/dns_status" android:text="NETWORK OPTIMIZER: READY" android:textColor="#B8FFE7" android:textSize="11sp" android:textStyle="bold"
+            android:layout_marginTop="7dp" android:layout_width="match_parent" android:layout_height="wrap_content"/>
+        <TextView android:text="Auto-tests real DNS response time, then activates the fastest reachable resolver. This can reduce website and game-login lookup delays; it cannot increase your ISP bandwidth or guarantee lower in-game ping."
+            android:textColor="#A8B4C9" android:textSize="10sp" android:layout_marginTop="6dp"
+            android:layout_width="match_parent" android:layout_height="wrap_content"/>
+    </LinearLayout>
+
+    <LinearLayout android:orientation="vertical" android:padding="15dp" android:layout_marginTop="12dp"
+        android:background="@drawable/rb22_card" android:tag="rb22_card" android:layout_width="match_parent" android:layout_height="wrap_content">
+        <TextView android:text="UNIVERSAL NETWORK FOCUS" android:textColor="#FFFFFF" android:textSize="13sp" android:textStyle="bold"
+            android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+        <TextView android:text="Tap once. RB22 automatically detects the app you open and follows app switches while monitoring its network activity."
+            android:textColor="#C9D7FF" android:textSize="11sp" android:layout_marginTop="4dp"
+            android:layout_width="match_parent" android:layout_height="wrap_content"/>
+        <LinearLayout android:orientation="horizontal" android:layout_marginTop="6dp"
+            android:layout_width="match_parent" android:layout_height="wrap_content">
+            <Button android:id="@+id/network_focus_start" android:text="▶ START APP FOCUS" android:textAllCaps="false"
+                android:layout_width="0dp" android:layout_height="46dp" android:layout_weight="1"/>
+            <Button android:id="@+id/network_focus_stop" android:text="■ STOP" android:textAllCaps="false"
+                android:layout_marginStart="8dp" android:layout_width="0dp" android:layout_height="46dp" android:layout_weight="1"/>
+        </LinearLayout>
+        <TextView android:id="@+id/network_focus_status" android:text="APP FOCUS OFF • Tap START APP FOCUS to begin."
+            android:textColor="#B8FFE7" android:textSize="11sp" android:textStyle="bold" android:layout_marginTop="7dp"
+            android:layout_width="match_parent" android:layout_height="wrap_content"/>
+        <TextView android:text="Uses Android Usage Access to follow the foreground app and show its traffic where supported. Android does not allow ordinary apps to force bandwidth priority or guarantee lower ping; no artificial traffic is generated."
+            android:textColor="#A8B4C9" android:textSize="10sp" android:layout_marginTop="5dp"
+            android:layout_width="match_parent" android:layout_height="wrap_content"/>
+
+
+    </LinearLayout>
+
+    <LinearLayout android:orientation="vertical" android:padding="15dp" android:layout_marginTop="12dp"
+        android:background="@drawable/rb22_card" android:tag="rb22_card" android:layout_width="match_parent" android:layout_height="wrap_content">
+        <TextView android:text="GAME LIBRARY" android:textColor="#FFFFFF" android:textSize="13sp" android:textStyle="bold"
+            android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+        <TextView android:id="@+id/game_library_status" android:text="No games saved"
+            android:textColor="#C9D7FF" android:textSize="12sp" android:layout_marginTop="4dp"
+            android:layout_width="match_parent" android:layout_height="wrap_content"/>
+        <LinearLayout android:orientation="horizontal" android:layout_marginTop="8dp"
+            android:layout_width="match_parent" android:layout_height="wrap_content">
+            <Button android:id="@+id/add_game" android:text="＋ ADD" android:textAllCaps="false" android:layout_width="0dp" android:layout_height="48dp" android:layout_weight="1"/>
+            <Button android:id="@+id/game_library" android:text="OPEN" android:textAllCaps="false" android:layout_marginStart="8dp" android:layout_width="0dp" android:layout_height="48dp" android:layout_weight="1"/>
+        </LinearLayout>
+    </LinearLayout>
+
+    <LinearLayout android:orientation="vertical" android:padding="15dp" android:layout_marginTop="12dp"
+        android:background="@drawable/rb22_card" android:tag="rb22_card" android:layout_width="match_parent" android:layout_height="wrap_content">
+        <TextView android:text="DEVICE HEALTH" android:textColor="#FFFFFF" android:textSize="13sp" android:textStyle="bold"
+            android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+        <TextView android:text="Lightweight check — no background cleanup tricks or forced CPU changes." android:textColor="#A8B4C9" android:textSize="11sp" android:layout_marginTop="4dp"
+            android:layout_width="match_parent" android:layout_height="wrap_content"/>
+        <TextView android:text="Refresh RAM and temperature from the current device state." android:textColor="#B8FFE7" android:textSize="10sp" android:layout_marginTop="6dp"
+            android:layout_width="match_parent" android:layout_height="wrap_content"/>
+    </LinearLayout>
+
+    <LinearLayout android:orientation="vertical" android:padding="15dp" android:layout_marginTop="12dp"
+        android:background="@drawable/rb22_card" android:tag="rb22_card" android:layout_width="match_parent" android:layout_height="wrap_content">
+        <TextView android:text="📱 RB22 MOBILE" android:textColor="#FFFFFF" android:textSize="15sp" android:textStyle="bold"
+            android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+        <TextView android:text="Dedicated mobile gaming controls • Dark Moon Aurora • independent from PC"
+            android:textColor="#C9D7FF" android:textSize="12sp" android:layout_marginTop="4dp"
+            android:layout_width="match_parent" android:layout_height="wrap_content"/>
+        <TextView android:text="MAX FPS  •  LOW OVERHEAD  •  GAMING PING  •  DARK AURORA"
+            android:textColor="#B8FFE7" android:textSize="10sp" android:textStyle="bold" android:layout_marginTop="8dp"
+            android:layout_width="match_parent" android:layout_height="wrap_content"/>
+        <LinearLayout android:orientation="horizontal" android:layout_marginTop="9dp"
+            android:layout_width="match_parent" android:layout_height="wrap_content">
+            <Button android:id="@+id/mobile_game_mode" android:text="GAME MODE" android:textAllCaps="false"
+                android:layout_width="0dp" android:layout_height="46dp" android:layout_weight="1"/>
+            <Button android:id="@+id/mobile_tools" android:text="EXTRA TOOLS" android:textAllCaps="false"
+                android:layout_marginStart="8dp" android:layout_width="0dp" android:layout_height="46dp" android:layout_weight="1"/>
+        </LinearLayout>
+        <Button android:id="@+id/mobile_charging" android:text="🔋 CHARGING MODE" android:textAllCaps="false"
+            android:layout_marginTop="7dp" android:layout_width="match_parent" android:layout_height="46dp"/>
+        <TextView android:text="Angel Snap stays PC-only"
+            android:textColor="#7182A8" android:textSize="10sp" android:gravity="center"
+            android:layout_marginTop="6dp" android:layout_width="match_parent" android:layout_height="wrap_content"/>
+    </LinearLayout>
+
+    <LinearLayout android:orientation="vertical" android:padding="15dp" android:layout_marginTop="12dp"
+        android:background="@drawable/rb22_card" android:tag="rb22_card" android:layout_width="match_parent" android:layout_height="wrap_content">
+        <TextView android:text="RB22 AUTO UPDATER" android:textColor="#FFFFFF" android:textSize="13sp" android:textStyle="bold"
+            android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+        <TextView android:text="Checks official Game Booster releases when RB22 opens and about once every 24 hours while network access is available."
+            android:textColor="#C9D7FF" android:textSize="11sp" android:layout_marginTop="4dp"
+            android:layout_width="match_parent" android:layout_height="wrap_content"/>
+        <Button android:id="@+id/check_updates" android:text="↻ CHECK FOR UPDATES" android:textAllCaps="false"
+            android:layout_marginTop="8dp" android:layout_width="match_parent" android:layout_height="46dp"/>
+        <TextView android:id="@+id/update_status" android:text="Automatic update checks enabled • Android will ask before installing an update."
+            android:textColor="#B8FFE7" android:textSize="10sp" android:layout_marginTop="6dp"
+            android:layout_width="match_parent" android:layout_height="wrap_content"/>
+    </LinearLayout>
+
+    <TextView android:text="RB22  •  PERFORMANCE-FIRST  •  SAFE SYSTEM CONTROLS"
+        android:textColor="#7182A8" android:textSize="9sp" android:gravity="center"
+        android:layout_marginTop="16dp" android:layout_marginBottom="8dp"
+        android:layout_width="match_parent" android:layout_height="wrap_content"/>
 </LinearLayout>
 </ScrollView>
