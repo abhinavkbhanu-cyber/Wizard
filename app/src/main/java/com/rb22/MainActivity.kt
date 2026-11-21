@@ -10,6 +10,7 @@ import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
 import android.widget.Button
+import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
 import android.os.CountDownTimer
@@ -20,6 +21,8 @@ import java.net.DatagramPacket
 import java.util.concurrent.Executors
 
 class MainActivity : AppCompatActivity() {
+    private var fastDownloader: FastDownloadManager? = null
+    private var lastDownloadedFile: java.io.File? = null
     private val dnsOptions = listOf(
         "Cloudflare" to ("one.one.one.one" to "1.1.1.1"),
         "Google" to ("dns.google" to "8.8.8.8"),
@@ -82,6 +85,62 @@ class MainActivity : AppCompatActivity() {
         findViewById<Button>(R.id.network_focus_select).setOnClickListener { showNetworkAppPicker() }
         findViewById<Button>(R.id.network_focus_start).setOnClickListener { startNetworkFocus() }
         findViewById<Button>(R.id.network_focus_stop).setOnClickListener { stopNetworkFocus() }
+        findViewById<Button>(R.id.fast_download_start).setOnClickListener {
+            val url = findViewById<EditText>(R.id.fast_download_url).text.toString().trim()
+            if (url.isBlank()) {
+                Toast.makeText(this, "Paste a direct download link first.", Toast.LENGTH_SHORT).show()
+            } else {
+                fastDownloader?.cancel()
+                val status = findViewById<TextView>(R.id.fast_download_status)
+                status.text = "CONNECTING • checking whether the server supports parallel downloads…"
+                fastDownloader = FastDownloadManager(this).also { downloader ->
+                    downloader.start(url, object : FastDownloadManager.Listener {
+                        override fun onProgress(downloaded: Long, total: Long, parallel: Boolean) {
+                            runOnUiThread {
+                                val received = android.text.format.Formatter.formatFileSize(this@MainActivity, downloaded)
+                                val size = if (total > 0L) android.text.format.Formatter.formatFileSize(this@MainActivity, total) else "unknown size"
+                                val method = if (parallel) "4-CONNECTION MODE" else "STANDARD MODE"
+                                status.text = "$method • $received / $size"
+                            }
+                        }
+                        override fun onComplete(file: java.io.File, parallel: Boolean) {
+                            runOnUiThread {
+                                lastDownloadedFile = file
+                                val method = if (parallel) "4 parallel connections" else "standard connection"
+                                status.text = "✓ COMPLETE • $method\n${file.name}\nUse SHARE / OPEN to access the file."
+                                Toast.makeText(this@MainActivity, "Download complete.", Toast.LENGTH_LONG).show()
+                            }
+                        }
+                        override fun onError(message: String) {
+                            runOnUiThread {
+                                status.text = message
+                                if (message.contains("cancelled", true)) lastDownloadedFile = null
+                            }
+                        }
+                    })
+                }
+            }
+        }
+        findViewById<Button>(R.id.fast_download_cancel).setOnClickListener {
+            fastDownloader?.cancel()
+            findViewById<TextView>(R.id.fast_download_status).text = "DOWNLOAD CANCELLED"
+        }
+        findViewById<Button>(R.id.fast_download_share).setOnClickListener {
+            val file = lastDownloadedFile
+            if (file == null || !file.exists()) {
+                Toast.makeText(this, "Complete a download first.", Toast.LENGTH_SHORT).show()
+            } else {
+                val uri = androidx.core.content.FileProvider.getUriForFile(this, "$packageName.fileprovider", file)
+                val mime = android.webkit.MimeTypeMap.getSingleton()
+                    .getMimeTypeFromExtension(file.extension.lowercase()) ?: "application/octet-stream"
+                val share = Intent(Intent.ACTION_SEND).apply {
+                    type = mime
+                    putExtra(Intent.EXTRA_STREAM, uri)
+                    addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                }
+                startActivity(Intent.createChooser(share, "Open or share download"))
+            }
+        }
         findViewById<Button>(R.id.check_updates).setOnClickListener {
             UpdateCheckWorker.checkNow(this)
             findViewById<TextView>(R.id.update_status).text = "Checking official RB22 releases… Connect to the internet and wait a moment."
