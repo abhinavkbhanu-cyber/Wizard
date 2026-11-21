@@ -10,7 +10,6 @@ import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
 import android.widget.Button
-import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
 import android.os.CountDownTimer
@@ -21,8 +20,6 @@ import java.net.DatagramPacket
 import java.util.concurrent.Executors
 
 class MainActivity : AppCompatActivity() {
-    private var fastDownloader: FastDownloadManager? = null
-    private var lastDownloadedFile: java.io.File? = null
     private val dnsOptions = listOf(
         "Cloudflare" to ("one.one.one.one" to "1.1.1.1"),
         "Google" to ("dns.google" to "8.8.8.8"),
@@ -39,6 +36,9 @@ class MainActivity : AppCompatActivity() {
     private var previousTxBytes = TrafficStats.UNSUPPORTED.toLong()
     private var previousNetworkSampleTime = 0L
     private var networkFocusDeviceFallback = false
+    private var focusedPackage: String? = null
+    private var lastUsageEventTime = 0L
+    private var pendingNetworkFocusStart = false
     private val networkFocusTick = object : Runnable {
         override fun run() {
             updateNetworkFocusStats()
@@ -82,71 +82,13 @@ class MainActivity : AppCompatActivity() {
 
         findViewById<Button>(R.id.dns_auto).setOnClickListener { testDns() }
         findViewById<Button>(R.id.gaming_ping).setOnClickListener { runGamingPing() }
-        findViewById<Button>(R.id.network_focus_select).setOnClickListener { showNetworkAppPicker() }
         findViewById<Button>(R.id.network_focus_start).setOnClickListener { startNetworkFocus() }
         findViewById<Button>(R.id.network_focus_stop).setOnClickListener { stopNetworkFocus() }
-        findViewById<Button>(R.id.fast_download_start).setOnClickListener {
-            val url = findViewById<EditText>(R.id.fast_download_url).text.toString().trim()
-            if (url.isBlank()) {
-                Toast.makeText(this, "Paste a direct download link first.", Toast.LENGTH_SHORT).show()
-            } else {
-                fastDownloader?.cancel()
-                val status = findViewById<TextView>(R.id.fast_download_status)
-                status.text = "CONNECTING • checking whether the server supports parallel downloads…"
-                fastDownloader = FastDownloadManager(this).also { downloader ->
-                    downloader.start(url, object : FastDownloadManager.Listener {
-                        override fun onProgress(downloaded: Long, total: Long, parallel: Boolean) {
-                            runOnUiThread {
-                                val received = android.text.format.Formatter.formatFileSize(this@MainActivity, downloaded)
-                                val size = if (total > 0L) android.text.format.Formatter.formatFileSize(this@MainActivity, total) else "unknown size"
-                                val method = if (parallel) "4-CONNECTION MODE" else "STANDARD MODE"
-                                status.text = "$method • $received / $size"
-                            }
-                        }
-                        override fun onComplete(file: java.io.File, parallel: Boolean) {
-                            runOnUiThread {
-                                lastDownloadedFile = file
-                                val method = if (parallel) "4 parallel connections" else "standard connection"
-                                status.text = "✓ COMPLETE • $method\n${file.name}\nUse SHARE / OPEN to access the file."
-                                Toast.makeText(this@MainActivity, "Download complete.", Toast.LENGTH_LONG).show()
-                            }
-                        }
-                        override fun onError(message: String) {
-                            runOnUiThread {
-                                status.text = message
-                                if (message.contains("cancelled", true)) lastDownloadedFile = null
-                            }
-                        }
-                    })
-                }
-            }
-        }
-        findViewById<Button>(R.id.fast_download_cancel).setOnClickListener {
-            fastDownloader?.cancel()
-            findViewById<TextView>(R.id.fast_download_status).text = "DOWNLOAD CANCELLED"
-        }
-        findViewById<Button>(R.id.fast_download_share).setOnClickListener {
-            val file = lastDownloadedFile
-            if (file == null || !file.exists()) {
-                Toast.makeText(this, "Complete a download first.", Toast.LENGTH_SHORT).show()
-            } else {
-                val uri = androidx.core.content.FileProvider.getUriForFile(this, "$packageName.fileprovider", file)
-                val mime = android.webkit.MimeTypeMap.getSingleton()
-                    .getMimeTypeFromExtension(file.extension.lowercase()) ?: "application/octet-stream"
-                val share = Intent(Intent.ACTION_SEND).apply {
-                    type = mime
-                    putExtra(Intent.EXTRA_STREAM, uri)
-                    addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-                }
-                startActivity(Intent.createChooser(share, "Open or share download"))
-            }
-        }
         findViewById<Button>(R.id.check_updates).setOnClickListener {
             UpdateCheckWorker.checkNow(this)
             findViewById<TextView>(R.id.update_status).text = "Checking official RB22 releases… Connect to the internet and wait a moment."
             Toast.makeText(this, "Update check queued", Toast.LENGTH_SHORT).show()
         }
-        refreshNetworkFocusSelection()
 
         val dnsButtons = listOf(
             R.id.dns_cloudflare to dnsOptions[0],
@@ -254,105 +196,129 @@ class MainActivity : AppCompatActivity() {
             }
         }
     }
-    private fun showNetworkAppPicker() {
-        val intent = Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_LAUNCHER)
-        val apps = packageManager.queryIntentActivities(intent, 0)
-            .filter { it.activityInfo.packageName != packageName }
-            .distinctBy { it.activityInfo.packageName }
-            .sortedBy { it.loadLabel(packageManager).toString().lowercase() }
-        if (apps.isEmpty()) { Toast.makeText(this, "No launchable apps found", Toast.LENGTH_SHORT).show(); return }
-        val labels = apps.map { it.loadLabel(packageManager).toString() }.toTypedArray()
-        AlertDialog.Builder(this).setTitle("Choose any app for Network Focus")
-            .setItems(labels) { _, which ->
-                gamePrefs.edit().putString("network_focus_package", apps[which].activityInfo.packageName).apply()
-                refreshNetworkFocusSelection()
-                Toast.makeText(this, "Selected " + labels[which], Toast.LENGTH_SHORT).show()
-            }.setNegativeButton("CANCEL", null).show()
+    private fun hasUsageAccess(): Boolean {
+        val appOps = getSystemService(Context.APP_OPS_SERVICE) as AppOpsManager
+        return appOps.checkOpNoThrow(
+            AppOpsManager.OPSTR_GET_USAGE_STATS,
+            android.os.Process.myUid(),
+            packageName
+        ) == AppOpsManager.MODE_ALLOWED
     }
 
-    private fun refreshNetworkFocusSelection() {
-        val pkg = gamePrefs.getString("network_focus_package", null)
-        val label = if (pkg.isNullOrEmpty()) null else runCatching {
-            packageManager.getApplicationLabel(packageManager.getApplicationInfo(pkg, 0)).toString()
-        }.getOrNull()
-        findViewById<TextView>(R.id.network_focus_status).text =
-            if (label == null) "Choose an app to monitor its network usage." else "SELECTED: $label • Ready to monitor"
+    override fun onResume() {
+        super.onResume()
+        if (pendingNetworkFocusStart && hasUsageAccess()) {
+            pendingNetworkFocusStart = false
+            beginNetworkFocus()
+        }
     }
 
     private fun startNetworkFocus() {
-        val pkg = gamePrefs.getString("network_focus_package", null)
-        if (pkg.isNullOrEmpty()) { showNetworkAppPicker(); return }
-        val uid = runCatching { packageManager.getApplicationInfo(pkg, 0).uid }.getOrNull()
-        if (uid == null) { Toast.makeText(this, "That app is no longer installed.", Toast.LENGTH_SHORT).show(); return }
-        previousRxBytes = TrafficStats.getUidRxBytes(uid)
-        previousTxBytes = TrafficStats.getUidTxBytes(uid)
-        networkFocusDeviceFallback =
-            previousRxBytes == TrafficStats.UNSUPPORTED.toLong() ||
-            previousTxBytes == TrafficStats.UNSUPPORTED.toLong()
-        if (networkFocusDeviceFallback) {
-            previousRxBytes = TrafficStats.getTotalRxBytes()
-            previousTxBytes = TrafficStats.getTotalTxBytes()
-            if (previousRxBytes == TrafficStats.UNSUPPORTED.toLong() ||
-                previousTxBytes == TrafficStats.UNSUPPORTED.toLong()) {
-                findViewById<TextView>(R.id.network_focus_status).text =
-                    "Network monitoring is unavailable: this Android build does not expose traffic counters."
-                return
-            }
-            findViewById<TextView>(R.id.network_focus_status).text =
-                "Per-app counters are blocked by this device. Switched to device-wide network monitoring; this does not prioritize or reserve bandwidth for the selected app."
+        if (!hasUsageAccess()) {
+            pendingNetworkFocusStart = true
+            AlertDialog.Builder(this)
+                .setTitle("Allow App Focus")
+                .setMessage("RB22 needs Usage Access to detect which app is currently on screen and follow app switches. It does not read messages or personal content.")
+                .setPositiveButton("OPEN SETTINGS") { _, _ ->
+                    startActivity(Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS))
+                }
+                .setNegativeButton("CANCEL") { _, _ -> pendingNetworkFocusStart = false }
+                .show()
+            return
         }
-        previousNetworkSampleTime = System.currentTimeMillis()
+        beginNetworkFocus()
+    }
+
+    private fun beginNetworkFocus() {
+        previousRxBytes = TrafficStats.UNSUPPORTED.toLong()
+        previousTxBytes = TrafficStats.UNSUPPORTED.toLong()
+        networkFocusDeviceFallback = false
+        focusedPackage = null
+        lastUsageEventTime = System.currentTimeMillis() - 5000L
         networkFocusRunning = true
         networkHandler.removeCallbacks(networkFocusTick)
+        findViewById<TextView>(R.id.network_focus_status).text =
+            "APP FOCUS ON • Open any app. RB22 will follow it automatically."
         networkHandler.post(networkFocusTick)
     }
 
     private fun stopNetworkFocus() {
+        pendingNetworkFocusStart = false
         networkFocusRunning = false
         networkHandler.removeCallbacks(networkFocusTick)
-        findViewById<TextView>(R.id.network_focus_status).text = "NETWORK FOCUS PAUSED"
+        focusedPackage = null
+        findViewById<TextView>(R.id.network_focus_status).text = "APP FOCUS OFF"
+    }
+
+    private fun detectForegroundPackage(): String? {
+        val usage = getSystemService(Context.USAGE_STATS_SERVICE) as android.app.usage.UsageStatsManager
+        val now = System.currentTimeMillis()
+        val events = usage.queryEvents(lastUsageEventTime, now)
+        val event = android.app.usage.UsageEvents.Event()
+        var foreground: String? = null
+        while (events.hasNextEvent()) {
+            events.getNextEvent(event)
+            if (event.eventType == android.app.usage.UsageEvents.Event.MOVE_TO_FOREGROUND ||
+                (Build.VERSION.SDK_INT >= 29 &&
+                    event.eventType == android.app.usage.UsageEvents.Event.ACTIVITY_RESUMED)) {
+                if (event.packageName != packageName) foreground = event.packageName
+            }
+        }
+        lastUsageEventTime = now
+        return foreground
     }
 
     private fun updateNetworkFocusStats() {
-        val pkg = gamePrefs.getString("network_focus_package", null) ?: return
-        val uid = runCatching { packageManager.getApplicationInfo(pkg, 0).uid }.getOrNull() ?: return
-        var rx = if (networkFocusDeviceFallback) TrafficStats.getTotalRxBytes() else TrafficStats.getUidRxBytes(uid)
-        var tx = if (networkFocusDeviceFallback) TrafficStats.getTotalTxBytes() else TrafficStats.getUidTxBytes(uid)
-        if (!networkFocusDeviceFallback &&
-            (rx == TrafficStats.UNSUPPORTED.toLong() || tx == TrafficStats.UNSUPPORTED.toLong())) {
-            networkFocusDeviceFallback = true
-            rx = TrafficStats.getTotalRxBytes()
-            tx = TrafficStats.getTotalTxBytes()
-            previousRxBytes = rx
-            previousTxBytes = tx
-            previousNetworkSampleTime = System.currentTimeMillis()
-            if (rx == TrafficStats.UNSUPPORTED.toLong() || tx == TrafficStats.UNSUPPORTED.toLong()) {
-                findViewById<TextView>(R.id.network_focus_status).text =
-                    "Network monitoring is unavailable: this Android build does not expose traffic counters."
-                networkFocusRunning = false
-            } else {
-                findViewById<TextView>(R.id.network_focus_status).text =
-                    "Per-app counters became unavailable. Switched to device-wide monitoring; no app bandwidth priority is being applied."
+        val detected = detectForegroundPackage()
+        if (!detected.isNullOrBlank() && detected != focusedPackage) {
+            focusedPackage = detected
+            val label = runCatching {
+                packageManager.getApplicationLabel(packageManager.getApplicationInfo(detected, 0)).toString()
+            }.getOrDefault(detected)
+            val uid = runCatching { packageManager.getApplicationInfo(detected, 0).uid }.getOrNull()
+            previousRxBytes = uid?.let { TrafficStats.getUidRxBytes(it) } ?: TrafficStats.UNSUPPORTED.toLong()
+            previousTxBytes = uid?.let { TrafficStats.getUidTxBytes(it) } ?: TrafficStats.UNSUPPORTED.toLong()
+            networkFocusDeviceFallback =
+                previousRxBytes == TrafficStats.UNSUPPORTED.toLong() ||
+                previousTxBytes == TrafficStats.UNSUPPORTED.toLong()
+            if (networkFocusDeviceFallback) {
+                previousRxBytes = TrafficStats.getTotalRxBytes()
+                previousTxBytes = TrafficStats.getTotalTxBytes()
             }
+            previousNetworkSampleTime = System.currentTimeMillis()
+            findViewById<TextView>(R.id.network_focus_status).text =
+                "FOCUSING: $label • monitoring its network activity"
             return
         }
-        if (rx == TrafficStats.UNSUPPORTED.toLong() || tx == TrafficStats.UNSUPPORTED.toLong() ||
-            previousRxBytes == TrafficStats.UNSUPPORTED.toLong() || previousTxBytes == TrafficStats.UNSUPPORTED.toLong()) {
+
+        val pkg = focusedPackage ?: run {
             findViewById<TextView>(R.id.network_focus_status).text =
-                "Network monitoring is unavailable: this Android build does not expose traffic counters."
-            networkFocusRunning = false
+                "APP FOCUS ON • Waiting for you to open another app…"
+            return
+        }
+        val uid = runCatching { packageManager.getApplicationInfo(pkg, 0).uid }.getOrNull()
+        val rx = if (networkFocusDeviceFallback) TrafficStats.getTotalRxBytes()
+            else uid?.let { TrafficStats.getUidRxBytes(it) } ?: TrafficStats.UNSUPPORTED.toLong()
+        val tx = if (networkFocusDeviceFallback) TrafficStats.getTotalTxBytes()
+            else uid?.let { TrafficStats.getUidTxBytes(it) } ?: TrafficStats.UNSUPPORTED.toLong()
+        if (rx == TrafficStats.UNSUPPORTED.toLong() || tx == TrafficStats.UNSUPPORTED.toLong()) {
+            findViewById<TextView>(R.id.network_focus_status).text =
+                "FOCUSING: $pkg • this Android build does not expose app traffic counters."
             return
         }
         val now = System.currentTimeMillis()
         val elapsed = ((now - previousNetworkSampleTime).coerceAtLeast(1L)) / 1000.0
-        val down = ((rx - previousRxBytes).coerceAtLeast(0L) * 8.0 / elapsed) / 1000000.0
-        val up = ((tx - previousTxBytes).coerceAtLeast(0L) * 8.0 / elapsed) / 1000000.0
-        val totalDown = rx / (1024.0 * 1024.0)
-        val totalUp = tx / (1024.0 * 1024.0)
-        val label = runCatching { packageManager.getApplicationLabel(packageManager.getApplicationInfo(pkg, 0)).toString() }.getOrDefault("Selected app")
-        val scope = if (networkFocusDeviceFallback) "DEVICE-WIDE FALLBACK • per-app counters unavailable" else "APP TRAFFIC"
-        findViewById<TextView>(R.id.network_focus_status).text = String.format(java.util.Locale.US,
-            "%s • %s\n↓ %.2f Mbps  ↑ %.2f Mbps\nTOTAL • ↓ %.1f MB  ↑ %.1f MB", label, scope, down, up, totalDown, totalUp)
+        val down = ((rx - previousRxBytes).coerceAtLeast(0L) * 8.0 / elapsed) / 1_000_000.0
+        val up = ((tx - previousTxBytes).coerceAtLeast(0L) * 8.0 / elapsed) / 1_000_000.0
+        val label = runCatching {
+            packageManager.getApplicationLabel(packageManager.getApplicationInfo(pkg, 0)).toString()
+        }.getOrDefault(pkg)
+        val scope = if (networkFocusDeviceFallback) "DEVICE-WIDE COUNTERS" else "APP TRAFFIC"
+        findViewById<TextView>(R.id.network_focus_status).text = String.format(
+            java.util.Locale.US,
+            "FOCUSING: %s • %s\\n↓ %.2f Mbps   ↑ %.2f Mbps\\nAutomatic focus follows app switches.",
+            label, scope, down, up
+        )
         previousRxBytes = rx
         previousTxBytes = tx
         previousNetworkSampleTime = now
