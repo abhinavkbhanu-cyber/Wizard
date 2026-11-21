@@ -1,0 +1,37 @@
+name: Publish RB22 Android v1 Beta Release
+
+on:
+  push:
+    branches:
+      - rb22-android-v1-beta
+    paths:
+      - .github/workflows/publish-android-beta-release.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  actions: read
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download verified Android beta artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: RB22-Android-v1.0.0-beta-debug
+          path: release-assets
+          repository: ${{ github.repository }}
+          run-id: 44938556568
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Publish GitHub prerelease
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v1.0.0-beta
+          target_commitish: rb22-android-v1-beta
+          name: RB22 Android v1.0.0 Beta
+          prerelease: true
+          draft: false
+          generate_release_notes: true
+          files: release-assets/*
