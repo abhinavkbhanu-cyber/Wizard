@@ -11,8 +11,8 @@ android {
         applicationId = "com.rb22"
         minSdk = 24
         targetSdk = 35
-        versionCode = 11
-        versionName = "3.9.0"
+        versionCode = 12
+        versionName = "4.0.0"
     }
 
     buildFeatures {
