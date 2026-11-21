@@ -18,7 +18,7 @@ This is the Android-only beta line. The Windows project and its release files ar
 - FPS cannot be increased universally by a third-party app; actual game FPS is controlled by the game, device, thermal state, and Android.
 - DNS changes can affect name resolution, not raw download bandwidth or ping to every game server.
 - The custom DNS VPN is experimental. Test on Wi-Fi and mobile data before relying on it; stop it if connectivity is affected.
-- Security integration is not yet an antivirus engine. This beta does not claim malware detection or real-time protection.
+- Antivirus integration, malware scanning, and real-time protection are not implemented in this first beta. The app must not claim antivirus protection until a real scanning engine and update pipeline are implemented and tested.
 
 ## Build
 
