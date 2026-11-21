@@ -119,53 +119,22 @@
 
     <LinearLayout android:orientation="vertical" android:padding="15dp" android:layout_marginTop="12dp"
         android:background="@drawable/rb22_card" android:tag="rb22_card" android:layout_width="match_parent" android:layout_height="wrap_content">
-        <LinearLayout android:orientation="vertical" android:padding="15dp" android:layout_marginTop="12dp"
-            android:background="@drawable/rb22_card" android:tag="rb22_card" android:layout_width="match_parent" android:layout_height="wrap_content">
-            <TextView android:text="⚡ FAST DOWNLOAD" android:textColor="#FFFFFF" android:textSize="13sp" android:textStyle="bold"
-                android:layout_width="wrap_content" android:layout_height="wrap_content"/>
-            <TextView android:text="Paste a direct file link. RB22 tries up to four parallel connections when the server supports byte ranges, then falls back automatically."
-                android:textColor="#C9D7FF" android:textSize="11sp" android:layout_marginTop="4dp"
-                android:layout_width="match_parent" android:layout_height="wrap_content"/>
-            <EditText android:id="@+id/fast_download_url" android:hint="https://example.com/file.zip"
-                android:inputType="textUri" android:singleLine="true" android:selectAllOnFocus="false"
-                android:textColor="#FFFFFF" android:textColorHint="#7182A8"
-                android:padding="10dp" android:layout_marginTop="8dp"
-                android:background="@drawable/rb22_card" android:layout_width="match_parent" android:layout_height="48dp"/>
-            <LinearLayout android:orientation="horizontal" android:layout_marginTop="7dp"
-                android:layout_width="match_parent" android:layout_height="wrap_content">
-                <Button android:id="@+id/fast_download_start" android:text="▶ START" android:textAllCaps="false"
-                    android:layout_width="0dp" android:layout_height="46dp" android:layout_weight="1"/>
-                <Button android:id="@+id/fast_download_cancel" android:text="CANCEL" android:textAllCaps="false"
-                    android:layout_marginStart="8dp" android:layout_width="0dp" android:layout_height="46dp" android:layout_weight="1"/>
-            </LinearLayout>
-            <Button android:id="@+id/fast_download_share" android:text="OPEN / SHARE LAST DOWNLOAD" android:textAllCaps="false"
-                android:layout_marginTop="6dp" android:layout_width="match_parent" android:layout_height="44dp"/>
-            <TextView android:id="@+id/fast_download_status" android:text="READY • Downloads are saved in RB22's download folder."
-                android:textColor="#B8FFE7" android:textSize="10sp" android:textStyle="bold" android:layout_marginTop="7dp"
-                android:layout_width="match_parent" android:layout_height="wrap_content"/>
-            <TextView android:text="Parallel mode only helps when the file host allows range requests and has capacity available. It cannot exceed your connection or speed up other apps."
-                android:textColor="#A8B4C9" android:textSize="10sp" android:layout_marginTop="5dp"
-                android:layout_width="match_parent" android:layout_height="wrap_content"/>
-        </LinearLayout>
-
         <TextView android:text="UNIVERSAL NETWORK FOCUS" android:textColor="#FFFFFF" android:textSize="13sp" android:textStyle="bold"
             android:layout_width="wrap_content" android:layout_height="wrap_content"/>
-        <TextView android:text="Choose any installed app and monitor its real network traffic. No speed-test downloads or artificial traffic."
+        <TextView android:text="Tap once. RB22 automatically detects the app you open and follows app switches while monitoring its network activity."
             android:textColor="#C9D7FF" android:textSize="11sp" android:layout_marginTop="4dp"
             android:layout_width="match_parent" android:layout_height="wrap_content"/>
-        <Button android:id="@+id/network_focus_select" android:text="▣ CHOOSE ANY APP" android:textAllCaps="false"
-            android:layout_marginTop="8dp" android:layout_width="match_parent" android:layout_height="48dp"/>
         <LinearLayout android:orientation="horizontal" android:layout_marginTop="6dp"
             android:layout_width="match_parent" android:layout_height="wrap_content">
-            <Button android:id="@+id/network_focus_start" android:text="▶ START" android:textAllCaps="false"
+            <Button android:id="@+id/network_focus_start" android:text="▶ START APP FOCUS" android:textAllCaps="false"
                 android:layout_width="0dp" android:layout_height="46dp" android:layout_weight="1"/>
             <Button android:id="@+id/network_focus_stop" android:text="■ STOP" android:textAllCaps="false"
                 android:layout_marginStart="8dp" android:layout_width="0dp" android:layout_height="46dp" android:layout_weight="1"/>
         </LinearLayout>
-        <TextView android:id="@+id/network_focus_status" android:text="Choose an app to monitor its network usage."
+        <TextView android:id="@+id/network_focus_status" android:text="APP FOCUS OFF • Tap START APP FOCUS to begin."
             android:textColor="#B8FFE7" android:textSize="11sp" android:textStyle="bold" android:layout_marginTop="7dp"
             android:layout_width="match_parent" android:layout_height="wrap_content"/>
-        <TextView android:text="Android does not let ordinary apps force another app to use more bandwidth or reserve network priority. This tool measures per-app traffic; it does not inject extra traffic."
+        <TextView android:text="Uses Android Usage Access to follow the foreground app and show its traffic where supported. Android does not allow ordinary apps to force bandwidth priority or guarantee lower ping; no artificial traffic is generated."
             android:textColor="#A8B4C9" android:textSize="10sp" android:layout_marginTop="5dp"
             android:layout_width="match_parent" android:layout_height="wrap_content"/>
 
