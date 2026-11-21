@@ -48,30 +48,50 @@ jobs:
           test -f settings.gradle.kts
           test -f app/build.gradle.kts
           test -d "$ANDROID_HOME/platforms/android-35"
-      - name: Build debug APK
-        run: gradle :app:assembleDebug --stacktrace --no-daemon --no-build-cache --console=plain
-      - name: Rename APK using app version
-        id: apk
+      - name: Build signed release when signing secrets are configured
+        id: build
+        env:
+          RB22_KEYSTORE_BASE64: ${{ secrets.RB22_KEYSTORE_BASE64 }}
+          RB22_STORE_PASSWORD: ${{ secrets.RB22_STORE_PASSWORD }}
+          RB22_KEY_ALIAS: ${{ secrets.RB22_KEY_ALIAS }}
+          RB22_KEY_PASSWORD: ${{ secrets.RB22_KEY_PASSWORD }}
         run: |
           VERSION_NAME=$(sed -n 's/.*versionName = "\([^"]*\)".*/\1/p' app/build.gradle.kts | head -n1)
           test -n "$VERSION_NAME"
-          APK_NAME="RB22-v${VERSION_NAME}-mobile-debug.apk"
-          cp app/build/outputs/apk/debug/app-debug.apk "$APK_NAME"
+          if [ -n "$RB22_KEYSTORE_BASE64" ] && [ -n "$RB22_STORE_PASSWORD" ] && [ -n "$RB22_KEY_ALIAS" ] && [ -n "$RB22_KEY_PASSWORD" ]; then
+            printf '%s' "$RB22_KEYSTORE_BASE64" | base64 --decode > app/rb22-release.jks
+            gradle :app:assembleRelease --stacktrace --no-daemon --no-build-cache --console=plain
+            APK_NAME="RB22-v${VERSION_NAME}-mobile-release-signed.apk"
+            cp app/build/outputs/apk/release/app-release.apk "$APK_NAME"
+            echo "signed=true" >> "$GITHUB_OUTPUT"
+          else
+            gradle :app:assembleDebug --stacktrace --no-daemon --no-build-cache --console=plain
+            APK_NAME="RB22-v${VERSION_NAME}-mobile-debug.apk"
+            cp app/build/outputs/apk/debug/app-debug.apk "$APK_NAME"
+            echo "signed=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::No RB22 signing secrets configured. Published APK is debug-signed; configure the four RB22 signing secrets for a stable release signature."
+          fi
           echo "version=$VERSION_NAME" >> "$GITHUB_OUTPUT"
           echo "apk=$APK_NAME" >> "$GITHUB_OUTPUT"
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
           name: RB22-Mobile-APK
-          path: ${{ steps.apk.outputs.apk }}
+          path: ${{ steps.build.outputs.apk }}
       - name: Publish versioned and latest GitHub Releases
         env:
           GH_TOKEN: ${{ github.token }}
-          VERSION_NAME: ${{ steps.apk.outputs.version }}
-          APK_NAME: ${{ steps.apk.outputs.apk }}
+          VERSION_NAME: ${{ steps.build.outputs.version }}
+          APK_NAME: ${{ steps.build.outputs.apk }}
+          SIGNED: ${{ steps.build.outputs.signed }}
         run: |
           VERSION_TAG="rb22-game-booster-v${VERSION_NAME}"
-          gh release view "$VERSION_TAG" >/dev/null 2>&1 || gh release create "$VERSION_TAG" --title "RB22 Game Booster Pro v${VERSION_NAME}" --notes "RB22 Android mobile build. Review release notes and verify the APK before installing. Android confirmation is required to install updates."
+          if [ "$SIGNED" = "true" ]; then
+            NOTES="RB22 Android release build signed with the configured RB22 release certificate. Play Protect may still scan the APK."
+          else
+            NOTES="RB22 Android debug-signed build. Configure RB22 signing secrets to publish a stable release-signed APK. Play Protect may still scan the APK."
+          fi
+          gh release view "$VERSION_TAG" >/dev/null 2>&1 || gh release create "$VERSION_TAG" --title "RB22 Game Booster Pro v${VERSION_NAME}" --notes "$NOTES"
           gh release upload "$VERSION_TAG" "$APK_NAME" --clobber
-          gh release view latest >/dev/null 2>&1 || gh release create latest --title "RB22 — Latest APK" --notes "Latest RB22 Android mobile build."
+          gh release view latest >/dev/null 2>&1 || gh release create latest --title "RB22 — Latest APK" --notes "Latest RB22 Android mobile build. Verify the APK before installing."
           gh release upload latest "$APK_NAME" --clobber
