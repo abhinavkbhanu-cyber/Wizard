@@ -15,22 +15,28 @@ android {
         versionName = "4.1.0"
     }
 
-    buildFeatures {
-        buildConfig = true
+    signingConfigs {
+        create("rb22Release") {
+            storeFile = file("rb22-release.jks")
+            storePassword = System.getenv("RB22_STORE_PASSWORD") ?: ""
+            keyAlias = System.getenv("RB22_KEY_ALIAS") ?: ""
+            keyPassword = System.getenv("RB22_KEY_PASSWORD") ?: ""
+        }
     }
+
+    buildFeatures { buildConfig = true }
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
 
-    kotlinOptions {
-        jvmTarget = "17"
-    }
+    kotlinOptions { jvmTarget = "17" }
 
     buildTypes {
         release {
             isMinifyEnabled = false
+            signingConfig = signingConfigs.getByName("rb22Release")
         }
     }
 }
