@@ -50,16 +50,28 @@ jobs:
           test -d "$ANDROID_HOME/platforms/android-35"
       - name: Build debug APK
         run: gradle :app:assembleDebug --stacktrace --no-daemon --no-build-cache --console=plain
-      - name: Rename APK
-        run: cp app/build/outputs/apk/debug/app-debug.apk RB22-v3.9.0-mobile-debug.apk
+      - name: Rename APK using app version
+        id: apk
+        run: |
+          VERSION_NAME=$(sed -n 's/.*versionName = "\\([^"]*\\)".*/\\1/p' app/build.gradle.kts | head -n1)
+          test -n "$VERSION_NAME"
+          APK_NAME="RB22-v${VERSION_NAME}-mobile-debug.apk"
+          cp app/build/outputs/apk/debug/app-debug.apk "$APK_NAME"
+          echo "version=$VERSION_NAME" >> "$GITHUB_OUTPUT"
+          echo "apk=$APK_NAME" >> "$GITHUB_OUTPUT"
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
-          name: RB22-Ultimate-APK
-          path: RB22-v3.9.0-mobile-debug.apk
-      - name: Publish latest GitHub Release
+          name: RB22-Mobile-APK
+          path: ${{ steps.apk.outputs.apk }}
+      - name: Publish versioned and latest GitHub Releases
         env:
           GH_TOKEN: ${{ github.token }}
+          VERSION_NAME: ${{ steps.apk.outputs.version }}
+          APK_NAME: ${{ steps.apk.outputs.apk }}
         run: |
-          gh release view latest 2>/dev/null || gh release create latest --title "RB22 — Latest APK" --notes "RB22 Android v3.9.0 MOBILE — adaptive gaming HUD, profiles, thermal/RAM telemetry, universal per-app Network Focus monitoring, smart automation and capability-aware monitoring."
-          gh release upload latest RB22-v3.9.0-mobile-debug.apk --clobber
+          VERSION_TAG="rb22-game-booster-v${VERSION_NAME}"
+          gh release view "$VERSION_TAG" >/dev/null 2>&1 || gh release create "$VERSION_TAG" --title "RB22 Game Booster Pro v${VERSION_NAME}" --notes "RB22 Android mobile build. Review release notes and verify the APK before installing. Android confirmation is required to install updates."
+          gh release upload "$VERSION_TAG" "$APK_NAME" --clobber
+          gh release view latest >/dev/null 2>&1 || gh release create latest --title "RB22 — Latest APK" --notes "Latest RB22 Android mobile build."
+          gh release upload latest "$APK_NAME" --clobber

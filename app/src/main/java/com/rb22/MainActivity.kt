@@ -34,6 +34,7 @@ class MainActivity : AppCompatActivity() {
     private var previousRxBytes = TrafficStats.UNSUPPORTED.toLong()
     private var previousTxBytes = TrafficStats.UNSUPPORTED.toLong()
     private var previousNetworkSampleTime = 0L
+    private var networkFocusDeviceFallback = false
     private val networkFocusTick = object : Runnable {
         override fun run() {
             updateNetworkFocusStats()
@@ -225,6 +226,21 @@ class MainActivity : AppCompatActivity() {
         if (uid == null) { Toast.makeText(this, "That app is no longer installed.", Toast.LENGTH_SHORT).show(); return }
         previousRxBytes = TrafficStats.getUidRxBytes(uid)
         previousTxBytes = TrafficStats.getUidTxBytes(uid)
+        networkFocusDeviceFallback =
+            previousRxBytes == TrafficStats.UNSUPPORTED.toLong() ||
+            previousTxBytes == TrafficStats.UNSUPPORTED.toLong()
+        if (networkFocusDeviceFallback) {
+            previousRxBytes = TrafficStats.getTotalRxBytes()
+            previousTxBytes = TrafficStats.getTotalTxBytes()
+            if (previousRxBytes == TrafficStats.UNSUPPORTED.toLong() ||
+                previousTxBytes == TrafficStats.UNSUPPORTED.toLong()) {
+                findViewById<TextView>(R.id.network_focus_status).text =
+                    "Network monitoring is unavailable: this Android build does not expose traffic counters."
+                return
+            }
+            findViewById<TextView>(R.id.network_focus_status).text =
+                "Per-app counters are blocked by this device. Switched to device-wide network monitoring; this does not prioritize or reserve bandwidth for the selected app."
+        }
         previousNetworkSampleTime = System.currentTimeMillis()
         networkFocusRunning = true
         networkHandler.removeCallbacks(networkFocusTick)
@@ -240,11 +256,30 @@ class MainActivity : AppCompatActivity() {
     private fun updateNetworkFocusStats() {
         val pkg = gamePrefs.getString("network_focus_package", null) ?: return
         val uid = runCatching { packageManager.getApplicationInfo(pkg, 0).uid }.getOrNull() ?: return
-        val rx = TrafficStats.getUidRxBytes(uid)
-        val tx = TrafficStats.getUidTxBytes(uid)
+        var rx = if (networkFocusDeviceFallback) TrafficStats.getTotalRxBytes() else TrafficStats.getUidRxBytes(uid)
+        var tx = if (networkFocusDeviceFallback) TrafficStats.getTotalTxBytes() else TrafficStats.getUidTxBytes(uid)
+        if (!networkFocusDeviceFallback &&
+            (rx == TrafficStats.UNSUPPORTED.toLong() || tx == TrafficStats.UNSUPPORTED.toLong())) {
+            networkFocusDeviceFallback = true
+            rx = TrafficStats.getTotalRxBytes()
+            tx = TrafficStats.getTotalTxBytes()
+            previousRxBytes = rx
+            previousTxBytes = tx
+            previousNetworkSampleTime = System.currentTimeMillis()
+            if (rx == TrafficStats.UNSUPPORTED.toLong() || tx == TrafficStats.UNSUPPORTED.toLong()) {
+                findViewById<TextView>(R.id.network_focus_status).text =
+                    "Network monitoring is unavailable: this Android build does not expose traffic counters."
+                networkFocusRunning = false
+            } else {
+                findViewById<TextView>(R.id.network_focus_status).text =
+                    "Per-app counters became unavailable. Switched to device-wide monitoring; no app bandwidth priority is being applied."
+            }
+            return
+        }
         if (rx == TrafficStats.UNSUPPORTED.toLong() || tx == TrafficStats.UNSUPPORTED.toLong() ||
             previousRxBytes == TrafficStats.UNSUPPORTED.toLong() || previousTxBytes == TrafficStats.UNSUPPORTED.toLong()) {
-            findViewById<TextView>(R.id.network_focus_status).text = "Per-app traffic statistics are not supported on this device."
+            findViewById<TextView>(R.id.network_focus_status).text =
+                "Network monitoring is unavailable: this Android build does not expose traffic counters."
             networkFocusRunning = false
             return
         }
@@ -255,8 +290,9 @@ class MainActivity : AppCompatActivity() {
         val totalDown = rx / (1024.0 * 1024.0)
         val totalUp = tx / (1024.0 * 1024.0)
         val label = runCatching { packageManager.getApplicationLabel(packageManager.getApplicationInfo(pkg, 0)).toString() }.getOrDefault("Selected app")
+        val scope = if (networkFocusDeviceFallback) "DEVICE-WIDE FALLBACK • per-app counters unavailable" else "APP TRAFFIC"
         findViewById<TextView>(R.id.network_focus_status).text = String.format(java.util.Locale.US,
-            "%s • ↓ %.2f Mbps  ↑ %.2f Mbps\nTOTAL • ↓ %.1f MB  ↑ %.1f MB", label, down, up, totalDown, totalUp)
+            "%s • %s\n↓ %.2f Mbps  ↑ %.2f Mbps\nTOTAL • ↓ %.1f MB  ↑ %.1f MB", label, scope, down, up, totalDown, totalUp)
         previousRxBytes = rx
         previousTxBytes = tx
         previousNetworkSampleTime = now

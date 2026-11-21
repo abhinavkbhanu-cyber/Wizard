@@ -27,7 +27,6 @@ private const val UPDATE_WORK_NAME = "rb22-game-booster-periodic-update-check"
 private const val UPDATE_CHANNEL_ID = "rb22_game_booster_updates"
 private const val RELEASES_API = "https://api.github.com/repos/abhinavkbhanu-cyber/Wizard/releases?per_page=100"
 private const val RELEASES_PAGE = "https://github.com/abhinavkbhanu-cyber/Wizard/releases"
-private const val RELEASE_TAG_PREFIX = "rb22-game-booster-v"
 
 class UpdateCheckWorker(context: Context, params: WorkerParameters) : CoroutineWorker(context, params) {
     override suspend fun doWork(): Result {
@@ -47,11 +46,15 @@ class UpdateCheckWorker(context: Context, params: WorkerParameters) : CoroutineW
             if (connection.responseCode != HttpURLConnection.HTTP_OK) return Result.retry()
             val releases = JSONArray(connection.inputStream.bufferedReader().use { it.readText() })
             val versions = mutableListOf<Pair<String, String>>()
+            val apkVersionPattern = Regex("^RB22-v([0-9]+(?:\\.[0-9]+){1,3})-mobile-debug\\.apk$")
             for (i in 0 until releases.length()) {
                 val release = releases.getJSONObject(i)
-                val tag = release.optString("tag_name")
-                if (tag.startsWith(RELEASE_TAG_PREFIX) && !release.optBoolean("draft", true) && !release.optBoolean("prerelease", false)) {
-                    versions += tag.removePrefix(RELEASE_TAG_PREFIX) to release.optString("html_url", RELEASES_PAGE)
+                if (release.optBoolean("draft", true) || release.optBoolean("prerelease", false)) continue
+                val assets = release.optJSONArray("assets") ?: continue
+                for (assetIndex in 0 until assets.length()) {
+                    val assetName = assets.getJSONObject(assetIndex).optString("name")
+                    val match = apkVersionPattern.matchEntire(assetName) ?: continue
+                    versions += match.groupValues[1] to release.optString("html_url", RELEASES_PAGE)
                 }
             }
             val latest = versions.maxWithOrNull { a, b -> compareVersions(a.first, b.first) }
