@@ -594,16 +594,6 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun hasUsageAccess(): Boolean {
-        val appOps = getSystemService(APP_OPS_SERVICE) as AppOpsManager
-        @Suppress("DEPRECATION")
-        val mode = appOps.checkOpNoThrow(
-            AppOpsManager.OPSTR_GET_USAGE_STATS,
-            android.os.Process.myUid(),
-            packageName
-        )
-        return mode == AppOpsManager.MODE_ALLOWED
-    }
 
     private fun startAutoBoostMonitor() {
         if (savedGames().isEmpty()) {
