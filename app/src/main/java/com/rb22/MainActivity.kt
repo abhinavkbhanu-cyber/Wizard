@@ -463,7 +463,9 @@ class MainActivity : AppCompatActivity() {
         val tick = object : Runnable {
             override fun run() {
                 status.text = engine.statusText()
-                handler.postDelayed(this, 2000)
+                val lowOverhead = gamePrefs.getBoolean("max_fps", false) ||
+                    gamePrefs.getBoolean("charging_mode", false)
+                handler.postDelayed(this, if (lowOverhead) 5000L else 3000L)
             }
         }
         handler.post(tick)
