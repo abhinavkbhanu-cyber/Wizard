@@ -60,6 +60,7 @@ class MainActivity : AppCompatActivity() {
         setupDeviceRefresh()
         setupBoostModes()
         setupMobileControls()
+        setupV12Controls()
         startUltimateEngine()
 
         findViewById<Button>(R.id.start_booster).setOnClickListener { startGameBooster() }
@@ -83,8 +84,6 @@ class MainActivity : AppCompatActivity() {
         findViewById<Button>(R.id.dns_auto).setOnClickListener { testDns() }
         findViewById<Button>(R.id.dns_disable).setOnClickListener { disableDns() }
         findViewById<Button>(R.id.gaming_ping).setOnClickListener { runGamingPing() }
-        findViewById<Button>(R.id.network_focus_start).setOnClickListener { startNetworkFocus() }
-        findViewById<Button>(R.id.network_focus_stop).setOnClickListener { stopNetworkFocus() }
         findViewById<Button>(R.id.check_updates).setOnClickListener {
             UpdateCheckWorker.checkNow(this)
             findViewById<TextView>(R.id.update_status).text = "Checking official RB22 releases… Connect to the internet and wait a moment."
@@ -117,6 +116,50 @@ class MainActivity : AppCompatActivity() {
     }
 
 
+
+    private fun setupV12Controls() {
+        val engine = V12PerformanceEngine(this)
+        val status = findViewById<TextView>(R.id.v12_engine_status)
+        fun refresh(message: String? = null) {
+            status.text = message ?: engine.statusText()
+            findViewById<TextView>(R.id.v12_graphics_advice).text =
+                "GRAPHICS ADVICE • " + engine.graphicsRecommendation()
+        }
+        fun select(profile: V12PerformanceEngine.Profile, label: String) {
+            engine.setProfile(profile)
+            refresh("✓ $label PROFILE ACTIVE • " + engine.statusText())
+            Toast.makeText(this, "$label profile selected", Toast.LENGTH_SHORT).show()
+        }
+        findViewById<Button>(R.id.v12_balanced).setOnClickListener {
+            select(V12PerformanceEngine.Profile.BALANCED, "BALANCED")
+        }
+        findViewById<Button>(R.id.v12_gaming).setOnClickListener {
+            select(V12PerformanceEngine.Profile.GAMING, "GAMING")
+        }
+        findViewById<Button>(R.id.v12_streaming).setOnClickListener {
+            select(V12PerformanceEngine.Profile.STREAMING, "STREAMING")
+        }
+        findViewById<Button>(R.id.v12_battery).setOnClickListener {
+            select(V12PerformanceEngine.Profile.BATTERY, "BATTERY")
+        }
+        findViewById<Button>(R.id.v12_quick_boost).setOnClickListener {
+            val caution = engine.isThermalCaution()
+            val profile = if (caution) V12PerformanceEngine.Profile.BALANCED
+                else V12PerformanceEngine.Profile.GAMING
+            engine.setProfile(profile)
+            refresh(if (caution) "THERMAL CAUTION • BALANCED PROFILE SELECTED" else "QUICK BOOST • GAMING PROFILE SELECTED")
+            Toast.makeText(this, if (caution) "Device is warm. Balanced profile selected to help avoid extra heat." else "Gaming profile selected.", Toast.LENGTH_LONG).show()
+        }
+        findViewById<Button>(R.id.v12_graphics_button).setOnClickListener {
+            refresh()
+            AlertDialog.Builder(this)
+                .setTitle("RB22 Graphics Recommendations")
+                .setMessage(engine.graphicsRecommendation() + "\\n\\nThese are recommendations for the game's own graphics menu. RB22 cannot directly change another app's graphics settings.")
+                .setPositiveButton("OK", null)
+                .show()
+        }
+        refresh()
+    }
 
     private fun setupMobileControls() {
         findViewById<Button>(R.id.mobile_game_mode).setOnClickListener {
