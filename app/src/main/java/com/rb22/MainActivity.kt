@@ -46,6 +46,8 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    private var networkRecoveryAssist: NetworkRecoveryAssist? = null
+
     private val gamePrefs by lazy {
         getSharedPreferences("rb22_games", Context.MODE_PRIVATE)
     }
@@ -259,6 +261,28 @@ class MainActivity : AppCompatActivity() {
             android.os.Process.myUid(),
             packageName
         ) == AppOpsManager.MODE_ALLOWED
+    }
+
+    override fun onStart() {
+        super.onStart()
+        networkRecoveryAssist = NetworkRecoveryAssist(this) { message, networkChanged ->
+            runOnUiThread {
+                val profile = gamePrefs.getString("network_focus_profile", "DEFAULT")
+                findViewById<TextView>(R.id.v12_network_status)?.text = "NETWORK FOCUS: $profile • $message"
+                if (networkChanged) {
+                    val activeDns = gamePrefs.getString("active_dns_ip", null)
+                    if (!activeDns.isNullOrBlank()) {
+                        startDnsService(activeDns)
+                    }
+                }
+            }
+        }.also { it.start() }
+    }
+
+    override fun onStop() {
+        networkRecoveryAssist?.stop()
+        networkRecoveryAssist = null
+        super.onStop()
     }
 
     override fun onResume() {
