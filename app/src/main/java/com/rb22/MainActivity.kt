@@ -156,7 +156,13 @@ class MainActivity : AppCompatActivity() {
         val networkPrefs = getSharedPreferences("rb22_games", MODE_PRIVATE)
         fun setNetworkProfile(profile: String) {
             networkPrefs.edit().putString("network_focus_profile", profile).apply()
+            when (profile) {
+                "GAMING" -> engine.setProfile(V12PerformanceEngine.Profile.GAMING)
+                "STREAMING" -> engine.setProfile(V12PerformanceEngine.Profile.STREAMING)
+                else -> engine.setProfile(V12PerformanceEngine.Profile.BALANCED)
+            }
             networkStatus.text = "NETWORK FOCUS: $profile"
+            refresh()
             Toast.makeText(this, "$profile focus selected", Toast.LENGTH_SHORT).show()
         }
         findViewById<Button>(R.id.v12_network_gaming).setOnClickListener { setNetworkProfile("GAMING") }
