@@ -12,7 +12,7 @@
             android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1">
             <TextView android:text="RB22" android:textColor="#FFFFFF" android:textSize="30sp" android:textStyle="bold"
                 android:layout_width="wrap_content" android:layout_height="wrap_content"/>
-            <TextView android:text="ULTIMATE  •  v4.0.0  •  NETWORK BOOSTER" android:textColor="#B8FFE7" android:textSize="11sp" android:textStyle="bold"
+            <TextView android:text="RB22  •  v1.2 BETA  •  NETWORK FOCUS+" android:textColor="#B8FFE7" android:textSize="11sp" android:textStyle="bold"
                 android:layout_width="wrap_content" android:layout_height="wrap_content"/>
         </LinearLayout>
         <TextView android:text="● LIVE" android:textColor="#B8FFE7" android:textSize="11sp" android:textStyle="bold"
@@ -159,6 +159,43 @@
 
     <LinearLayout android:orientation="vertical" android:padding="15dp" android:layout_marginTop="12dp"
         android:background="@drawable/rb22_card" android:tag="rb22_card" android:layout_width="match_parent" android:layout_height="wrap_content">
+
+    <LinearLayout android:orientation="vertical" android:padding="15dp" android:layout_marginTop="12dp"
+        android:background="@drawable/rb22_card" android:tag="rb22_card" android:layout_width="match_parent" android:layout_height="wrap_content">
+        <TextView android:text="PERFORMANCE ENGINE 2.0" android:textColor="#FFFFFF" android:textSize="13sp" android:textStyle="bold"
+            android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+        <TextView android:text="Adaptive profiles • thermal protection • RAM efficiency • battery-aware operation"
+            android:textColor="#C9D7FF" android:textSize="11sp" android:layout_marginTop="4dp"
+            android:layout_width="match_parent" android:layout_height="wrap_content"/>
+        <TextView android:id="@+id/v12_engine_status" android:text="RB22 v1.2 • ENGINE READY"
+            android:textColor="#B8FFE7" android:textSize="10sp" android:textStyle="bold" android:layout_marginTop="7dp"
+            android:layout_width="match_parent" android:layout_height="wrap_content"/>
+        <LinearLayout android:orientation="horizontal" android:layout_marginTop="7dp"
+            android:layout_width="match_parent" android:layout_height="wrap_content">
+            <Button android:id="@+id/v12_balanced" android:text="BALANCED" android:textAllCaps="false"
+                android:layout_width="0dp" android:layout_height="44dp" android:layout_weight="1"/>
+            <Button android:id="@+id/v12_gaming" android:text="GAMING" android:textAllCaps="false"
+                android:layout_marginStart="6dp" android:layout_width="0dp" android:layout_height="44dp" android:layout_weight="1"/>
+        </LinearLayout>
+        <LinearLayout android:orientation="horizontal" android:layout_marginTop="6dp"
+            android:layout_width="match_parent" android:layout_height="wrap_content">
+            <Button android:id="@+id/v12_streaming" android:text="STREAMING" android:textAllCaps="false"
+                android:layout_width="0dp" android:layout_height="44dp" android:layout_weight="1"/>
+            <Button android:id="@+id/v12_battery" android:text="BATTERY SMART" android:textAllCaps="false"
+                android:layout_marginStart="6dp" android:layout_width="0dp" android:layout_height="44dp" android:layout_weight="1"/>
+        </LinearLayout>
+        <Button android:id="@+id/v12_quick_boost" android:text="⚡ QUICK BOOST" android:textAllCaps="false"
+            android:layout_marginTop="7dp" android:layout_width="match_parent" android:layout_height="48dp"/>
+        <Button android:id="@+id/v12_graphics_button" android:text="GRAPHICS RECOMMENDATIONS" android:textAllCaps="false"
+            android:layout_marginTop="6dp" android:layout_width="match_parent" android:layout_height="44dp"/>
+        <TextView android:id="@+id/v12_graphics_advice" android:text="GRAPHICS ADVICE • READY"
+            android:textColor="#B8FFE7" android:textSize="10sp" android:layout_marginTop="6dp"
+            android:layout_width="match_parent" android:layout_height="wrap_content"/>
+        <TextView android:text="Thermal safeguards use Android thermal status where available. RAM efficiency reduces RB22's own work; it does not kill other apps. Graphics advice must be applied in each game's settings. FPS and CPU/GPU limits remain controlled by Android and the game."
+            android:textColor="#A8B4C9" android:textSize="10sp" android:layout_marginTop="6dp"
+            android:layout_width="match_parent" android:layout_height="wrap_content"/>
+    </LinearLayout>
+
         <TextView android:text="DEVICE HEALTH" android:textColor="#FFFFFF" android:textSize="13sp" android:textStyle="bold"
             android:layout_width="wrap_content" android:layout_height="wrap_content"/>
         <TextView android:text="Lightweight check — no background cleanup tricks or forced CPU changes." android:textColor="#A8B4C9" android:textSize="11sp" android:layout_marginTop="4dp"
