@@ -42,7 +42,7 @@ class GameAutoBoostService : Service() {
         executor.scheduleWithFixedDelay(
             { runCatching { checkForegroundGame() } },
             0,
-            2,
+            3,
             TimeUnit.SECONDS
         )
     }
