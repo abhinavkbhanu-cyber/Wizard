@@ -85,11 +85,15 @@ class GameAutoBoostService : Service() {
                 previousProfile = prefs.getString("v12_profile", "BALANCED") ?: "BALANCED"
             }
             lastGame = current
+            val power = getSystemService(Context.POWER_SERVICE) as android.os.PowerManager
+            val thermalCaution = Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q &&
+                power.currentThermalStatus >= android.os.PowerManager.THERMAL_STATUS_MODERATE
+            val selectedProfile = if (thermalCaution) "BALANCED" else "GAMING"
             prefs.edit()
-                .putBoolean("game_mode", true)
-                .putBoolean("max_fps", true)
-                .putString("profile", "MAX FPS")
-                .putString("v12_profile", "GAMING")
+                .putBoolean("game_mode", !thermalCaution)
+                .putBoolean("max_fps", !thermalCaution)
+                .putString("profile", selectedProfile)
+                .putString("v12_profile", selectedProfile)
                 .apply()
 
             val label = runCatching {
@@ -98,7 +102,7 @@ class GameAutoBoostService : Service() {
             val notification = Notification.Builder(this, "rb22_auto")
                 .setSmallIcon(android.R.drawable.ic_media_play)
                 .setContentTitle("RB22 AUTO BOOST")
-                .setContentText("Gaming profile selected • " + label)
+                .setContentText((if (thermalCaution) "Thermal caution • Balanced profile • " else "Gaming profile selected • ") + label)
                 .setAutoCancel(true)
                 .build()
             getSystemService(NotificationManager::class.java).notify(24, notification)
