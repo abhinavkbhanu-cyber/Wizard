@@ -142,15 +142,7 @@
             android:textColor="#A8B4C9" android:textSize="10sp" android:layout_marginTop="5dp"
             android:layout_width="match_parent" android:layout_height="wrap_content"/>
     </LinearLayout>
-        <TextView android:id="@+id/network_focus_status" android:text="APP FOCUS OFF • Tap START APP FOCUS to begin."
-            android:textColor="#B8FFE7" android:textSize="11sp" android:textStyle="bold" android:layout_marginTop="7dp"
-            android:layout_width="match_parent" android:layout_height="wrap_content"/>
-        <TextView android:text="Uses Android Usage Access to follow the foreground app and show its traffic where supported. Android does not allow ordinary apps to force bandwidth priority or guarantee lower ping; no artificial traffic is generated."
-            android:textColor="#A8B4C9" android:textSize="10sp" android:layout_marginTop="5dp"
-            android:layout_width="match_parent" android:layout_height="wrap_content"/>
 
-
-    </LinearLayout>
 
     <LinearLayout android:orientation="vertical" android:padding="15dp" android:layout_marginTop="12dp"
         android:background="@drawable/rb22_card" android:tag="rb22_card" android:layout_width="match_parent" android:layout_height="wrap_content">
