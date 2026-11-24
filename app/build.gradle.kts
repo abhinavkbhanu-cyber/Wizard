@@ -11,8 +11,8 @@ android {
         applicationId = "com.rb22"
         minSdk = 24
         targetSdk = 35
-        versionCode = 14
-        versionName = "4.2.0"
+        versionCode = 15
+        versionName = "1.1-beta"
     }
 
     signingConfigs {
