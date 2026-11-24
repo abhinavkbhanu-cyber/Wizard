@@ -81,6 +81,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         findViewById<Button>(R.id.dns_auto).setOnClickListener { testDns() }
+        findViewById<Button>(R.id.dns_disable).setOnClickListener { disableDns() }
         findViewById<Button>(R.id.gaming_ping).setOnClickListener { runGamingPing() }
         findViewById<Button>(R.id.network_focus_start).setOnClickListener { startNetworkFocus() }
         findViewById<Button>(R.id.network_focus_stop).setOnClickListener { stopNetworkFocus() }
