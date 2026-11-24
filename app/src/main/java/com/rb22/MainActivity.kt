@@ -31,6 +31,9 @@ class MainActivity : AppCompatActivity() {
     private val gamingEndpoints = listOf("Cloudflare" to "1.1.1.1", "Google" to "8.8.8.8", "Quad9" to "9.9.9.9")
     private var pendingDnsIp: String? = null
     private val networkHandler by lazy { android.os.Handler(mainLooper) }
+    // Reuse one worker instead of leaving a new idle executor thread behind for every test.
+    private val backgroundExecutor = Executors.newSingleThreadExecutor()
+    private var gamingTimer: CountDownTimer? = null
     private var networkFocusRunning = false
     private var previousRxBytes = TrafficStats.UNSUPPORTED.toLong()
     private var previousTxBytes = TrafficStats.UNSUPPORTED.toLong()
@@ -153,7 +156,8 @@ class MainActivity : AppCompatActivity() {
         val minutes = intArrayOf(15, 30, 60)
         AlertDialog.Builder(this).setTitle("Gaming Timer").setItems(options) { _, which ->
             val totalMs = minutes[which] * 60_000L
-            object : CountDownTimer(totalMs, 1_000L) {
+            gamingTimer?.cancel()
+            gamingTimer = object : CountDownTimer(totalMs, 1_000L) {
                 override fun onTick(ms: Long) {
                     val m = ms / 60_000L
                     val s = (ms / 1_000L) % 60
@@ -171,7 +175,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun runGamingPing() {
         Toast.makeText(this, "Testing gaming network latency…", Toast.LENGTH_SHORT).show()
-        Executors.newSingleThreadExecutor().execute {
+        backgroundExecutor.execute {
             val results = gamingEndpoints.mapNotNull { (name, host) ->
                 val ms = runCatching {
                     java.net.Socket().use { socket ->
@@ -485,7 +489,7 @@ class MainActivity : AppCompatActivity() {
         stopService(Intent(this, DnsVpnService::class.java))
         gamePrefs.edit().remove("active_dns_ip").apply()
         applyActiveTheme()
-        Executors.newSingleThreadExecutor().execute {
+        backgroundExecutor.execute {
             val results = dnsOptions.mapNotNull { (name, pair) ->
                 val ms = probeDnsResolver(pair.second)
                 if (ms != null) Triple(name, pair.second, ms) else null
@@ -502,6 +506,15 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         }
+    }
+
+    override fun onDestroy() {
+        networkFocusRunning = false
+        networkHandler.removeCallbacks(networkFocusTick)
+        gamingTimer?.cancel()
+        gamingTimer = null
+        backgroundExecutor.shutdownNow()
+        super.onDestroy()
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
