@@ -150,6 +150,18 @@ class MainActivity : AppCompatActivity() {
             refresh(if (caution) "THERMAL CAUTION • BALANCED PROFILE SELECTED" else "QUICK BOOST • GAMING PROFILE SELECTED")
             Toast.makeText(this, if (caution) "Device is warm. Balanced profile selected to help avoid extra heat." else "Gaming profile selected.", Toast.LENGTH_LONG).show()
         }
+        val networkStatus = findViewById<TextView>(R.id.v12_network_status)
+        val networkPrefs = getSharedPreferences("rb22_games", MODE_PRIVATE)
+        fun setNetworkProfile(profile: String) {
+            networkPrefs.edit().putString("network_focus_profile", profile).apply()
+            networkStatus.text = "NETWORK FOCUS: $profile"
+            Toast.makeText(this, "$profile focus selected", Toast.LENGTH_SHORT).show()
+        }
+        findViewById<Button>(R.id.v12_network_gaming).setOnClickListener { setNetworkProfile("GAMING") }
+        findViewById<Button>(R.id.v12_network_streaming).setOnClickListener { setNetworkProfile("STREAMING") }
+        findViewById<Button>(R.id.v12_network_default).setOnClickListener { setNetworkProfile("DEFAULT") }
+        networkStatus.text = "NETWORK FOCUS: " + networkPrefs.getString("network_focus_profile", "DEFAULT")
+
         findViewById<Button>(R.id.v12_graphics_button).setOnClickListener {
             refresh()
             AlertDialog.Builder(this)
