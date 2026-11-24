@@ -18,16 +18,19 @@ class NetworkRecoveryAssist(
     private val connectivity = appContext.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
     private var registered = false
     private var lastNetwork: Network? = null
+    private var hadNetworkLoss = false
 
     private val callback = object : ConnectivityManager.NetworkCallback() {
         override fun onAvailable(network: Network) {
-            val changed = lastNetwork != null && lastNetwork != network
+            val changed = hadNetworkLoss || (lastNetwork != null && lastNetwork != network)
+            hadNetworkLoss = false
             lastNetwork = network
             onNetworkEvent(if (changed) "Network changed • roaming/reconnect detected" else "Network available", changed)
         }
 
         override fun onLost(network: Network) {
             if (lastNetwork == network) lastNetwork = null
+            hadNetworkLoss = true
             onNetworkEvent("Network temporarily unavailable • waiting for Android to reconnect", false)
         }
 
@@ -59,5 +62,6 @@ class NetworkRecoveryAssist(
         runCatching { connectivity.unregisterNetworkCallback(callback) }
         registered = false
         lastNetwork = null
+        hadNetworkLoss = false
     }
 }
