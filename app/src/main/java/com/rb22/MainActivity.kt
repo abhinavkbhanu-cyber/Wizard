@@ -81,6 +81,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         findViewById<Button>(R.id.dns_auto).setOnClickListener { testDns() }
+        findViewById<Button>(R.id.dns_disable).setOnClickListener { disableDns() }
         findViewById<Button>(R.id.gaming_ping).setOnClickListener { runGamingPing() }
         findViewById<Button>(R.id.network_focus_start).setOnClickListener { startNetworkFocus() }
         findViewById<Button>(R.id.network_focus_stop).setOnClickListener { stopNetworkFocus() }
@@ -428,6 +429,15 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    private fun disableDns() {
+        stopService(Intent(this, DnsVpnService::class.java))
+        gamePrefs.edit().remove("active_dns_ip").apply()
+        applyActiveTheme()
+        findViewById<TextView>(R.id.dns_status).text =
+            "RB22 DNS OFF • Android default DNS restored"
+        Toast.makeText(this, "RB22 DNS disabled.", Toast.LENGTH_SHORT).show()
+    }
+
     private fun startDnsService(ip: String) {
         gamePrefs.edit().putString("active_dns_ip", ip).apply()
         applyActiveTheme()
@@ -497,8 +507,12 @@ class MainActivity : AppCompatActivity() {
                 } else {
                     val best = results.first()
                     gamePrefs.edit().putString("best_dns_name", best.first).apply()
-                    status.text = "BEST DNS: " + best.first + " • " + best.third + " ms • activating"
-                    activateDns(best.first, best.second)
+                    status.text = "BEST DNS RECOMMENDATION: " + best.first + " • " + best.third + " ms • NOT ACTIVATED"
+                    Toast.makeText(
+                        this,
+                        "Best resolver: " + best.first + " (" + best.third + " ms). Select it manually if you want to test it.",
+                        Toast.LENGTH_LONG
+                    ).show()
                 }
             }
         }
