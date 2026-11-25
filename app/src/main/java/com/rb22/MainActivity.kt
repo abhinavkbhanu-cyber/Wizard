@@ -323,7 +323,7 @@ class MainActivity : AppCompatActivity() {
         lastUsageEventTime = System.currentTimeMillis() - 5000L
         networkFocusRunning = true
         networkHandler.removeCallbacks(networkFocusTick)
-        findViewById<TextView>(R.id.network_focus_status).text =
+        findViewById<TextView>(R.id.v12_network_status).text =
             "APP FOCUS ON • Open any app. RB22 will follow it automatically."
         networkHandler.post(networkFocusTick)
     }
@@ -333,7 +333,7 @@ class MainActivity : AppCompatActivity() {
         networkFocusRunning = false
         networkHandler.removeCallbacks(networkFocusTick)
         focusedPackage = null
-        findViewById<TextView>(R.id.network_focus_status).text = "APP FOCUS OFF"
+        findViewById<TextView>(R.id.v12_network_status).text = "APP FOCUS OFF"
     }
 
     private fun detectForegroundPackage(): String? {
@@ -372,13 +372,13 @@ class MainActivity : AppCompatActivity() {
                 previousTxBytes = TrafficStats.getTotalTxBytes()
             }
             previousNetworkSampleTime = System.currentTimeMillis()
-            findViewById<TextView>(R.id.network_focus_status).text =
+            findViewById<TextView>(R.id.v12_network_status).text =
                 "FOCUSING: $label • monitoring its network activity"
             return
         }
 
         val pkg = focusedPackage ?: run {
-            findViewById<TextView>(R.id.network_focus_status).text =
+            findViewById<TextView>(R.id.v12_network_status).text =
                 "APP FOCUS ON • Waiting for you to open another app…"
             return
         }
@@ -388,7 +388,7 @@ class MainActivity : AppCompatActivity() {
         val tx = if (networkFocusDeviceFallback) TrafficStats.getTotalTxBytes()
             else uid?.let { TrafficStats.getUidTxBytes(it) } ?: TrafficStats.UNSUPPORTED.toLong()
         if (rx == TrafficStats.UNSUPPORTED.toLong() || tx == TrafficStats.UNSUPPORTED.toLong()) {
-            findViewById<TextView>(R.id.network_focus_status).text =
+            findViewById<TextView>(R.id.v12_network_status).text =
                 "FOCUSING: $pkg • this Android build does not expose app traffic counters."
             return
         }
@@ -400,7 +400,7 @@ class MainActivity : AppCompatActivity() {
             packageManager.getApplicationLabel(packageManager.getApplicationInfo(pkg, 0)).toString()
         }.getOrDefault(pkg)
         val scope = if (networkFocusDeviceFallback) "DEVICE-WIDE COUNTERS" else "APP TRAFFIC"
-        findViewById<TextView>(R.id.network_focus_status).text = String.format(
+        findViewById<TextView>(R.id.v12_network_status).text = String.format(
             java.util.Locale.US,
             "FOCUSING: %s • %s\\n↓ %.2f Mbps   ↑ %.2f Mbps\\nAutomatic focus follows app switches.",
             label, scope, down, up
