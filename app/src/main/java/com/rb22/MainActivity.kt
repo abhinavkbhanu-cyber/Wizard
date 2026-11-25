@@ -46,6 +46,8 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    private var networkRecoveryAssist: NetworkRecoveryAssist? = null
+
     private val gamePrefs by lazy {
         getSharedPreferences("rb22_games", Context.MODE_PRIVATE)
     }
@@ -60,6 +62,7 @@ class MainActivity : AppCompatActivity() {
         setupDeviceRefresh()
         setupBoostModes()
         setupMobileControls()
+        setupV12Controls()
         startUltimateEngine()
 
         findViewById<Button>(R.id.start_booster).setOnClickListener { startGameBooster() }
@@ -83,8 +86,6 @@ class MainActivity : AppCompatActivity() {
         findViewById<Button>(R.id.dns_auto).setOnClickListener { testDns() }
         findViewById<Button>(R.id.dns_disable).setOnClickListener { disableDns() }
         findViewById<Button>(R.id.gaming_ping).setOnClickListener { runGamingPing() }
-        findViewById<Button>(R.id.network_focus_start).setOnClickListener { startNetworkFocus() }
-        findViewById<Button>(R.id.network_focus_stop).setOnClickListener { stopNetworkFocus() }
         findViewById<Button>(R.id.check_updates).setOnClickListener {
             UpdateCheckWorker.checkNow(this)
             findViewById<TextView>(R.id.update_status).text = "Checking official RB22 releases… Connect to the internet and wait a moment."
@@ -117,6 +118,68 @@ class MainActivity : AppCompatActivity() {
     }
 
 
+
+    private fun setupV12Controls() {
+        val engine = V12PerformanceEngine(this)
+        val status = findViewById<TextView>(R.id.v12_engine_status)
+        fun refresh(message: String? = null) {
+            status.text = message ?: engine.statusText()
+            findViewById<TextView>(R.id.v12_graphics_advice).text =
+                "GRAPHICS ADVICE • " + engine.graphicsRecommendation()
+        }
+        fun select(profile: V12PerformanceEngine.Profile, label: String) {
+            engine.setProfile(profile)
+            refresh("✓ $label PROFILE ACTIVE • " + engine.statusText())
+            Toast.makeText(this, "$label profile selected", Toast.LENGTH_SHORT).show()
+        }
+        findViewById<Button>(R.id.v12_balanced).setOnClickListener {
+            select(V12PerformanceEngine.Profile.BALANCED, "BALANCED")
+        }
+        findViewById<Button>(R.id.v12_gaming).setOnClickListener {
+            select(V12PerformanceEngine.Profile.GAMING, "GAMING")
+        }
+        findViewById<Button>(R.id.v12_streaming).setOnClickListener {
+            select(V12PerformanceEngine.Profile.STREAMING, "STREAMING")
+        }
+        findViewById<Button>(R.id.v12_battery).setOnClickListener {
+            select(V12PerformanceEngine.Profile.BATTERY, "BATTERY")
+        }
+        findViewById<Button>(R.id.v12_quick_boost).setOnClickListener {
+            val caution = engine.isThermalCaution()
+            val profile = if (caution) V12PerformanceEngine.Profile.BALANCED
+                else V12PerformanceEngine.Profile.GAMING
+            engine.setProfile(profile)
+            refresh(if (caution) "THERMAL CAUTION • BALANCED PROFILE SELECTED" else "QUICK BOOST • GAMING PROFILE SELECTED")
+            Toast.makeText(this, if (caution) "Device is warm. Balanced profile selected to help avoid extra heat." else "Gaming profile selected.", Toast.LENGTH_LONG).show()
+        }
+        val networkStatus = findViewById<TextView>(R.id.v12_network_status)
+        val networkPrefs = getSharedPreferences("rb22_games", MODE_PRIVATE)
+        fun setNetworkProfile(profile: String) {
+            networkPrefs.edit().putString("network_focus_profile", profile).apply()
+            when (profile) {
+                "GAMING" -> engine.setProfile(V12PerformanceEngine.Profile.GAMING)
+                "STREAMING" -> engine.setProfile(V12PerformanceEngine.Profile.STREAMING)
+                else -> engine.setProfile(V12PerformanceEngine.Profile.BALANCED)
+            }
+            networkStatus.text = "NETWORK FOCUS: $profile"
+            refresh()
+            Toast.makeText(this, "$profile focus selected", Toast.LENGTH_SHORT).show()
+        }
+        findViewById<Button>(R.id.v12_network_gaming).setOnClickListener { setNetworkProfile("GAMING") }
+        findViewById<Button>(R.id.v12_network_streaming).setOnClickListener { setNetworkProfile("STREAMING") }
+        findViewById<Button>(R.id.v12_network_default).setOnClickListener { setNetworkProfile("DEFAULT") }
+        networkStatus.text = "NETWORK FOCUS: " + networkPrefs.getString("network_focus_profile", "DEFAULT")
+
+        findViewById<Button>(R.id.v12_graphics_button).setOnClickListener {
+            refresh()
+            AlertDialog.Builder(this)
+                .setTitle("RB22 Graphics Recommendations")
+                .setMessage(engine.graphicsRecommendation() + "\\n\\nThese are recommendations for the game's own graphics menu. RB22 cannot directly change another app's graphics settings.")
+                .setPositiveButton("OK", null)
+                .show()
+        }
+        refresh()
+    }
 
     private fun setupMobileControls() {
         findViewById<Button>(R.id.mobile_game_mode).setOnClickListener {
@@ -206,6 +269,28 @@ class MainActivity : AppCompatActivity() {
         ) == AppOpsManager.MODE_ALLOWED
     }
 
+    override fun onStart() {
+        super.onStart()
+        networkRecoveryAssist = NetworkRecoveryAssist(this) { message, networkChanged ->
+            runOnUiThread {
+                val profile = gamePrefs.getString("network_focus_profile", "DEFAULT")
+                findViewById<TextView>(R.id.v12_network_status)?.text = "NETWORK FOCUS: $profile • $message"
+                if (networkChanged) {
+                    val activeDns = gamePrefs.getString("active_dns_ip", null)
+                    if (!activeDns.isNullOrBlank()) {
+                        startDnsService(activeDns)
+                    }
+                }
+            }
+        }.also { it.start() }
+    }
+
+    override fun onStop() {
+        networkRecoveryAssist?.stop()
+        networkRecoveryAssist = null
+        super.onStop()
+    }
+
     override fun onResume() {
         super.onResume()
         if (pendingNetworkFocusStart && hasUsageAccess()) {
@@ -238,7 +323,7 @@ class MainActivity : AppCompatActivity() {
         lastUsageEventTime = System.currentTimeMillis() - 5000L
         networkFocusRunning = true
         networkHandler.removeCallbacks(networkFocusTick)
-        findViewById<TextView>(R.id.network_focus_status).text =
+        findViewById<TextView>(R.id.v12_network_status).text =
             "APP FOCUS ON • Open any app. RB22 will follow it automatically."
         networkHandler.post(networkFocusTick)
     }
@@ -248,7 +333,7 @@ class MainActivity : AppCompatActivity() {
         networkFocusRunning = false
         networkHandler.removeCallbacks(networkFocusTick)
         focusedPackage = null
-        findViewById<TextView>(R.id.network_focus_status).text = "APP FOCUS OFF"
+        findViewById<TextView>(R.id.v12_network_status).text = "APP FOCUS OFF"
     }
 
     private fun detectForegroundPackage(): String? {
@@ -287,13 +372,13 @@ class MainActivity : AppCompatActivity() {
                 previousTxBytes = TrafficStats.getTotalTxBytes()
             }
             previousNetworkSampleTime = System.currentTimeMillis()
-            findViewById<TextView>(R.id.network_focus_status).text =
+            findViewById<TextView>(R.id.v12_network_status).text =
                 "FOCUSING: $label • monitoring its network activity"
             return
         }
 
         val pkg = focusedPackage ?: run {
-            findViewById<TextView>(R.id.network_focus_status).text =
+            findViewById<TextView>(R.id.v12_network_status).text =
                 "APP FOCUS ON • Waiting for you to open another app…"
             return
         }
@@ -303,7 +388,7 @@ class MainActivity : AppCompatActivity() {
         val tx = if (networkFocusDeviceFallback) TrafficStats.getTotalTxBytes()
             else uid?.let { TrafficStats.getUidTxBytes(it) } ?: TrafficStats.UNSUPPORTED.toLong()
         if (rx == TrafficStats.UNSUPPORTED.toLong() || tx == TrafficStats.UNSUPPORTED.toLong()) {
-            findViewById<TextView>(R.id.network_focus_status).text =
+            findViewById<TextView>(R.id.v12_network_status).text =
                 "FOCUSING: $pkg • this Android build does not expose app traffic counters."
             return
         }
@@ -315,7 +400,7 @@ class MainActivity : AppCompatActivity() {
             packageManager.getApplicationLabel(packageManager.getApplicationInfo(pkg, 0)).toString()
         }.getOrDefault(pkg)
         val scope = if (networkFocusDeviceFallback) "DEVICE-WIDE COUNTERS" else "APP TRAFFIC"
-        findViewById<TextView>(R.id.network_focus_status).text = String.format(
+        findViewById<TextView>(R.id.v12_network_status).text = String.format(
             java.util.Locale.US,
             "FOCUSING: %s • %s\\n↓ %.2f Mbps   ↑ %.2f Mbps\\nAutomatic focus follows app switches.",
             label, scope, down, up
@@ -378,7 +463,9 @@ class MainActivity : AppCompatActivity() {
         val tick = object : Runnable {
             override fun run() {
                 status.text = engine.statusText()
-                handler.postDelayed(this, 2000)
+                val lowOverhead = gamePrefs.getBoolean("max_fps", false) ||
+                    gamePrefs.getBoolean("charging_mode", false)
+                handler.postDelayed(this, if (lowOverhead) 5000L else 3000L)
             }
         }
         handler.post(tick)

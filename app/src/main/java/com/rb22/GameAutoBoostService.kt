@@ -16,6 +16,7 @@ import java.util.concurrent.TimeUnit
 class GameAutoBoostService : Service() {
     private val executor = Executors.newSingleThreadScheduledExecutor()
     @Volatile private var lastGame = ""
+    @Volatile private var previousProfile = "BALANCED"
 
     override fun onCreate() {
         super.onCreate()
@@ -41,7 +42,7 @@ class GameAutoBoostService : Service() {
         executor.scheduleWithFixedDelay(
             { runCatching { checkForegroundGame() } },
             0,
-            2,
+            3,
             TimeUnit.SECONDS
         )
     }
@@ -59,43 +60,62 @@ class GameAutoBoostService : Service() {
     }
 
     private fun checkForegroundGame() {
-        val games = getSharedPreferences("rb22_games", Context.MODE_PRIVATE)
-            .getStringSet("packages", emptySet()) ?: emptySet()
-
+        val prefs = getSharedPreferences("rb22_games", Context.MODE_PRIVATE)
+        val games = prefs.getStringSet("packages", emptySet()) ?: emptySet()
         if (games.isEmpty()) return
 
-        val usm = getSystemService(USAGE_STATS_SERVICE) as UsageStatsManager
+        val usage = getSystemService(USAGE_STATS_SERVICE) as UsageStatsManager
         val now = System.currentTimeMillis()
-        val stats = usm.queryUsageStats(
-            UsageStatsManager.INTERVAL_DAILY,
-            now - 15000,
-            now
-        )
-        val current = stats.maxByOrNull { it.lastTimeUsed }?.packageName ?: return
+        val events = usage.queryEvents(now - 12000L, now)
+        val event = android.app.usage.UsageEvents.Event()
+        var foregroundPackage: String? = null
+        while (events.hasNextEvent()) {
+            events.getNextEvent(event)
+            val isForeground = event.eventType == android.app.usage.UsageEvents.Event.MOVE_TO_FOREGROUND ||
+                (Build.VERSION.SDK_INT >= 29 &&
+                    event.eventType == android.app.usage.UsageEvents.Event.ACTIVITY_RESUMED)
+            if (isForeground && event.packageName != packageName) {
+                foregroundPackage = event.packageName
+            }
+        }
+        val current = foregroundPackage ?: return
 
         if (current in games && current != lastGame) {
+            if (lastGame.isEmpty()) {
+                previousProfile = prefs.getString("v12_profile", "BALANCED") ?: "BALANCED"
+            }
             lastGame = current
-            getSharedPreferences("rb22_games", Context.MODE_PRIVATE).edit()
-                .putBoolean("game_mode", true)
-                .putBoolean("max_fps", true)
-                .putString("profile", "MAX FPS")
+            val power = getSystemService(Context.POWER_SERVICE) as android.os.PowerManager
+            val thermalCaution = Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q &&
+                power.currentThermalStatus >= android.os.PowerManager.THERMAL_STATUS_MODERATE
+            val selectedProfile = if (thermalCaution) "BALANCED" else "GAMING"
+            prefs.edit()
+                .putBoolean("game_mode", !thermalCaution)
+                .putBoolean("max_fps", !thermalCaution)
+                .putString("profile", selectedProfile)
+                .putString("v12_profile", selectedProfile)
                 .apply()
-            val label = runCatching {
-                packageManager.getApplicationLabel(
-                    packageManager.getApplicationInfo(current, 0)
-                ).toString()
-            }.getOrDefault("Game")
 
+            val label = runCatching {
+                packageManager.getApplicationLabel(packageManager.getApplicationInfo(current, 0)).toString()
+            }.getOrDefault("Game")
             val notification = Notification.Builder(this, "rb22_auto")
                 .setSmallIcon(android.R.drawable.ic_media_play)
                 .setContentTitle("RB22 AUTO BOOST")
-                .setContentText("MAX FPS profile active • " + label)
+                .setContentText((if (thermalCaution) "Thermal caution • Balanced profile • " else "Gaming profile selected • ") + label)
                 .setAutoCancel(true)
                 .build()
-
             getSystemService(NotificationManager::class.java).notify(24, notification)
-        } else if (current !in games) {
+        } else if (current !in games && lastGame.isNotEmpty()) {
             lastGame = ""
+            val restoreGaming = previousProfile == "GAMING"
+            prefs.edit()
+                .putBoolean("game_mode", restoreGaming)
+                .putBoolean("max_fps", restoreGaming)
+                .putBoolean("charging_mode", previousProfile == "BATTERY")
+                .putString("profile", previousProfile)
+                .putString("v12_profile", previousProfile)
+                .apply()
         }
     }
 
